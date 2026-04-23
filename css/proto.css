@@ -144,15 +144,21 @@ em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color
   border-bottom: none;
   transition: background 0.35s ease, backdrop-filter 0.35s ease;
 }
-/* Header over dark hero (SeatGeek-style) — solid black at top, flips to
-   light when the user scrolls. Solid (not translucent) keeps contrast
-   crisp and matches the brand against the video/starfield hero. */
+/* Header over dark hero — SAME bg as hero (#0a0a0a), not transparent.
+   Patrón de Spotify / Apple Music / Dice: header y hero comparten el
+   mismo negro, así no hay frontera visual que pintar (el sub-pixel
+   rendering que antes veíamos como "línea blanca" no tiene colores
+   contrastantes que separar). Tampoco hay overlap feo cuando scrolleas,
+   porque el header es opaco y cubre el contenido limpio. Al scrollear
+   (body.scrolled), transición suave a blanco translucent para que el
+   contenido de abajo se lea sobre el chrome. */
 .header-hero {
-  background: #000;
-  border-bottom: none !important;
+  background: #0a0a0a;
+  border: 0 !important;
+  outline: 0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  box-shadow: none;
+  box-shadow: none !important;
   transition: background 0.35s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease;
 }
 body:not(.scrolled) .header-hero .nav-link { color: rgba(255,255,255,0.75); }
