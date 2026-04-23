@@ -1314,18 +1314,44 @@ body.mode-escapes::-webkit-scrollbar-corner { background: #f0f2f1; }
   transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
-/* Sobre el hero oscuro de home (body NO scrolled) el borde negro se funde
-   con el fondo; aplicamos un anillo blanco para separarlo visualmente y
-   ponemos la letra en blanco para que contraste contra el bg oscuro.
-   Regla también aplica a .mode-ticks (header negro del flow de ticks). */
+/* Sobre headers oscuros (hero NO scrolled, mode-ticks, checkout flow) el
+   default lime+letra-oscura no funciona: la letra sobre lima tiene un
+   contrast ratio de ~1.9:1 (falla WCAG AA). Invertimos por completo:
+     · bg        → gris oscuro (#1f1f1f) — no negro puro, porque el header
+                   también es negro y el avatar se perdería como aro flotante.
+                   El gris le da "cuerpo" al avatar, lo hace sentir construido
+                   en vez de plano. Contrast lime-sobre-#1f1f1f: ~14:1 (AAA).
+     · border    → lima (accent) — ring distintivo de logged-in
+     · color     → lima (accent) — letra legible sobre el gris
+     · inset     → hairline blanca muy sutil (~5% op) entre el gris y el ring
+                   para separación extra. Da feel premium sin gritar.
+   Patrón de apps con theming dark: Linear, Vercel, Raycast. */
 body:not(.scrolled) .header-hero .account-avatar,
-body.mode-ticks:not(.scrolled) .header-hero .account-avatar {
-  border-color: #fff;
-  color: #fff;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.18);
+body.mode-ticks:not(.scrolled) .header-hero .account-avatar,
+.page[data-page="tickets"] .header .account-avatar,
+.page[data-page="checkout"] .header .account-avatar,
+.page[data-page="checkout-details"] .header .account-avatar,
+.page[data-page="checkout-payment"] .header .account-avatar,
+.page[data-page="checkout-success"] .header .account-avatar {
+  background: #1f1f1f;
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 2px rgba(198, 248, 0, 0.14);
 }
-body:not(.scrolled) .header-hero .account-avatar:hover {
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.32), 0 2px 8px rgba(0,0,0,0.2);
+body:not(.scrolled) .header-hero .account-avatar:hover,
+body.mode-ticks:not(.scrolled) .header-hero .account-avatar:hover,
+.page[data-page="tickets"] .header .account-avatar:hover,
+.page[data-page="checkout"] .header .account-avatar:hover,
+.page[data-page="checkout-details"] .header .account-avatar:hover,
+.page[data-page="checkout-payment"] .header .account-avatar:hover,
+.page[data-page="checkout-success"] .header .account-avatar:hover {
+  background: #262626; /* un poquito más claro para feedback de hover */
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 0 2px rgba(198, 248, 0, 0.32),
+    0 2px 8px rgba(0, 0, 0, 0.35);
 }
 .account-avatar-lg {
   width: 44px; height: 44px;
@@ -5111,18 +5137,28 @@ body.menu-open .mobile-menu {
   line-height: 1.55;
   color: var(--ink-mid);
   margin: 0;
-  max-width: 360px;
-  margin-left: auto; margin-right: auto;
 }
-.otp-standalone-sub strong {
-  color: var(--ink); font-weight: 600;
-  word-break: break-all; /* emails largos no rompen layout */
+/* Email en su propia fila: el correo en texto ink emphasizado + "Cambiar"
+   al lado como link sutil. Al estar en su propio contenedor, el email se
+   lee entero en una línea casi siempre. Si el viewport es muy estrecho,
+   `flex-wrap` permite que "Cambiar" caiga a la siguiente línea en vez de
+   partir el correo a la mitad de palabra. `overflow-wrap: anywhere` en el
+   strong es fallback para emails patológicamente largos. */
+.otp-standalone-email {
+  display: flex; align-items: baseline;
+  justify-content: center; flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: -8px 0 0; /* pull closer to sub */
+  font-size: 15px; line-height: 1.55;
 }
-/* Botón inline "Cambiar" al lado del email — se ve como link sutil.
-   Palabra cortita en oposición a "Usar otro email". */
+.otp-standalone-email strong {
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
 .otp-change {
   background: none; border: 0; padding: 0;
-  margin-left: 4px;
   color: var(--ink);
   font: inherit;
   font-weight: 600;
@@ -5130,6 +5166,7 @@ body.menu-open .mobile-menu {
   text-underline-offset: 3px;
   cursor: pointer;
   transition: color 0.12s ease;
+  white-space: nowrap;
 }
 .otp-change:hover { color: var(--ink-mid); }
 

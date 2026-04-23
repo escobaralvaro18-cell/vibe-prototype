@@ -460,10 +460,11 @@
         <div class="otp-standalone">
           <div class="otp-card">
             <h1 class="otp-standalone-title">Ingresá el <em>código</em></h1>
-            <p class="otp-standalone-sub">
-              Te enviamos un código de 6 dígitos a <strong x-text="authEmail"></strong>.
+            <p class="otp-standalone-sub">Te enviamos un código de 6 dígitos a</p>
+            <div class="otp-standalone-email">
+              <strong x-text="authEmail"></strong>
               <button type="button" class="otp-change" @click="backToEmail()">Cambiar</button>
-            </p>
+            </div>
 
             <form class="otp-standalone-form" @submit.prevent="verifyOtp()">
               <div class="otp-group" @paste="handleOtpPaste($event)">
