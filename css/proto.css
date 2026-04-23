@@ -3705,6 +3705,15 @@ body.menu-open .mobile-menu {
 }
 .continue-cta svg { width: 16px; height: 16px; stroke: currentColor; flex-shrink: 0; }
 
+/* En mobile (<900px) la `.mobile-buy-bar` sticky al fondo ya ofrece el
+   CTA con toda la info (fecha + venue + precio), así que el CTA inline
+   del datepicker se vuelve redundante — dos "Continuar" compiten. Lo
+   ocultamos abajo del breakpoint. En desktop (≥900px) la bar mobile se
+   oculta y este CTA vuelve a ser el primario, sin duplicación. */
+@media (max-width: 899.98px) {
+  .continue-cta { display: none; }
+}
+
 .see-all-dates {
   display: inline-flex; align-items: center; gap: 6px;
   background: transparent; border: none;
