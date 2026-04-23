@@ -3876,7 +3876,23 @@ body.menu-open .mobile-menu {
   font-size: 30px; letter-spacing: -0.03em; color: var(--ink);
   line-height: 1;
 }
-.buy-box .btn-primary { margin-left: auto; padding: 14px 26px; font-size: 15px; background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+/* CTA del buy-box: `margin-left: auto` lo empuja a la derecha del flex
+   container — DESDE/price a la izquierda, botón lime a la derecha.
+   Aplica a ambas variantes (el botón ahora es `.btn-accent`, antes era
+   `.btn-primary` con override a color accent).
+   !important agregado para asegurar que gana sobre cualquier override de
+   Tailwind CDN que pudiera aplicar flex children alignment distinto.    */
+.buy-box .btn-primary,
+.buy-box .btn-accent {
+  margin-left: auto !important;
+  padding: 14px 26px;
+  font-size: 15px;
+}
+.buy-box .btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
 .buy-box .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--accent-ink); }
 /* When buy-box is in presale state, countdown fills entire box */
 .buy-box.is-presale .presale-countdown {
