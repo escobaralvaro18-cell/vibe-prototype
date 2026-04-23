@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe — Mi cuenta</title>
+
+  <!-- Favicon inline (SVG) para evitar 404 ruidoso en consola -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
+
+  <!-- Google Fonts (idéntico al resto de páginas para paridad tipográfica) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700;1,900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Theme tokens (@theme para Tailwind v4) -->
+  <style type="text/tailwindcss">
+    @theme {
+      --color-accent:       #c6f800;
+      --color-accent-hover: #b5e000;
+      --color-accent-soft:  #f5ffcc;
+      --color-ink:          #0a0a0a;
+      --color-ink-mid:      #4a4a4a;
+      --color-ink-dim:      #8c8c88;
+      --color-bg:           #ffffff;
+      --color-bg-soft:      #f7f7f5;
+      --color-line:         #e5e3dd;
+      --font-display:       "Geist", -apple-system, system-ui, sans-serif;
+      --font-serif:         "Playfair Display", Georgia, serif;
+      --font-mono:          "Geist Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <!-- Estilos del prototipo (compartidos con el resto del sitio) -->
+  <link rel="stylesheet" href="css/proto.css">
+
+  <!-- Orden crítico: persist primero, luego data/stores/components, Alpine core al final.
+       Todos con `defer` para ejecución post-parse y en orden documento. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
+  <script defer src="js/data/countries.js"></script>
+  <script defer src="js/data/events.js"></script>
+  <script defer src="js/stores.js"></script>
+  <script defer src="js/components.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<body
+  x-data="accountPage()"
+  x-init="init()"
+  :class="{ 'menu-open': $store.ui?.menuOpen }"
+  class="mode-ticks">
+
+<!-- ============================================= -->
+<!-- HEADER con avatar + dropdown (session-aware)   -->
+<!-- Matchea prototipo línea 9536-9572.              -->
+<!-- ============================================= -->
+<header class="header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibe</a>
+
+    <nav class="nav-desktop">
+      <a href="index.html" class="nav-link">Eventos</a>
+      <a href="account.html" class="nav-link active">Mi cuenta</a>
+    </nav>
+
+    <div class="header-actions">
+      <!-- Avatar con dropdown (desktop + tablet) -->
+      <div class="account-header-avatar-wrap" x-ref="avatarWrap">
+        <button type="button" class="account-avatar"
+                @click="toggleDropdown()"
+                aria-label="Menú de cuenta">
+          <span x-text="initials.charAt(0) || 'U'"></span>
+        </button>
+        <div class="account-menu-dropdown" :class="{ active: dropdownOpen }">
+          <div class="account-menu-header">
+            <div class="account-avatar account-avatar-lg"><span x-text="initials"></span></div>
+            <div class="account-menu-user">
+              <div class="account-menu-name" x-text="fullName"></div>
+              <div class="account-menu-email" x-text="email"></div>
+            </div>
+          </div>
+          <a class="account-menu-item" @click.prevent="logout()" href="#">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesión
+          </a>
+        </div>
+      </div>
+
+      <button class="icon-btn menu-toggle"
+              @click="$store.ui.menuOpen = !$store.ui.menuOpen"
+              aria-label="Abrir menú">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu">
+    <div class="mobile-menu-section">
+      <span class="mobile-menu-label">Mi cuenta</span>
+      <a href="?tab=tickets" @click="switchTab('tickets'); $store.ui.menuOpen = false">Mis tickets <span class="chev">→</span></a>
+      <a href="?tab=favs" @click="switchTab('favs'); $store.ui.menuOpen = false">Mis favoritos <span class="chev">→</span></a>
+    </div>
+    <div class="mobile-menu-section">
+      <span class="mobile-menu-label">Explorá</span>
+      <a href="index.html">Eventos <span class="chev">→</span></a>
+    </div>
+    <div class="mobile-menu-ctas">
+      <a class="mobile-menu-cta-logout" @click.prevent="logout()" href="#">Cerrar sesión</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- HERO: saludo personal                          -->
+<!-- ============================================= -->
+<section class="account-hero">
+  <div class="container">
+    <p class="account-greeting-kicker">Mi espacio</p>
+    <h1 class="account-greeting">
+      <span x-text="greeting + ','"></span>
+      <em x-text="firstName"></em>
+    </h1>
+    <p class="account-greeting-sub">Tus entradas y favoritos en un solo lugar.</p>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- BODY: tabs + sub-tabs + listas                  -->
+<!-- ============================================= -->
+<section class="account-body">
+  <div class="container">
+
+    <!-- Tabs principales -->
+    <div class="account-tabs" role="tablist">
+      <button type="button"
+              class="account-tab"
+              :class="{ active: tab === 'tickets' }"
+              role="tab"
+              @click="switchTab('tickets')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+        Mis tickets
+      </button>
+      <button type="button"
+              class="account-tab"
+              :class="{ active: tab === 'favs' }"
+              role="tab"
+              @click="switchTab('favs')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+        Favoritos
+      </button>
+    </div>
+
+    <!-- ================= TICKETS TAB ================= -->
+    <div class="account-tab-panel" :class="{ active: tab === 'tickets' }" role="tabpanel">
+
+      <div class="account-subtabs">
+        <button type="button"
+                class="account-subtab"
+                :class="{ active: ticketsSubtab === 'upcoming' }"
+                @click="switchTicketsSubtab('upcoming')">
+          Próximos <span class="account-subtab-count" x-text="upcomingTickets.length"></span>
+        </button>
+        <button type="button"
+                class="account-subtab"
+                :class="{ active: ticketsSubtab === 'past' }"
+                @click="switchTicketsSubtab('past')">
+          Pasados <span class="account-subtab-count" x-text="pastTickets.length"></span>
+        </button>
+      </div>
+
+      <!-- Subpanel: Próximos -->
+      <div class="account-sub-panel" :class="{ active: ticketsSubtab === 'upcoming' }">
+        <div class="account-list" x-show="upcomingTickets.length > 0" x-cloak>
+          <template x-for="t in upcomingTickets" :key="t.id">
+            <div class="account-ticket-card">
+              <div class="account-ticket-thumb"><div :class="t.artBg"></div></div>
+              <div class="account-ticket-info">
+                <p class="account-ticket-kicker" x-text="t.kicker"></p>
+                <h3 class="account-ticket-title" x-text="t.title"></h3>
+                <div class="account-ticket-meta">
+                  <span>
+                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    <span x-text="t.dateLabel"></span>
+                  </span>
+                  <span class="dot"></span>
+                  <span>
+                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 22s-8-7-8-13a8 8 0 1116 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                    <span x-text="t.venue"></span>
+                  </span>
+                </div>
+                <div class="account-ticket-badges">
+                  <span class="account-ticket-badge" x-text="t.section"></span>
+                  <template x-if="t.seat">
+                    <span class="account-ticket-badge neutral" x-text="t.seat"></span>
+                  </template>
+                  <span class="account-ticket-badge neutral" x-text="'×' + t.qty"></span>
+                </div>
+              </div>
+              <button type="button" class="account-ticket-cta">
+                <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+                <span>Ver entradas</span>
+              </button>
+            </div>
+          </template>
+        </div>
+
+        <!-- Empty state -->
+        <div class="account-empty-state" x-show="upcomingTickets.length === 0" x-cloak>
+          <div class="account-empty-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+          </div>
+          <h3 class="account-empty-title">Sin entradas próximas</h3>
+          <p class="account-empty-copy">Descubrí tu próxima experiencia y encontrá aquí tus pases.</p>
+          <a class="account-empty-cta" href="index.html">Explorar eventos</a>
+        </div>
+      </div>
+
+      <!-- Subpanel: Pasados -->
+      <div class="account-sub-panel" :class="{ active: ticketsSubtab === 'past' }">
+        <div class="account-list" x-show="pastTickets.length > 0" x-cloak>
+          <template x-for="t in pastTickets" :key="t.id">
+            <div class="account-ticket-card account-ticket-card--past">
+              <div class="account-ticket-thumb"><div :class="t.artBg"></div></div>
+              <div class="account-ticket-info">
+                <p class="account-ticket-kicker" x-text="t.kicker"></p>
+                <h3 class="account-ticket-title" x-text="t.title"></h3>
+                <div class="account-ticket-meta">
+                  <span>
+                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    <span x-text="t.dateLabel"></span>
+                  </span>
+                  <span class="dot"></span>
+                  <span>
+                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 22s-8-7-8-13a8 8 0 1116 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                    <span x-text="t.venue"></span>
+                  </span>
+                  <span class="dot"></span>
+                  <span class="account-finalizado-tag">Finalizado</span>
+                </div>
+                <div class="account-ticket-badges">
+                  <span class="account-ticket-badge" x-text="t.section"></span>
+                  <template x-if="t.seat">
+                    <span class="account-ticket-badge neutral" x-text="t.seat"></span>
+                  </template>
+                  <span class="account-ticket-badge neutral" x-text="'×' + t.qty"></span>
+                </div>
+              </div>
+              <button type="button" class="account-ticket-cta">
+                <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+                <span>Ver recuerdo</span>
+              </button>
+            </div>
+          </template>
+        </div>
+
+        <div class="account-empty-state" x-show="pastTickets.length === 0" x-cloak>
+          <div class="account-empty-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+          </div>
+          <h3 class="account-empty-title">Sin historial de entradas</h3>
+          <p class="account-empty-copy">Los eventos a los que asistas van a quedar acá como un recuerdo.</p>
+          <a class="account-empty-cta" href="index.html">Explorar eventos</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= FAVORITES TAB ================= -->
+    <div class="account-tab-panel" :class="{ active: tab === 'favs' }" role="tabpanel">
+
+      <div class="account-subtabs">
+        <button type="button"
+                class="account-subtab"
+                :class="{ active: favsSubtab === 'upcoming' }"
+                @click="switchFavsSubtab('upcoming')">
+          Vigentes <span class="account-subtab-count" x-text="upcomingFavs.length"></span>
+        </button>
+        <button type="button"
+                class="account-subtab"
+                :class="{ active: favsSubtab === 'past' }"
+                @click="switchFavsSubtab('past')">
+          Pasados <span class="account-subtab-count" x-text="pastFavs.length"></span>
+        </button>
+      </div>
+
+      <!-- Subpanel: Vigentes -->
+      <div class="account-sub-panel" :class="{ active: favsSubtab === 'upcoming' }">
+        <div class="favs-grid" x-show="upcomingFavs.length > 0" x-cloak>
+          <template x-for="fav in upcomingFavs" :key="fav.id">
+            <a class="event-card" :href="'event.html?id=' + fav.id">
+              <div class="event-thumb-wrap">
+                <div class="event-thumb-img">
+                  <div :class="fav.event?.bg"></div>
+                </div>
+                <span class="event-genre" x-text="(fav.event?.kicker || '').split(' ').slice(0,3).join(' ')"></span>
+                <!-- Botón corazón: acá siempre está saved (estamos en favoritos). -->
+                <button type="button" class="event-save saved"
+                        @click.prevent.stop="$store.favorites.toggle(fav.id)"
+                        aria-label="Quitar de favoritos">
+                  <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+                </button>
+                <div class="event-badges" x-show="fav.event?.ageRestricted === 18" x-cloak>
+                  <span class="badge-age">+18</span>
+                </div>
+              </div>
+              <div class="event-body">
+                <h3 class="event-title" x-text="cardTitle(fav.event)"></h3>
+                <div class="event-date" x-text="formatFavDate(fav.event)"></div>
+                <div class="event-venue" x-text="[fav.event?.venue, fav.event?.city].filter(Boolean).join(' · ')"></div>
+                <div class="event-price"><span>Desde</span><strong x-text="fav.event?.price"></strong></div>
+              </div>
+            </a>
+          </template>
+        </div>
+
+        <div class="account-empty-state" x-show="upcomingFavs.length === 0" x-cloak>
+          <div class="account-empty-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+          </div>
+          <h3 class="account-empty-title">Sin favoritos aún</h3>
+          <p class="account-empty-copy">Tocá el ♥ en cualquier evento para guardarlo acá. Es tu lista personal.</p>
+          <a class="account-empty-cta" href="index.html">Explorar eventos</a>
+        </div>
+      </div>
+
+      <!-- Subpanel: Pasados (favoritos cuyo evento ya no está en el catálogo) -->
+      <div class="account-sub-panel" :class="{ active: favsSubtab === 'past' }">
+        <div class="favs-grid" x-show="pastFavs.length > 0" x-cloak>
+          <template x-for="fav in pastFavs" :key="fav.id">
+            <div class="event-card event-card--past">
+              <div class="event-thumb-wrap">
+                <div class="event-thumb-img">
+                  <div class="bg-bg-soft"></div>
+                </div>
+                <button type="button" class="event-save saved"
+                        @click.prevent.stop="$store.favorites.toggle(fav.id)"
+                        aria-label="Quitar de favoritos">
+                  <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+                </button>
+              </div>
+              <div class="event-body">
+                <h3 class="event-title" x-text="fav.id"></h3>
+                <div class="event-venue" style="margin-top: 6px;">Evento ya finalizado</div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="account-empty-state" x-show="pastFavs.length === 0" x-cloak>
+          <div class="account-empty-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+          </div>
+          <h3 class="account-empty-title">Sin historial de favoritos</h3>
+          <p class="account-empty-copy">Los eventos que marcaste como favoritos y ya finalizaron van a aparecer acá.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer minimal -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 VIBE.</span>
+      <span>Hecho con <span style="color: var(--accent);">✦</span> en Centroamérica</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Estilos específicos de account.html -->
+<style>
+  [x-cloak] { display: none !important; }
+
+  /* Tag "Finalizado" — aparece solo en tickets pasados. */
+  .account-finalizado-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--bg-soft);
+    color: var(--ink-mid);
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* CTA de logout en mobile menu — estilo alert/rojo, para diferenciarlo
+     del CTA primario de signup que aparece en las otras páginas. */
+  .mobile-menu-cta-logout {
+    display: block;
+    padding: 14px 20px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--ink);
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+  }
+  .mobile-menu-cta-logout:hover {
+    background: #fafaf8;
+    border-color: var(--line-strong, var(--ink));
+  }
+
+  /* Fallback para favs pasados sin bg class */
+  .event-card--past { opacity: 0.6; pointer-events: none; }
+  .event-card--past .event-thumb-img > div.bg-bg-soft { background: var(--bg-soft); }
+</style>
+
+</body>
+</html>

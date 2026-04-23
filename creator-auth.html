@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe — Creadores</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700;1,900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --color-accent:       #c6f800;
+      --color-accent-hover: #b5e000;
+      --color-accent-soft:  #f5ffcc;
+      --color-ink:          #0a0a0a;
+      --color-ink-mid:      #4a4a4a;
+      --color-ink-dim:      #8c8c88;
+      --color-bg:           #ffffff;
+      --color-bg-soft:      #f7f7f5;
+      --color-line:         #e5e3dd;
+      --font-display:       "Geist", -apple-system, system-ui, sans-serif;
+      --font-serif:         "Playfair Display", Georgia, serif;
+      --font-mono:          "Geist Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <link rel="stylesheet" href="css/proto.css">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
+  <script defer src="js/data/countries.js"></script>
+  <script defer src="js/data/events.js"></script>
+  <script defer src="js/stores.js"></script>
+  <script defer src="js/components.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<body x-data :class="{ 'menu-open': $store.ui?.menuOpen }" class="mode-ticks">
+
+<!-- Header minimal: solo logo + botón de cerrar (vuelve a creators landing). -->
+<header class="header header-minimal">
+  <div class="container header-inner">
+    <a href="creators.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibe</a>
+    <div class="header-actions">
+      <a href="creators.html" class="icon-btn" aria-label="Cerrar">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- CREATOR AUTH (Alpine component: creatorAuthPage) -->
+<!-- 4 steps: email → otp → signup → redirect         -->
+<!-- ============================================= -->
+<main x-data="creatorAuthPage()" x-init="init()">
+
+  <!-- ==== STEP 1: EMAIL ==== -->
+  <section class="auth-page auth-creator" x-show="step === 'email'" x-cloak>
+    <div class="auth-card-wrap">
+      <span class="auth-badge">✦ Creadores</span>
+      <h1 class="auth-title">Ingresá o creá tu <em>cuenta</em></h1>
+      <p class="auth-sub">Sin contraseñas. Si es tu primera vez, te creamos la cuenta al verificar tu email.</p>
+
+      <div class="auth-social-row">
+        <button type="button" class="auth-social-btn" @click="loginWithGoogle()" :disabled="busy">
+          <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+          <span x-text="busy ? 'Conectando…' : 'Continuar con Google'"></span>
+        </button>
+      </div>
+
+      <div class="auth-divider">o con email</div>
+
+      <form class="auth-form" @submit.prevent="submitEmail()">
+        <div class="form-field">
+          <label class="form-label" for="creator-email">Email de empresa</label>
+          <input class="form-input" id="creator-email" type="email"
+                 x-model="email"
+                 placeholder="contacto@tuempresa.com"
+                 required autocomplete="email"/>
+        </div>
+        <p class="auth-error" x-show="error" x-text="error" x-cloak></p>
+        <button type="submit" class="auth-submit dark" :disabled="busy">Continuar</button>
+        <p class="auth-legal">Te enviaremos un código de 6 dígitos para verificar tu email. Al continuar aceptás los <a href="#">Términos para creadores</a> y la <a href="#">Política de Privacidad</a>.</p>
+      </form>
+
+      <div class="auth-switcher" style="margin-top: 20px; background: #fff; border: 1px dashed var(--line-strong);">
+        ¿Buscás comprar entradas? <a href="auth.html?mode=login">Ingresá como asistente</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== STEP 2: OTP ==== -->
+  <section class="auth-page auth-creator" x-show="step === 'otp'" x-cloak>
+    <div class="auth-card-wrap">
+      <span class="auth-badge">✦ Creadores</span>
+      <h1 class="auth-title">Verificá tu <em>email</em></h1>
+      <p class="auth-sub">
+        Enviamos un código de 6 dígitos a <strong x-text="email"></strong>.
+        <a class="auth-change-email" href="#" @click.prevent="backToEmail()">Cambiar</a>
+      </p>
+
+      <form class="auth-form" @submit.prevent="submitOtp()">
+        <div class="otp-group" role="group" aria-label="Código de 6 dígitos">
+          <template x-for="idx in [0,1,2,3,4,5]" :key="idx">
+            <input class="otp-input" type="text"
+                   inputmode="numeric" maxlength="1"
+                   :data-cotp-idx="idx"
+                   :aria-label="'Dígito ' + (idx + 1)"
+                   autocomplete="one-time-code"
+                   :value="otp[idx]"
+                   @input="onOtpInput(idx, $event)"
+                   @keydown="onOtpKeydown(idx, $event)"
+                   @paste="onOtpPaste($event)"/>
+          </template>
+        </div>
+        <p class="otp-error" x-show="error" x-text="error" x-cloak></p>
+        <button type="submit" class="auth-submit dark" :disabled="busy">
+          <span x-text="busy ? 'Verificando…' : 'Verificar'"></span>
+        </button>
+      </form>
+
+      <p class="auth-foot otp-resend-row">
+        ¿No te llegó?
+        <template x-if="resendCountdown === 0">
+          <a href="#" @click.prevent="resendOtp()">Reenviar código</a>
+        </template>
+        <template x-if="resendCountdown > 0">
+          <span style="color:var(--ink-mid)">Podés reenviar en <span x-text="resendCountdown"></span>s</span>
+        </template>
+      </p>
+      <p class="otp-demo-hint">Demo: podés ingresar cualquier secuencia de 6 dígitos.</p>
+    </div>
+  </section>
+
+  <!-- ==== STEP 3: SIGNUP (empresa + nombre) — solo si es nuevo creador ==== -->
+  <section class="auth-page auth-creator" x-show="step === 'signup'" x-cloak>
+    <div class="auth-card-wrap">
+      <span class="auth-badge">✦ Creadores</span>
+      <h1 class="auth-title">Completá tu <em>perfil</em></h1>
+      <p class="auth-sub">Un último paso antes de acceder a tu panel.</p>
+
+      <form class="auth-form" @submit.prevent="submitSignup()">
+        <div class="form-field">
+          <label class="form-label" for="creator-company">Nombre de la empresa o productora</label>
+          <input class="form-input" id="creator-company" type="text"
+                 x-model="company"
+                 placeholder="Ej. Move Concerts CR"
+                 required autocomplete="organization"/>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label" for="creator-first-name">Tu nombre</label>
+            <input class="form-input" id="creator-first-name" type="text"
+                   x-model="firstName"
+                   placeholder="Nombre" required autocomplete="given-name"/>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="creator-last-name">Apellido</label>
+            <input class="form-input" id="creator-last-name" type="text"
+                   x-model="lastName"
+                   placeholder="Apellido" required autocomplete="family-name"/>
+          </div>
+        </div>
+        <p class="auth-error" x-show="error" x-text="error" x-cloak></p>
+        <button type="submit" class="auth-submit dark">Ir al panel</button>
+        <p class="auth-legal">Al continuar aceptás los <a href="#">Términos para creadores</a> y la <a href="#">Política de Privacidad</a>. Desde el panel vas a poder completar tus datos fiscales y validar tu identidad.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==== STEP 4: REDIRECT (honest demo boundary) ==== -->
+  <section class="creator-redirect-hero" x-show="step === 'redirect'" x-cloak>
+    <div class="container creator-redirect-inner">
+      <div class="creator-redirect-spinner" aria-hidden="true"></div>
+      <span class="auth-badge">✦ Creadores</span>
+      <h1 class="creator-redirect-title">Preparando tu <em>panel…</em></h1>
+      <p class="creator-redirect-sub">
+        Te estamos llevando a tu dashboard de organizador,
+        <strong x-text="firstName || 'creador'"></strong>.
+      </p>
+      <div class="creator-redirect-note">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4m0-4h.01"/></svg>
+        <div>
+          <strong>Esto es una demo.</strong>
+          <span>En producción, serías redirigido al backoffice del organizador en <code>panel.vibe.cr</code>, donde completás datos fiscales, creás eventos y gestionás ventas.</span>
+        </div>
+      </div>
+      <div class="creator-redirect-actions">
+        <a class="btn-ghost" href="index.html">Volver al inicio</a>
+        <a class="btn-primary-sm" href="creators.html">Ver página de creadores</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Estilos específicos de creator-auth.html -->
+<style>
+  [x-cloak] { display: none !important; }
+
+  .auth-error {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.06em;
+    color: #dc2626;
+    margin: -4px 0 0;
+  }
+
+  .form-grid {
+    display: grid; gap: 12px;
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 480px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  .auth-change-email {
+    color: var(--ink-mid);
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  .auth-change-email:hover { color: var(--ink); }
+</style>
+
+</body>
+</html>

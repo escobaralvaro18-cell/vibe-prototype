@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe — Evento</title>
+
+  <!-- Favicon inline (SVG) para evitar 404 ruidoso en consola -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
+
+  <!-- Google Fonts (igual que index.html — portadas para paridad tipográfica) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700;1,900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Theme tokens (@theme para Tailwind v4) — mismos que index.html -->
+  <style type="text/tailwindcss">
+    @theme {
+      --color-accent:       #c6f800;
+      --color-accent-hover: #b5e000;
+      --color-accent-soft:  #f5ffcc;
+      --color-ink:          #0a0a0a;
+      --color-ink-mid:      #4a4a4a;
+      --color-ink-dim:      #8c8c88;
+      --color-bg:           #ffffff;
+      --color-bg-soft:      #f7f7f5;
+      --color-line:         #e5e3dd;
+      --font-display:       "Geist", -apple-system, system-ui, sans-serif;
+      --font-serif:         "Playfair Display", Georgia, serif;
+      --font-mono:          "Geist Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <!-- Estilos del prototipo (compartidos con index.html) -->
+  <link rel="stylesheet" href="css/proto.css">
+
+  <!-- Orden crítico: persist PRIMERO (para que Alpine.$persist esté registrado
+       cuando corre el listener de alpine:init en stores.js), luego data/stores/
+       components, y por ÚLTIMO Alpine core. Todos con `defer` para que corran
+       después del parseo del HTML y en orden documento. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
+  <script defer src="js/data/countries.js"></script>
+  <script defer src="js/data/events.js"></script>
+  <script defer src="js/stores.js"></script>
+  <script defer src="js/components.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<!-- BODY: body classes reactivos al store `ui` (país/menú/filtro). -->
+<!-- En la página evento no seteamos 'on-home' — el header va plano.       -->
+<body
+  x-data
+  :class="{
+    'menu-open':     $store.ui?.menuOpen,
+    'filter-active': !!($store.ui?.country),
+    'show-cr':       $store.ui?.country === 'CR',
+    'show-sv':       $store.ui?.country === 'SV',
+    'show-hn':       $store.ui?.country === 'HN'
+  }"
+  class="mode-ticks">
+
+<!-- SVG flag defs (portado desde prototipo, referenciado por #flag-cr etc) -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="flag-cr" viewBox="0 0 30 18">
+      <rect width="30" height="18" fill="#002b7f"/>
+      <rect y="3" width="30" height="12" fill="#ffffff"/>
+      <rect y="6" width="30" height="6" fill="#ce1126"/>
+    </symbol>
+    <symbol id="flag-sv" viewBox="0 0 30 18">
+      <rect width="30" height="6"  fill="#0047ab"/>
+      <rect y="6" width="30" height="6" fill="#ffffff"/>
+      <rect y="12" width="30" height="6" fill="#0047ab"/>
+    </symbol>
+    <symbol id="flag-hn" viewBox="0 0 30 18">
+      <rect width="30" height="6"  fill="#0073cf"/>
+      <rect y="6"  width="30" height="6" fill="#ffffff"/>
+      <rect y="12" width="30" height="6" fill="#0073cf"/>
+      <g fill="#0073cf">
+        <circle cx="15"    cy="9"    r="0.9"/>
+        <circle cx="11.5"  cy="9"    r="0.9"/>
+        <circle cx="18.5"  cy="9"    r="0.9"/>
+        <circle cx="13.25" cy="10.7" r="0.9"/>
+        <circle cx="16.75" cy="10.7" r="0.9"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================================= -->
+<!-- PAGE: EVENTO                                   -->
+<!-- ============================================= -->
+
+<!-- Header (copia manual desde index.html, sin 'header-hero') -->
+<header class="header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibe</a>
+
+    <label class="header-search" @click.prevent="$store.ui.searchOverlayOpen = true">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" placeholder="Buscar evento, artista, venue…" readonly />
+    </label>
+
+    <nav class="nav-desktop" x-show="!$store.session.isAuthed" x-cloak>
+      <a href="creators.html" class="nav-link">Para creadores</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn search-mobile" @click.prevent="$store.ui.searchOverlayOpen = true" aria-label="Buscar">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+      </button>
+
+      <!-- Logged-out CTA: sólo "Ingresar" (mismo patrón que index.html).
+           El "Publicar" vive en el nav desktop arriba como "Para creadores"
+           y en el mobile menu — no acá, porque visualmente hacía parecer
+           que el header era de creator, no de asistente. -->
+      <template x-if="!$store.session.isAuthed">
+        <a class="btn-signin" href="auth.html?mode=login">Ingresar</a>
+      </template>
+
+      <!-- Logged-in: avatar + dropdown -->
+      <div class="account-header-avatar-wrap"
+           x-data="sessionMenu"
+           x-show="$store.session.isAuthed"
+           x-cloak>
+        <button type="button" class="account-avatar" @click="toggle()" aria-label="Menú de cuenta">
+          <span x-text="initials.charAt(0) || 'U'"></span>
+        </button>
+        <div class="account-menu-dropdown" :class="{ active: open }">
+          <div class="account-menu-header">
+            <div class="account-avatar account-avatar-lg"><span x-text="initials"></span></div>
+            <div class="account-menu-user">
+              <div class="account-menu-name" x-text="fullName"></div>
+              <div class="account-menu-email" x-text="email"></div>
+            </div>
+          </div>
+          <a class="account-menu-item" href="account.html?tab=tickets">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+            Mis tickets
+          </a>
+          <a class="account-menu-item" href="account.html?tab=favs">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+            Favoritos
+          </a>
+          <a class="account-menu-item" @click.prevent="logout()" href="#">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesión
+          </a>
+        </div>
+      </div>
+
+      <button class="icon-btn menu-toggle" @click="$store.ui.menuOpen = !$store.ui.menuOpen" aria-label="Abrir menú"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </div>
+  <!-- Mobile menu: mismo patrón que index.html.
+       Logueado:  Mi cuenta → Explorar → Cerrar sesión
+       No:        Explorar → Para creadores → Ingresar/Crear cuenta      -->
+  <div class="mobile-menu">
+    <template x-if="$store.session.isAuthed">
+      <div class="mobile-menu-section">
+        <span class="mobile-menu-label">Mi cuenta</span>
+        <a href="account.html?tab=tickets">Mis tickets <span class="chev">→</span></a>
+        <a href="account.html?tab=favs">Mis favoritos <span class="chev">→</span></a>
+      </div>
+    </template>
+
+    <div class="mobile-menu-section">
+      <span class="mobile-menu-label">Explorar</span>
+      <a href="index.html">Eventos <span class="chev">→</span></a>
+    </div>
+
+    <template x-if="!$store.session.isAuthed">
+      <div class="mobile-menu-section mobile-menu-creators">
+        <span class="mobile-menu-label">Para creadores</span>
+        <a href="creators.html">Publicá tu evento <span class="chev">→</span></a>
+        <a href="creator-auth.html?mode=login">Panel del organizador <span class="chev">→</span></a>
+      </div>
+    </template>
+
+    <div class="mobile-menu-ctas">
+      <template x-if="!$store.session.isAuthed">
+        <a class="mobile-cta-primary" href="auth.html?mode=login">Ingresar</a>
+      </template>
+      <template x-if="!$store.session.isAuthed">
+        <a class="mobile-cta-secondary" href="auth.html?mode=signup">Crear cuenta</a>
+      </template>
+      <template x-if="$store.session.isAuthed">
+        <a class="mobile-cta-secondary" @click.prevent="$store.session.logout(); $store.cart.clear(); location.href='index.html'" href="#">Cerrar sesión</a>
+      </template>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- CONTENIDO DEL EVENTO (x-data="eventPage")      -->
+<!-- Lee ?id= de la URL, busca en window.EVENT_DATA.-->
+<!-- ============================================= -->
+<main x-data="eventPage()" x-init="load()">
+
+  <!-- Volver -->
+  <div class="container">
+    <a href="index.html" class="detail-back">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver al inicio
+    </a>
+  </div>
+
+  <!-- Evento no encontrado. `x-cloak` evita FOUC mientras Alpine hidrata. -->
+  <section class="container" x-show="!event" x-cloak style="padding:80px 0;">
+    <h1 style="font-family:var(--font-serif);font-size:48px;font-weight:700;">Evento no encontrado</h1>
+    <p style="color:var(--ink-mid);margin:16px 0 24px;">El id <code x-text="eventId || '(vacío)'"></code> no corresponde a ningún evento del catálogo.</p>
+    <a href="index.html" class="btn-primary">Ver todos los eventos</a>
+  </section>
+
+  <!-- Detalle -->
+  <section class="container" x-show="event" x-cloak>
+    <div class="detail-hero">
+      <div class="detail-poster">
+        <div class="detail-poster-bg" :class="event?.bg"></div>
+      </div>
+
+      <div class="detail-info">
+        <!-- Kicker + badges en la misma fila. Esto evita el hueco visual raro
+             que dejaba el pill "PREVENTA PRONTO" entre el kicker y el título,
+             y agrupa semánticamente la meta del evento (tour/kicker + tags). -->
+        <div class="event-hero-kicker">
+          <span class="pulse-dot"></span>
+          <span class="kicker-text" x-text="event?.kicker"></span>
+          <template x-for="(badge, idx) in heroBadges" :key="idx">
+            <span class="hero-badge" :class="'hero-badge-' + badge.kind" x-text="badge.label"></span>
+          </template>
+        </div>
+
+        <h1 x-html="event?.title"></h1>
+
+        <!-- Facts: solo para eventos `single`. Los recurring no tienen fecha
+             fija (hay muchas clases al mes), y los multi-date tienen varias
+             funciones con venues distintos (lo resolvemos en el datepicker). -->
+        <div class="event-facts" x-show="!isRecurring && !isMultiDate" x-cloak>
+          <div class="fact"><div class="fact-label">Fecha</div>  <div class="fact-value" x-text="event?.date"></div></div>
+          <div class="fact"><div class="fact-label">Hora</div>   <div class="fact-value" x-text="event?.time"></div></div>
+          <div class="fact"><div class="fact-label">Venue</div>  <div class="fact-value" x-text="event?.venue"></div></div>
+          <div class="fact"><div class="fact-label">Ciudad</div> <div class="fact-value" x-text="event?.city"></div></div>
+        </div>
+
+        <div class="event-desc" x-html="event?.desc"></div>
+
+        <div class="lineup" x-show="(event?.lineup || []).length">
+          <h3>Line-up</h3>
+          <div class="lineup-tags">
+            <template x-for="(artist, idx) in (event?.lineup || [])" :key="idx">
+              <span class="lineup-tag" :class="{ 'main': artist.main }" x-text="artist.name"></span>
+            </template>
+          </div>
+        </div>
+
+        <!-- Organizer card: display-only. Feature "seguir" fuera de scope,
+             así que la card no tiene acción ni hover — proto.css la estila
+             sin transition ni pointer cursor (sugiere inerte).             -->
+        <div class="organizer-card">
+          <div class="organizer-avatar" x-text="event?.orgAvatar"></div>
+          <div class="organizer-info">
+            <div class="organizer-label">Organiza</div>
+            <div class="organizer-name" x-text="event?.orgName"></div>
+          </div>
+        </div>
+
+        <!-- Buy-box: solo para eventos `single`. Recurring usa la CTA inline
+             del calendario de clases, multi-date usa la CTA del datepicker.
+             `is-presale` modifica el wrapper en modo preventa — proto.css lo
+             vuelve transparente (sin border/padding) para que sólo el card
+             negro del countdown sea visible (match 1:1 con el prototipo). -->
+        <div class="buy-box" :class="{ 'is-presale': isPresale }" x-show="!isRecurring && !isMultiDate">
+          <!-- Modo normal: venta abierta -->
+          <div class="buy-box-normal" x-show="!isPresale">
+            <div>
+              <span class="price-label">Desde</span>
+              <span class="price-value" x-text="event?.price"></span>
+            </div>
+            <button class="btn-accent" @click="goCheckout()">
+              Comprar entradas
+              <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- Modo preventa: usa las MISMAS clases que el prototipo (proto.css
+               ya tiene toda la styling). Card negro con label arriba, grid
+               4-col con días/hrs/min/seg, y disclosure de código de acceso.
+               IMPORTANTE: no usar clases `.presale-unit/-num/-cap/-sep` — esas
+               no existían en el prototipo y chocaban con `.presale-countdown`
+               que en proto.css ES el card negro (flex column con bg ink).    -->
+          <div class="buy-box-presale" x-show="isPresale" x-cloak>
+            <div class="presale-countdown">
+              <span class="presale-countdown-label">Venta abre en</span>
+              <div class="presale-countdown-clock">
+                <div class="countdown-unit">
+                  <div class="countdown-unit-num" x-text="presaleDD">00</div>
+                  <div class="countdown-unit-label">Días</div>
+                </div>
+                <div class="countdown-unit">
+                  <div class="countdown-unit-num" x-text="presaleHH">00</div>
+                  <div class="countdown-unit-label">Hrs</div>
+                </div>
+                <div class="countdown-unit">
+                  <div class="countdown-unit-num" x-text="presaleMM">00</div>
+                  <div class="countdown-unit-label">Min</div>
+                </div>
+                <div class="countdown-unit">
+                  <div class="countdown-unit-num" x-text="presaleSS">00</div>
+                  <div class="countdown-unit-label">Seg</div>
+                </div>
+              </div>
+              <!-- Código de acceso — disclosure discreto dentro del card negro -->
+              <div class="presale-code" :class="{ 'open': presaleCodeOpen }" :shake="presaleShake">
+                <button class="presale-code-trigger" type="button" @click="togglePresaleCode()">
+                  <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11v6m-6-6V9a6 6 0 1112 0v2m-14 0h16v10H4V11z"/></svg>
+                  <span>¿Tenés un código de acceso anticipado?</span>
+                </button>
+                <div class="presale-code-panel">
+                  <form class="presale-code-form" :class="{ 'error': presaleState === 'error', 'success': presaleState === 'success' }" @submit.prevent="submitPresaleCode()">
+                    <input
+                      type="text"
+                      class="presale-code-input"
+                      x-model="presaleCode"
+                      placeholder="Ej. VIBE2026"
+                      autocomplete="off"
+                      spellcheck="false"
+                      maxlength="20"
+                      aria-label="Código de acceso anticipado"
+                    />
+                    <button type="submit" class="presale-code-submit" :disabled="presaleState === 'success'">
+                      <span x-show="presaleState !== 'success'">Aplicar</span>
+                      <svg x-show="presaleState === 'success'" x-cloak fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                    <button type="button" class="presale-code-close" @click="closePresaleCode()" aria-label="Cerrar">
+                      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                  </form>
+                  <div class="presale-code-feedback" :class="{ 'is-error': presaleState === 'error', 'is-success': presaleState === 'success' }" x-show="presaleFeedback" x-text="presaleFeedback"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- RECURRING: Calendario de clases (eventType === 'recurring')   -->
+        <!-- Portado 1:1 del prototipo (líneas 12708-12854).                -->
+        <!-- Navegación por mes + grid de días (dot = hay clases) + panel  -->
+        <!-- de slots + CTA inline que avanza directo a checkout?step=     -->
+        <!-- details (ya hay qty=1 seleccionada: la clase).                -->
+        <!-- ============================================================ -->
+        <div class="recurring-section" x-show="isRecurring" x-cloak>
+          <div class="recurring-subtitle">Calendario de clases</div>
+          <div class="cal-wrapper">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" @click="changeMonth(-1)" :disabled="!canGoPrev" aria-label="Mes anterior">
+                <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <div class="cal-month-label" x-text="monthLabel"></div>
+              <button class="cal-nav-btn" @click="changeMonth(1)" :disabled="!canGoNext" aria-label="Mes siguiente">
+                <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="cal-grid">
+              <!-- Días de la semana (Lun-Dom) -->
+              <div class="cal-dow">Lun</div>
+              <div class="cal-dow">Mar</div>
+              <div class="cal-dow">Mié</div>
+              <div class="cal-dow">Jue</div>
+              <div class="cal-dow">Vie</div>
+              <div class="cal-dow">Sáb</div>
+              <div class="cal-dow">Dom</div>
+              <!-- Celdas: empty (padding) + day (con/sin clases) -->
+              <template x-for="(cell, i) in gridCells" :key="i">
+                <template x-if="cell.type === 'empty'">
+                  <div class="cal-day empty"></div>
+                </template>
+              </template>
+              <template x-for="(cell, i) in gridCells" :key="'d' + i">
+                <template x-if="cell.type === 'day'">
+                  <button class="cal-day"
+                          :class="{
+                            'has-classes': cell.hasClasses,
+                            'no-classes': !cell.hasClasses,
+                            'selected': cell.selected
+                          }"
+                          :disabled="!cell.hasClasses"
+                          @click="selectDay(cell.day)"
+                          x-text="cell.day"></button>
+                </template>
+              </template>
+            </div>
+          </div>
+
+          <!-- Empty state de mes: si el mes activo no tiene clases programadas
+               (scheduleByMonth[calMonthKey] vacío), mostrá un cartel claro en
+               vez de dejar al usuario tocando días muertos. -->
+          <template x-if="monthIsEmpty">
+            <div class="cal-empty-state">No hay clases programadas para este mes. Probá el mes siguiente.</div>
+          </template>
+          <!-- Panel de clases del día: empty state o lista de slots -->
+          <template x-if="!monthIsEmpty && !selectedDay">
+            <div class="cal-empty-state">Tocá un día con punto verde para ver las clases disponibles</div>
+          </template>
+          <template x-if="!monthIsEmpty && selectedDay && selectedDayClasses.length === 0">
+            <div class="cal-empty-state">No hay clases este día</div>
+          </template>
+          <template x-if="!monthIsEmpty && selectedDay && selectedDayClasses.length > 0">
+            <div>
+              <div class="cal-classes-header" x-text="selectedDayLabel"></div>
+              <div class="cal-classes-list">
+                <template x-for="(cls, idx) in selectedDayClasses" :key="idx">
+                  <button type="button" class="class-slot"
+                          :data-status="cls.status"
+                          :disabled="cls.status === 'soldout'"
+                          :class="{ 'selected': selectedClassIdx === idx }"
+                          @click="selectClass(selectedDay, idx)">
+                    <div class="class-slot-time" x-text="cls.time"></div>
+                    <div class="class-slot-info">
+                      <div class="class-slot-name" x-text="cls.name"></div>
+                      <div class="class-slot-teacher" x-text="'Con ' + cls.teacher"></div>
+                    </div>
+                    <span class="class-slot-badge" x-show="cls.status === 'last'">Últimas</span>
+                    <span class="class-slot-badge" x-show="cls.status === 'soldout'"
+                          style="background:var(--ink-mid);color:#fff;">Agotado</span>
+                    <div class="class-slot-price" x-text="cls.price"></div>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </template>
+
+          <!-- CTA inline: Continuar con esta clase (bloqueado hasta elegir).
+               x-ref="continueCta" lo usa selectClass() para auto-scroll. -->
+          <button type="button" class="continue-cta"
+                  x-ref="continueCta"
+                  :disabled="!hasSelectedClass"
+                  @click="continueToClass()">
+            <template x-if="!hasSelectedClass"><span>Elegí una clase</span></template>
+            <template x-if="hasSelectedClass">
+              <span>
+                Continuar con esta clase
+                <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;margin-left:6px;"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </span>
+            </template>
+          </button>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- MULTI-DATE: Datepicker de funciones (eventType === 'multi-date') -->
+        <!-- Portado 1:1 del prototipo (renderMultiDate líneas 12603-12632). -->
+        <!-- Scroll horizontal de date-cards + panel de detalle (venue/hora  -->
+        <!-- /ciudad de la función elegida) + CTA que guarda selectedDateId -->
+        <!-- en el cart y navega a checkout?step=cart.                       -->
+        <!-- ============================================================ -->
+        <div class="datepicker-section" x-show="isMultiDate" x-cloak>
+          <div class="datepicker-head">
+            <span class="datepicker-label">Elegí tu fecha</span>
+            <span class="datepicker-count" x-text="datesCount + ' funciones disponibles'"></span>
+          </div>
+          <div class="datepicker-scroll-wrap">
+            <div class="datepicker-scroll">
+              <template x-for="d in eventDates" :key="d.id">
+                <button type="button" class="date-card"
+                        :data-status="d.status"
+                        :disabled="d.status === 'soldout'"
+                        :class="{ 'selected': selectedDateId === d.id }"
+                        @click="selectDate(d.id)">
+                  <span class="date-badge" x-show="d.status === 'last'">Últimas</span>
+                  <span class="date-badge" x-show="d.status === 'soldout'">Agotado</span>
+                  <span class="dayname" x-text="d.dayName"></span>
+                  <span class="daynum" x-text="d.day"></span>
+                  <span class="month" x-text="d.month"></span>
+                  <span class="price" x-text="d.price"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Panel de detalle: venue / hora / ciudad de la fecha elegida.
+               x-ref="selectedDateDetail" lo usa selectDate() para auto-scroll. -->
+          <template x-if="selectedDate">
+            <div class="selected-date-detail" x-ref="selectedDateDetail">
+              <div class="selected-date-detail-item">
+                <span class="selected-date-detail-label">Venue</span>
+                <span class="selected-date-detail-value" x-text="selectedDate.venue"></span>
+              </div>
+              <div class="selected-date-detail-divider"></div>
+              <div class="selected-date-detail-item">
+                <span class="selected-date-detail-label">Hora</span>
+                <span class="selected-date-detail-value" x-text="selectedDate.time"></span>
+              </div>
+              <div class="selected-date-detail-divider"></div>
+              <div class="selected-date-detail-item">
+                <span class="selected-date-detail-label">Ciudad</span>
+                <span class="selected-date-detail-value" x-text="selectedDate.city"></span>
+              </div>
+            </div>
+          </template>
+
+          <!-- CTA: Continuar con esta fecha (bloqueado hasta elegir). -->
+          <button type="button" class="continue-cta"
+                  :disabled="!selectedDate"
+                  @click="continueToDate()">
+            <template x-if="!selectedDate"><span>Elegí una fecha</span></template>
+            <template x-if="selectedDate">
+              <span>
+                Continuar con esta fecha
+                <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;margin-left:6px;"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </span>
+            </template>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info secundaria -->
+    <section class="event-secondary">
+      <div class="event-secondary-grid">
+        <div class="info-block">
+          <h3>Información importante</h3>
+          <ul class="info-list">
+            <template x-for="(pair, idx) in (event?.info || [])" :key="idx">
+              <li><strong x-text="pair[0]"></strong> <span x-text="pair[1]"></span></li>
+            </template>
+          </ul>
+        </div>
+        <!-- Mapa "Cómo llegar": solo si hay venue/city fijos (eventos single).
+             Los recurring no tienen venue único; los multi-date tienen uno
+             distinto por función (se muestra en el panel del datepicker). -->
+        <div class="info-block" x-show="!isRecurring && !isMultiDate && (event?.venue || event?.city)">
+          <h3>Cómo llegar</h3>
+          <div class="map-block">
+            <div class="map-roads"></div>
+            <div class="map-pin"></div>
+            <div class="map-overlay">
+              <div><strong x-text="event?.venue"></strong><span x-text="event?.city"></span></div>
+              <a class="btn-ghost" style="font-size:11px;padding:7px 10px;">Maps →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </section>
+
+  <!-- =========================================== -->
+  <!-- EVENTOS SIMILARES (carrusel final)            -->
+  <!-- Portado del prototipo línea 8645. Dinámico:   -->
+  <!-- itera EVENT_DATA y muestra hasta 6 eventos    -->
+  <!-- (excluyendo el actual). Mismo markup de card  -->
+  <!-- que index.html para paridad visual.           -->
+  <!-- =========================================== -->
+  <section class="section similar-events-section" x-show="event && similarEvents.length > 0" x-cloak style="padding-bottom: 80px;">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head-left">
+          <h2 class="section-title">Eventos <em>similares</em></h2>
+        </div>
+        <div class="section-actions">
+          <div class="carousel-controls">
+            <button type="button" class="carousel-btn" @click="scrollSimilar(-1)" aria-label="Anterior">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button type="button" class="carousel-btn" @click="scrollSimilar(1)" aria-label="Siguiente">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <a href="index.html" class="section-link">Ver todos →</a>
+        </div>
+      </div>
+
+      <div class="carousel" x-ref="similarCarousel">
+        <template x-for="sim in similarEvents" :key="sim.id">
+          <a :href="'event.html?id=' + sim.id" class="event-card">
+            <div class="event-thumb-wrap">
+              <div class="event-thumb-img">
+                <div :class="sim.bg"></div>
+              </div>
+              <!-- Kicker como genre label (si cabe) — usa primeras 2-3 palabras -->
+              <span class="event-genre" x-text="(sim.kicker || '').split(' ').slice(0,3).join(' ')"></span>
+              <!-- Botón de favorito: mismo patrón que index.html -->
+              <button type="button" class="event-save"
+                      :class="{ saved: $store.favorites.has(sim.id) }"
+                      @click.prevent.stop="$store.favorites.toggle(sim.id)"
+                      aria-label="Guardar evento">
+                <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+              </button>
+              <!-- Badge +18 si aplica -->
+              <div class="event-badges" x-show="sim.ageRestricted === 18">
+                <span class="badge-age">+18</span>
+              </div>
+            </div>
+            <div class="event-body">
+              <h3 class="event-title" x-text="cardTitle(sim)"></h3>
+              <div class="event-date" x-text="formatCardDate(sim)"></div>
+              <div class="event-venue" x-text="[sim.venue, sim.city].filter(Boolean).join(' · ')"></div>
+              <div class="event-price"><span>Desde</span><strong x-text="sim.price"></strong></div>
+            </div>
+          </a>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================== -->
+  <!-- STICKY MOBILE BUY BAR                         -->
+  <!-- Se muestra solo en mobile al scrollear lejos  -->
+  <!-- del hero. Refleja el estado del buy-box.      -->
+  <!-- `far` se enciende al pasar 400px de scroll    -->
+  <!-- (P0-6: matchea prototipo línea ~6880).        -->
+  <!-- =========================================== -->
+  <!-- Paridad prototipo v27 (L3877): en mobile el sticky buy bar es
+       SIEMPRE visible sobre event.html. No hay threshold de scroll —
+       el CSS ya lo oculta en desktop (>= 900px). Antes usábamos
+       `scrollY > 400` y se sentía tardío. -->
+  <div class="mobile-buy-bar"
+       x-show="event"
+       x-cloak>
+    <!-- Modo recurring: espejo del CTA inline del calendario. Mientras no haya
+         clase elegida el botón queda deshabilitado; al elegir, muestra el
+         precio y dispara continueToClass(). -->
+    <template x-if="isRecurring">
+      <div class="mobile-buy-bar-inner">
+        <div class="mobile-buy-bar-price">
+          <template x-if="selectedClass">
+            <div>
+              <span class="mobile-buy-bar-label" x-text="selectedClass.time + ' · ' + selectedClass.name"></span>
+              <span class="mobile-buy-bar-value" x-text="selectedClass.price"></span>
+            </div>
+          </template>
+          <template x-if="!selectedClass">
+            <div>
+              <span class="mobile-buy-bar-label">Desde</span>
+              <span class="mobile-buy-bar-value" x-text="event?.price"></span>
+            </div>
+          </template>
+        </div>
+        <button class="btn-accent mobile-buy-bar-cta"
+                :disabled="!hasSelectedClass"
+                @click="continueToClass()">
+          <span x-text="hasSelectedClass ? 'Continuar' : 'Elegí una clase'"></span>
+          <svg x-show="hasSelectedClass" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </template>
+    <!-- Modo multi-date: espejo del CTA del datepicker. Deshabilitado hasta
+         que el usuario elija una función; al elegir, muestra día+venue+precio
+         y dispara continueToDate(). -->
+    <template x-if="isMultiDate">
+      <div class="mobile-buy-bar-inner">
+        <div class="mobile-buy-bar-price">
+          <template x-if="selectedDate">
+            <div>
+              <span class="mobile-buy-bar-label" x-text="selectedDate.dayName + ' ' + selectedDate.day + ' · ' + selectedDate.venue"></span>
+              <span class="mobile-buy-bar-value" x-text="selectedDate.price"></span>
+            </div>
+          </template>
+          <template x-if="!selectedDate">
+            <div>
+              <span class="mobile-buy-bar-label" x-text="datesCount + ' funciones'"></span>
+              <span class="mobile-buy-bar-value" x-text="event?.price"></span>
+            </div>
+          </template>
+        </div>
+        <button class="btn-accent mobile-buy-bar-cta"
+                :disabled="!selectedDate"
+                @click="continueToDate()">
+          <span x-text="selectedDate ? 'Continuar' : 'Elegí una fecha'"></span>
+          <svg x-show="selectedDate" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </template>
+    <!-- Modo normal (single) -->
+    <template x-if="!isRecurring && !isMultiDate && !isPresale">
+      <div class="mobile-buy-bar-inner">
+        <div class="mobile-buy-bar-price">
+          <span class="mobile-buy-bar-label">Desde</span>
+          <span class="mobile-buy-bar-value" x-text="event?.price"></span>
+        </div>
+        <button class="btn-accent mobile-buy-bar-cta" @click="goCheckout()">
+          Comprar
+          <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </template>
+    <!-- Modo preventa -->
+    <template x-if="!isRecurring && !isMultiDate && isPresale">
+      <div class="mobile-buy-bar-inner">
+        <div class="mobile-buy-bar-price">
+          <span class="mobile-buy-bar-label">Preventa en</span>
+          <span class="mobile-buy-bar-countdown">
+            <span x-text="presaleDD"></span>d
+            <span x-text="presaleHH"></span>h
+            <span x-text="presaleMM"></span>m
+          </span>
+        </div>
+        <button class="btn-ghost mobile-buy-bar-cta" @click="togglePresaleCode()">
+          Tengo código
+        </button>
+      </div>
+    </template>
+  </div>
+
+</main>
+
+<!-- ===== SEARCH OVERLAY (modal global — mismo markup que index.html) ===== -->
+<div
+  x-data="searchOverlay"
+  :class="{ 'is-open': $store.ui?.searchOverlayOpen }"
+  x-effect="
+    if ($store.ui?.searchOverlayOpen) { onOpen(); document.body.classList.add('search-open'); }
+    else { document.body.classList.remove('search-open'); }
+  "
+  @keydown.escape.window="close()"
+  class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-label="Buscar">
+  <button type="button" class="search-overlay-close" @click="close()" aria-label="Cerrar búsqueda">
+    <svg viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+  </button>
+
+  <label class="search-overlay-field" for="search-overlay-input">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <input
+      x-ref="input"
+      id="search-overlay-input"
+      type="text"
+      placeholder="Buscar evento, artista, venue…"
+      autocomplete="off"
+      x-model="query"
+      @keydown.arrow-down.prevent="moveCursor(1)"
+      @keydown.arrow-up.prevent="moveCursor(-1)"
+      @keydown.enter.prevent="submitCursor()"
+    />
+    <button type="button" class="search-overlay-clear" x-show="query.length > 0" x-cloak @click="clearQuery()" aria-label="Limpiar búsqueda">
+      <svg viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </label>
+
+  <div class="search-overlay-body">
+    <template x-if="!query.trim()">
+      <div class="search-explore">
+        <template x-if="recent.length > 0">
+          <div class="search-section">
+            <div class="search-section-head">
+              <span class="search-section-title">Búsquedas recientes</span>
+              <button type="button" class="search-section-clear" @click="clearRecent()">Limpiar</button>
+            </div>
+            <div class="search-chip-row">
+              <template x-for="(r, i) in recent" :key="'recent-' + i">
+                <button type="button" class="search-chip" @click="useSuggestion(r)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                  <span x-text="r"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <div class="search-section">
+          <div class="search-section-head">
+            <span class="search-section-title">Sugerencias populares</span>
+          </div>
+          <div class="search-chip-row">
+            <template x-for="(s, i) in suggestions" :key="'sug-' + i">
+              <button type="button" class="search-chip" @click="useSuggestion(s)"><span x-text="s"></span></button>
+            </template>
+          </div>
+        </div>
+
+        <div class="search-section">
+          <div class="search-section-head">
+            <span class="search-section-title">Eventos destacados</span>
+          </div>
+          <div class="search-overlay-results">
+            <template x-for="(r, i) in results" :key="'top-' + r.id + '-' + i">
+              <a href="#" class="search-result-card" :data-idx="i" :class="{ 'is-focused': cursor === i }" @click.prevent="go(r)">
+                <div class="search-result-thumb"><div :class="r.bg"></div></div>
+                <div class="search-result-meta" x-text="r.kicker || r.date"></div>
+                <div class="search-result-title" x-html="highlight(r.title)"></div>
+                <div class="search-result-venue" x-html="highlight([r.city, r.venue].filter(Boolean).join(' · '))"></div>
+                <div class="search-result-price">Desde <strong x-text="r.price"></strong></div>
+              </a>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template x-if="query.trim()">
+      <div class="search-results-wrap">
+        <template x-if="isEmpty">
+          <div class="search-empty">
+            <div class="search-empty-title">Sin resultados para "<span x-text="query"></span>"</div>
+            <div class="search-empty-sub">Probá con el nombre del artista, una ciudad o un género.</div>
+            <div class="search-chip-row search-chip-row-center">
+              <template x-for="(s, i) in suggestions.slice(0, 6)" :key="'empty-' + i">
+                <button type="button" class="search-chip" @click="useSuggestion(s)" x-text="s"></button>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="!isEmpty">
+          <div>
+            <div class="search-results-count">
+              <span x-text="results.length"></span>
+              <span x-text="results.length === 1 ? 'resultado' : 'resultados'"></span>
+            </div>
+            <div class="search-overlay-results">
+              <template x-for="(r, i) in results" :key="'res-' + r.id + '-' + i">
+                <a href="#" class="search-result-card" :data-idx="i" :class="{ 'is-focused': cursor === i }" @click.prevent="go(r)">
+                  <div class="search-result-thumb"><div :class="r.bg"></div></div>
+                  <div class="search-result-meta" x-text="r.kicker || r.date"></div>
+                  <div class="search-result-title" x-html="highlight(r.title)"></div>
+                  <div class="search-result-venue" x-html="highlight([r.city, r.venue].filter(Boolean).join(' · '))"></div>
+                  <div class="search-result-price">Desde <strong x-text="r.price"></strong></div>
+                </a>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- Estilos: hero badges, preventa, mobile buy bar -->
+<!-- (CSS específico de event.html)                  -->
+<!-- ============================================= -->
+<style>
+  [x-cloak] { display: none !important; }
+
+  /* -------- Hero badges (+18 / PREVENTA / SEMANAL) -----------------
+     Viven INLINE dentro de `.event-hero-kicker` (flex container). El
+     kicker ya provee gap 8px y letter-spacing/mono, así que los badges
+     se pegan al lado del texto sin romper jerarquía con el h1.        */
+  .detail-info .event-hero-kicker {
+    /* override del inline-flex del proto.css: permitimos wrap cuando
+       entra un pill extra (PREVENTA PRONTO tiene 14 chars y empuja). */
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong, var(--line));
+    background: var(--bg-elev, var(--bg-soft));
+    color: var(--ink);
+    /* reset del letter-spacing heredado del kicker para que quede tight */
+    line-height: 1;
+  }
+  .hero-badge-age      { background:#0a0a0a; color:#fff; border-color:#0a0a0a; }
+  .hero-badge-presale  { background: var(--accent); color:#0a0a0a; border-color: var(--accent); }
+  .hero-badge-recurring{ background:#fff; color:#0a0a0a; border-color: var(--line-strong, #0a0a0a); }
+
+  /* Buy-box en modo preventa: toda la styling vive en proto.css
+     (.buy-box.is-presale quita border/padding del wrapper y el countdown
+     fills 100% width). No necesitamos reglas custom acá. */
+
+  /* -------- Sticky mobile buy bar --------------------------------- */
+  .mobile-buy-bar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 90;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -6px 24px rgba(10,10,10,0.08);
+  }
+  .mobile-buy-bar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    max-width: 560px; margin: 0 auto;
+  }
+  .mobile-buy-bar-price {
+    display: flex; flex-direction: column;
+    min-width: 0;
+  }
+  .mobile-buy-bar-label {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-mid);
+  }
+  .mobile-buy-bar-value {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .mobile-buy-bar-countdown {
+    font-family: var(--font-mono);
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile-buy-bar-cta {
+    white-space: nowrap;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+  /* Solo visible en mobile; en desktop el buy-box del hero ya está visible */
+  @media (min-width: 900px) {
+    .mobile-buy-bar { display: none; }
+  }
+  /* Espaciado extra en mobile para que la bar no tape el contenido */
+  @media (max-width: 899.98px) {
+    main { padding-bottom: 88px; }
+  }
+
+  /* -------- Event-secondary grid fallback ------------------------- */
+  .event-secondary-grid {
+    display: grid; gap: 24px;
+    grid-template-columns: 1fr;
+    margin: 40px 0 60px;
+  }
+  @media (min-width: 768px) {
+    .event-secondary-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+</style>
+
+<!-- ===== Listener de scroll para body.scrolled (header condensado) ===== -->
+<script>
+  (function() {
+    const onScroll = () => {
+      document.body.classList.toggle('scrolled', window.scrollY > 8);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
+</body>
+</html>

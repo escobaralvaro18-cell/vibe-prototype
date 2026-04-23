@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe — Para creadores</title>
+
+  <!-- Favicon inline (SVG) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700;1,900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Theme tokens (@theme para Tailwind v4) -->
+  <style type="text/tailwindcss">
+    @theme {
+      --color-accent:       #c6f800;
+      --color-accent-hover: #b5e000;
+      --color-accent-soft:  #f5ffcc;
+      --color-ink:          #0a0a0a;
+      --color-ink-mid:      #4a4a4a;
+      --color-ink-dim:      #8c8c88;
+      --color-bg:           #ffffff;
+      --color-bg-soft:      #f7f7f5;
+      --color-line:         #e5e3dd;
+      --font-display:       "Geist", -apple-system, system-ui, sans-serif;
+      --font-serif:         "Playfair Display", Georgia, serif;
+      --font-mono:          "Geist Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <!-- Estilos del prototipo -->
+  <link rel="stylesheet" href="css/proto.css">
+
+  <!-- Scripts en orden: persist, data, stores, components, Alpine core. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
+  <script defer src="js/data/countries.js"></script>
+  <script defer src="js/data/events.js"></script>
+  <script defer src="js/stores.js"></script>
+  <script defer src="js/components.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<body
+  x-data
+  :class="{ 'menu-open': $store.ui?.menuOpen }"
+  class="mode-ticks">
+
+<!-- ============================================= -->
+<!-- HEADER (creators)                              -->
+<!-- Matchea prototipo líneas 9647-9674, con Alpine -->
+<!-- ============================================= -->
+<header class="header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibe</a>
+
+    <!-- Nav desktop: link de salida hacia asistentes (el usuario YA está en
+         la página de creadores, así que "Para creadores" sería redundante).
+         Convertirlo en "Volver a eventos" le da una ruta de escape clara y
+         no compite con los CTAs principales del header.                      -->
+    <nav class="nav-desktop">
+      <a href="index.html" class="nav-link">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+        Volver a eventos
+      </a>
+    </nav>
+
+    <div class="header-actions">
+      <!-- CTAs del creador. Tuvimos "Panel" + "Empezá" — muy vagos:
+           - "Panel" no comunica que es login.
+           - "Empezá" no dice QUÉ empieza (registro? publicar? venta?).
+           Los reemplazamos por labels explícitos y action-oriented:          -->
+      <template x-if="!$store.session.isAuthed">
+        <a class="btn-ghost" href="creator-auth.html?mode=login">Iniciar sesión</a>
+      </template>
+      <template x-if="!$store.session.isAuthed">
+        <a class="btn-primary-sm" href="creator-auth.html?mode=signup">Publicar evento</a>
+      </template>
+
+      <!-- Logged-in: avatar + dropdown (sessionMenu) -->
+      <div class="account-header-avatar-wrap"
+           x-data="sessionMenu"
+           x-show="$store.session.isAuthed"
+           x-cloak>
+        <button type="button" class="account-avatar" @click="toggle()" aria-label="Menú de cuenta">
+          <span x-text="initials.charAt(0) || 'U'"></span>
+        </button>
+        <div class="account-menu-dropdown" :class="{ active: open }">
+          <div class="account-menu-header">
+            <div class="account-avatar account-avatar-lg"><span x-text="initials"></span></div>
+            <div class="account-menu-user">
+              <div class="account-menu-name" x-text="fullName"></div>
+              <div class="account-menu-email" x-text="email"></div>
+            </div>
+          </div>
+          <a class="account-menu-item" href="account.html?tab=tickets">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+            Mi cuenta
+          </a>
+          <a class="account-menu-item" @click.prevent="logout()" href="#">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesión
+          </a>
+        </div>
+      </div>
+
+      <button class="icon-btn menu-toggle" @click="$store.ui.menuOpen = !$store.ui.menuOpen" aria-label="Abrir menú">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu del flow de creadores -->
+  <div class="mobile-menu">
+    <template x-if="$store.session.isAuthed">
+      <div class="mobile-menu-section">
+        <span class="mobile-menu-label">Mi cuenta</span>
+        <a href="account.html?tab=tickets">Mis tickets <span class="chev">→</span></a>
+        <a href="account.html?tab=favs">Mis favoritos <span class="chev">→</span></a>
+      </div>
+    </template>
+
+    <div class="mobile-menu-section">
+      <span class="mobile-menu-label">Explorá</span>
+      <a href="index.html">Volver a eventos <span class="chev">→</span></a>
+    </div>
+    <div class="mobile-menu-section mobile-menu-creators">
+      <span class="mobile-menu-label">Soy creador</span>
+      <a href="creator-auth.html?mode=signup">Publicar evento <span class="chev">→</span></a>
+      <a href="creator-auth.html?mode=login">Iniciar sesión <span class="chev">→</span></a>
+    </div>
+    <div class="mobile-menu-ctas">
+      <template x-if="!$store.session.isAuthed">
+        <a class="mobile-cta-primary" href="creator-auth.html?mode=signup">Publicar evento</a>
+      </template>
+      <template x-if="!$store.session.isAuthed">
+        <a class="mobile-cta-secondary" href="creator-auth.html?mode=login">Ya tengo cuenta</a>
+      </template>
+      <template x-if="$store.session.isAuthed">
+        <a class="mobile-cta-secondary"
+           @click.prevent="$store.session.logout(); $store.cart.clear(); location.href='index.html'"
+           href="#">Cerrar sesión</a>
+      </template>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- HERO: título + stats +240 / 50K / 3%           -->
+<!-- ============================================= -->
+<section class="creators-hero">
+  <div class="container creators-hero-inner">
+    <div>
+      <span class="creators-kicker">✦ Para creadores</span>
+      <!-- H1: outcome-first ("llená tu evento") en vez de "publicá en VIBE"
+           (redundante — el user YA está en VIBE). El italic sobre "evento"
+           en Playfair mantiene el contraste visual del hero original.       -->
+      <h1>Llená tu próximo <em>evento</em>.</h1>
+      <!-- Sub: tres value props comprimidos:
+             1. Audiencia concreta ("miles de asistentes activos")
+             2. Región ("Centroamérica")
+             3. Velocidad ("publicás en minutos · vendés el mismo día")     -->
+      <p class="creators-hero-sub">Llegá a miles de asistentes activos en Centroamérica. Publicás en minutos y empezás a vender el mismo día.</p>
+      <div class="creators-cta-row">
+        <a class="creators-cta-primary" href="creator-auth.html?mode=signup">
+          Publicá tu evento
+          <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="creators-cta-secondary" href="creator-auth.html?mode=login">Ya tengo cuenta</a>
+      </div>
+      <!-- Fineprint: levanta las 3 objeciones más comunes de pricing
+           (costo inicial / suscripción / comisión oculta) antes de que el
+           user las piense. Mono 11px opacity 60% — no compite con el CTA. -->
+      <p class="creators-hero-fineprint">Registro gratis · Sin costos mensuales · Solo pagás 3% cuando vendés</p>
+    </div>
+    <div class="creators-hero-stats">
+      <div>
+        <div class="creators-stat-num">+240</div>
+        <div class="creators-stat-label">Eventos<br>publicados</div>
+      </div>
+      <div>
+        <div class="creators-stat-num">50K</div>
+        <div class="creators-stat-label">Entradas<br>vendidas</div>
+      </div>
+      <div>
+        <div class="creators-stat-num">3%</div>
+        <div class="creators-stat-label">Comisión<br>por venta</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- BENEFICIOS: grid de 6 cards                     -->
+<!-- ============================================= -->
+<section class="creators-benefits">
+  <div class="container">
+    <div class="creators-benefits-head">
+      <h2>Todo lo que <em>necesitás</em></h2>
+      <p>Herramientas profesionales para vender entradas, gestionar accesos y crecer tu audiencia.</p>
+    </div>
+    <div class="creators-benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <h3>Publicación en minutos</h3>
+        <p>Creá tu evento en 5 minutos. Configurá múltiples tipos de entrada, fases de precios y descuentos.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <h3>Analytics en tiempo real</h3>
+        <p>Seguí tus ventas minuto a minuto. Exportá reportes de asistentes con toda la info que necesitás.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+        <h3>Check-in sin filas</h3>
+        <p>App de scanner para tu equipo. Valida códigos QR en segundos y controla el aforo en vivo.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div>
+        <h3>Pagos locales</h3>
+        <p>Aceptá tarjeta, transferencias y pagos móviles de cada país. Liquidamos a tu cuenta en 48h, en la moneda local o en dólares.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
+        <h3>Soporte humano</h3>
+        <p>Equipo dedicado en la región. WhatsApp directo con tu ejecutivo. Respuesta en menos de 2 horas.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div>
+        <h3>Audiencia que crece</h3>
+        <p>Tu evento aparece en miles de feeds. Emails segmentados a compradores que ya conocen tu marca.</p>
+      </div>
+    </div>
+
+    <!-- CTA section: bottom of the page. Sharpened copy — más específico
+         y con acción clara. "Vender" ya está en el H2; el botón refuerza
+         el trade: publicación sin costo, solo pagás cuando te compran.    -->
+    <div class="creators-cta-section">
+      <h2>¿Listo para <em>vender</em>?</h2>
+      <p>Registrate en 2 minutos, publicá tu evento gratis y empezá a cobrar entradas hoy mismo.</p>
+      <div class="creators-cta-row">
+        <a class="creators-cta-primary" href="creator-auth.html?mode=signup">
+          Publicar evento gratis
+          <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="creators-cta-secondary" href="creator-auth.html?mode=login">Ya tengo cuenta</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer minimal — copy regional, sin geo-lock a CR. -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 VIBE.</span>
+      <span>Hecho con <span style="color: var(--accent);">✦</span> en Centroamérica</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  [x-cloak] { display: none !important; }
+</style>
+
+</body>
+</html>

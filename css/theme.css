@@ -1,0 +1,56 @@
+/* ============================================================================
+   Vibe — theme tokens para Tailwind v4
+   Se importa con <link rel="stylesheet"> y también se declara el @theme
+   dentro de <style type="text/tailwindcss"> en cada HTML (Play CDN).
+   Este archivo sirve como referencia canónica de los tokens.
+   ============================================================================ */
+
+/* Los tokens Tailwind v4 se declaran con @theme en el HTML. Este CSS mantiene
+   las CSS vars crudas para usos fuera de utilidades Tailwind (e.g. SVG fills
+   en JS, inline styles dinámicos). Los valores deben mantenerse sincronizados
+   con el bloque @theme en index.html. */
+
+:root {
+  /* Palette (Dice-inspired light) */
+  --color-bg:          #ffffff;
+  --color-bg-soft:     #f7f7f5;
+  --color-bg-elev:     #efeeea;
+  --color-bg-elev-2:   #e5e3dd;
+  --color-bg-dark:     #0a0a0a;
+
+  --color-ink:         #0a0a0a;
+  --color-ink-mid:     #4a4a4a;
+  --color-ink-dim:     #8c8c88;
+  --color-ink-faint:   #c8c6c0;
+
+  --color-line:        #e5e3dd;
+  --color-line-soft:   #efeeea;
+  --color-line-strong: #d4d1c9;
+
+  /* Accent — Brat Lime */
+  --color-accent:       #c6f800;
+  --color-accent-hover: #b5e000;
+  --color-accent-soft:  #f5ffcc;
+  --color-accent-ink:   #0a0a0a;
+
+  --color-danger:  #e11900;
+  --color-success: #00aa5c;
+
+  /* Layout */
+  --container: 1320px;
+  --header-h:  64px;
+}
+
+/* Focus ring accesible (keyboard nav) — se aplica globalmente, no vía Tailwind. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input:focus-visible { outline: none; } /* inputs manejan su propio focus */
+
+::selection { background: var(--color-accent); color: var(--color-accent-ink); }

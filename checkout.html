@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe — Checkout</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700;1,900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --color-accent:       #c6f800;
+      --color-accent-hover: #b5e000;
+      --color-accent-soft:  #f5ffcc;
+      --color-ink:          #0a0a0a;
+      --color-ink-mid:      #4a4a4a;
+      --color-ink-dim:      #8c8c88;
+      --color-bg:           #ffffff;
+      --color-bg-soft:      #f7f7f5;
+      --color-line:         #e5e3dd;
+      --font-display:       "Geist", -apple-system, system-ui, sans-serif;
+      --font-serif:         "Playfair Display", Georgia, serif;
+      --font-mono:          "Geist Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <link rel="stylesheet" href="css/proto.css">
+
+  <!-- Orden crítico: persist PRIMERO (para que Alpine.$persist esté registrado
+       cuando corre el listener de alpine:init en stores.js), luego data/stores/
+       components, y por ÚLTIMO Alpine core. Todos con `defer` para que corran
+       después del parseo del HTML y en orden documento. -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
+  <script defer src="js/data/countries.js"></script>
+  <script defer src="js/data/events.js"></script>
+  <script defer src="js/stores.js"></script>
+  <script defer src="js/components.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<!-- Body con clases reactivas (mismo patrón que resto de páginas) -->
+<body
+  x-data
+  x-init="if (window.FLAG_DEFS_HTML && !document.getElementById('flag-defs')) { const d = document.createElement('div'); d.id = 'flag-defs'; d.innerHTML = window.FLAG_DEFS_HTML; document.body.insertBefore(d, document.body.firstChild); }"
+  :class="{ 'menu-open': $store.ui?.menuOpen }"
+  class="mode-ticks checkout-body">
+
+<!-- Header minimal (sin search, sin nav) para checkout -->
+<header class="header header-minimal">
+  <div class="container header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibe</a>
+    <div class="header-actions">
+      <!-- Guest: CTA "Ingresar" (redirige al checkout al volver).
+           Cuando estás en checkout sin sesión, mostrar el acceso para que
+           puedas recuperar tus datos si tenés cuenta. -->
+      <template x-if="!$store.session.isAuthed">
+        <a class="btn-signin"
+           :href="'auth.html?mode=login&redirect=' + encodeURIComponent(location.pathname + location.search)">
+          Ingresar
+        </a>
+      </template>
+
+      <!-- Avatar + dropdown cuando hay sesión. Aun en checkout minimal
+           sirve para mostrar como quién estás comprando. -->
+      <div class="account-header-avatar-wrap"
+           x-data="sessionMenu"
+           x-show="$store.session.isAuthed"
+           x-cloak>
+        <button type="button" class="account-avatar" @click="toggle()" aria-label="Menú de cuenta">
+          <span x-text="initials.charAt(0) || 'U'"></span>
+        </button>
+        <div class="account-menu-dropdown" :class="{ active: open }">
+          <div class="account-menu-header">
+            <div class="account-avatar account-avatar-lg"><span x-text="initials"></span></div>
+            <div class="account-menu-user">
+              <div class="account-menu-name" x-text="fullName"></div>
+              <div class="account-menu-email" x-text="email"></div>
+            </div>
+          </div>
+          <a class="account-menu-item" href="account.html?tab=tickets">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+            Mi cuenta
+          </a>
+          <a class="account-menu-item" @click.prevent="logout()" href="#">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesión
+          </a>
+        </div>
+      </div>
+      <button class="icon-btn menu-toggle" @click="$store.ui.menuOpen = !$store.ui.menuOpen" aria-label="Abrir menú"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <!-- Sección de sesión activa -->
+    <template x-if="$store.session.isAuthed">
+      <div class="mobile-menu-section">
+        <span class="mobile-menu-label">Mi cuenta</span>
+        <a href="account.html?tab=tickets">Mis tickets <span class="chev">→</span></a>
+        <a href="account.html?tab=favs">Mis favoritos <span class="chev">→</span></a>
+      </div>
+    </template>
+    <div class="mobile-menu-section">
+      <span class="mobile-menu-label">Explorá</span>
+      <a href="index.html">Eventos <span class="chev">→</span></a>
+    </div>
+    <div class="mobile-menu-ctas">
+      <template x-if="$store.session.isAuthed">
+        <a class="mobile-cta-secondary"
+           @click.prevent="$store.session.logout(); $store.cart.clear(); location.href='index.html'"
+           href="#">Cerrar sesión</a>
+      </template>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- CHECKOUT (Alpine component: checkoutPage)       -->
+<!-- Un solo archivo con 4 steps (x-show por step).  -->
+<!-- ============================================= -->
+<main x-data="checkoutPage()" x-init="load()">
+
+  <!-- Cart vacío → mensaje + link a home.
+       Aparece cuando:
+       - step=cart pero no hay evento asociado (llegaron sin ?event=)
+       - step !== cart y no hay tickets (y no estamos en success). -->
+  <section class="container" x-show="(step === 'cart' && !activeEvent) || (cartEmpty && step !== 'success' && step !== 'cart')" x-cloak style="padding:80px 0;">
+    <h1 style="font-family:var(--font-serif);font-size:44px;font-weight:700;margin-bottom:12px;">Todavía no elegiste entradas</h1>
+    <p style="color:var(--ink-mid);margin-bottom:24px;">Elegí un evento para empezar.</p>
+    <a href="index.html" class="btn-primary">Ver eventos</a>
+  </section>
+
+  <!-- ======= CONTENIDO DE CADA STEP =======
+       Mostrar si: (a) step=cart CON evento (aun con cart vacío — el usuario
+       justamente viene a elegir), (b) hay tickets, o (c) estamos en success. -->
+  <section class="container checkout-wrap" x-show="step !== 'success' && ((step === 'cart' && activeEvent) || (!cartEmpty && step !== 'cart'))" x-cloak>
+
+    <!-- Step progress compacta (identity/details/payment). En cart el progress
+         vive dentro del .tickets-header para seguir el patrón del prototipo. -->
+    <div class="checkout-head" x-show="step !== 'success' && step !== 'cart'" x-cloak>
+      <div class="step-progress" :aria-label="'Paso ' + stepNumber + ' de 3'">
+        <div class="step-progress-bars">
+          <span class="step-progress-bar" :class="{ active: stepNumber >= 1 }"></span>
+          <span class="step-progress-bar" :class="{ active: stepNumber >= 2 }"></span>
+          <span class="step-progress-bar" :class="{ active: stepNumber >= 3 }"></span>
+        </div>
+        <!-- Solo "Paso X de 3" — el descriptor textual redundaba con el H1
+             de cada sección (ej. progress "Paso 2 de 3 · Tus datos" + H1
+             "Tus datos" era doble). Las 3 barritas ya dan contexto visual. -->
+        <span class="step-progress-label" x-text="'Paso ' + stepNumber + ' de 3'"></span>
+      </div>
+    </div>
+
+    <!-- ---------- STEP 1: CART (selector de tiers del evento) ----------
+         Paridad prototipo L8727-8748: tickets-context + progress + h2
+         stacked en un header compacto a la izquierda; luego tickets-layout
+         con la lista + aside. No hay timer acá — arranca desde identity. -->
+    <div x-show="step === 'cart'" x-cloak class="checkout-step checkout-step-cart">
+      <a :href="'event.html?id=' + ($store.cart.eventId || '')" class="detail-back">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver al evento
+      </a>
+
+      <!-- Tickets header (paridad prototipo .tickets-header): contexto +
+           progress + h1 en un bloque tight. Vive fuera del grid para que
+           ocupe todo el ancho visualmente pero sin ese espacio vacío. -->
+      <div class="tickets-header">
+        <!-- Contexto del evento: título + fecha + venue + "Cambiar".
+             Usamos `contextTitle` (sin <br>) para que en mobile no se parta
+             el nombre en dos líneas — la card ya es compacta por diseño. -->
+        <div class="tickets-context" x-show="contextTitle">
+          <div class="tickets-context-body">
+            <div class="tickets-context-title" x-html="contextTitle"></div>
+            <div class="tickets-context-meta" x-text="eventMeta"></div>
+          </div>
+          <a class="tickets-context-change" :href="'event.html?id=' + ($store.cart.eventId || '')">Cambiar</a>
+        </div>
+        <div class="step-progress" aria-label="Paso 1 de 3">
+          <div class="step-progress-bars">
+            <span class="step-progress-bar active"></span>
+            <span class="step-progress-bar"></span>
+            <span class="step-progress-bar"></span>
+          </div>
+          <span class="step-progress-label">Paso 1 de 3</span>
+        </div>
+        <!-- Título dinámico según modo:
+             · Seated con plano  → "Elegí tus asientos"
+             · Seated sin plano  → "Elegí tus entradas"
+             · GA                → "Entradas generales" -->
+        <!-- Título unificado. Antes había 3 variantes ("Elegí tus asientos"
+             para seated-map, "Elegí tus entradas" para tiers, "Entradas
+             generales" para GA) — la última sonaba a label de categoría,
+             no a call-to-action. Ahora:
+               · Con plano interactivo → "Elegí tus asientos" (preciso)
+               · Resto (tiers / GA)    → "Elegí tus entradas" (unificado)   -->
+        <h1 class="checkout-h1" x-show="isSeated">Elegí tus <em>asientos</em></h1>
+        <h1 class="checkout-h1" x-show="!isSeated">Elegí tus <em>entradas</em></h1>
+      </div>
+
+      <div class="checkout-layout"><!-- cart uses list+aside grid -->
+        <div class="checkout-main">
+
+          <!-- Banner GA "Acceso general" removido. La info era redundante:
+               al no haber plano interactivo y al listar tiers con precios,
+               queda implícito que no hay asientos asignados. El banner
+               agregaba ruido y empujaba el grid de tiers fuera del fold. -->
+
+
+          <!-- SEAT PICKER (eventos `seated` con seatedConfig) — plano del
+               venue en SVG. Matchea prototipo L14739-14884. Legend arriba,
+               "ESCENARIO" + mapa interactivo, tap sobre butaca abre tooltip. -->
+          <div class="seated-wrapper" x-show="isSeated" x-cloak>
+            <!-- Legend scrollable horizontal en mobile si no entra -->
+            <div class="seated-legend">
+              <template x-for="sec in venueLegend" :key="sec.id">
+                <div class="seated-legend-item">
+                  <span class="seated-legend-dot" :style="'background:' + seatColorFor(sec.id)"></span>
+                  <span class="seated-legend-name" x-text="sec.name"></span>
+                  <span class="seated-legend-price" x-text="'$' + Number(sec.price).toFixed(0)"></span>
+                </div>
+              </template>
+            </div>
+
+            <!-- Mapa: generamos el SVG como string desde venueSvgHtml e
+                 inyectamos con x-html para que el parser respete el namespace
+                 SVG (Alpine x-for dentro de <svg> crea elementos HTML y el
+                 browser no los dibuja). Los clicks se delegan con onSeatClick
+                 que busca el .seat-dot más cercano. -->
+            <!-- Mapa de asientos interactivo. `role="application"` avisa a
+                 screen readers que el div no es contenido estático sino un
+                 widget interactivo (patrón recomendado para seat pickers,
+                 venue maps, canvas drawings). `aria-label` describe la
+                 función. Los puntos individuales de asientos son clickeable
+                 via delegación de evento y deberían tener aria-label propios
+                 en un refinamiento futuro (out of scope).                 -->
+            <div class="seated-map"
+                 role="application"
+                 aria-label="Mapa de asientos del venue — tocá un punto para seleccionar o deseleccionar una butaca"
+                 @click="onSeatClick($event)">
+              <div class="seated-stage-row">
+                <span class="seated-stage-line"></span>
+                <span class="seated-stage-label">Escenario</span>
+                <span class="seated-stage-line"></span>
+              </div>
+              <div class="seated-svg-host" x-html="venueSvgHtml"></div>
+            </div>
+
+            <div class="seated-hint">Tocá un asiento para seleccionarlo. Podés elegir hasta 8.</div>
+          </div>
+
+          <!-- Tooltip del seat picker (flota sobre el mapa, position: fixed).
+               Sólo visible cuando hay tooltipSeat. @click.outside cierra si
+               se toca fuera (salvo sobre otro .seat-dot, que reabre solo). -->
+          <div class="seated-tooltip"
+               :class="{ visible: tooltipSeat }"
+               x-show="tooltipSeat"
+               x-cloak
+               :style="'left: ' + tooltipX + 'px; top: ' + tooltipY + 'px'"
+               @click.stop
+               @click.outside="if (!$event.target.closest('.seat-dot')) closeSeatTooltip()">
+            <template x-if="tooltipSeat">
+              <div>
+                <div class="seated-tooltip-head">
+                  <span class="seated-tooltip-section" x-text="tooltipSeat.sectionName"></span>
+                  <span class="seated-tooltip-price" x-text="'$' + Number(tooltipSeat.price).toFixed(0)"></span>
+                </div>
+                <div class="seated-tooltip-meta">
+                  <div class="seated-tooltip-meta-item">
+                    <div class="seated-tooltip-meta-label">Fila</div>
+                    <div class="seated-tooltip-meta-value" x-text="tooltipSeat.row"></div>
+                  </div>
+                  <div class="seated-tooltip-meta-item">
+                    <div class="seated-tooltip-meta-label">Asiento</div>
+                    <div class="seated-tooltip-meta-value" x-text="tooltipSeat.seat"></div>
+                  </div>
+                </div>
+                <div class="seated-tooltip-actions">
+                  <button type="button" class="seated-tooltip-btn cancel" @click="closeSeatTooltip()">Cerrar</button>
+                  <button type="button"
+                          class="seated-tooltip-btn confirm"
+                          :class="{ 'selected-state': isSeatSelected(tooltipSeat.id) }"
+                          @click="confirmSeatFromTooltip()">
+                    <template x-if="!isSeatSelected(tooltipSeat.id)">
+                      <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </template>
+                    <template x-if="isSeatSelected(tooltipSeat.id)">
+                      <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>
+                    </template>
+                    <span x-text="isSeatSelected(tooltipSeat.id) ? 'Quitar' : 'Seleccionar'"></span>
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Lista de tiers (sólo cuando NO hay plano de asientos) -->
+          <div class="ticket-list" x-show="!isSeated">
+            <template x-for="tier in tiers" :key="tier.id">
+              <div class="ticket" :class="{ 'sold-out': tier.status === 'soldout' }">
+                <div class="ticket-info">
+                  <div class="ticket-type-row">
+                    <span class="ticket-type" x-text="tier.name"></span>
+                    <span class="ticket-badge ticket-badge-fewleft" x-show="tier.status === 'fewleft'">Últimas</span>
+                    <span class="ticket-badge ticket-badge-soldout" x-show="tier.status === 'soldout'">Agotado</span>
+                  </div>
+                  <div class="ticket-desc" x-show="tier.description" x-text="tier.description"></div>
+                  <div class="ticket-price-row">
+                    <span class="ticket-price-before" x-show="tier.priceBefore" x-text="'$' + Number(tier.priceBefore).toFixed(2)"></span>
+                    <span class="ticket-price-now" x-text="'$' + Number(tier.price).toFixed(2)"></span>
+                  </div>
+                </div>
+                <div class="ticket-qty">
+                  <template x-if="tier.status !== 'soldout'">
+                    <div class="ticket-qty-inner">
+                      <button type="button" @click="decrementTier(tier.id)" :disabled="qtyForTier(tier.id) === 0" aria-label="Menos">−</button>
+                      <span x-text="qtyForTier(tier.id)"></span>
+                      <button type="button" @click="incrementTier(tier)" aria-label="Más">+</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- NOTA: el cupón NO va acá. En el prototipo vive en el step de pago
+               (debajo del form de tarjeta), como disclosure. Ver más abajo. -->
+        </div>
+
+        <!-- Summary column -->
+        <aside class="checkout-summary">
+          <h3>Resumen</h3>
+
+          <!-- Líneas por tier (solo las que tienen qty > 0) -->
+          <div class="summary-lines" x-show="$store.cart.qtyTotal > 0">
+            <template x-for="t in $store.cart.tickets" :key="t.tierId">
+              <div class="summary-line">
+                <span class="summary-line-name" x-text="t.qty + ' × ' + t.name"></span>
+                <span class="summary-line-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+              </div>
+            </template>
+          </div>
+          <p class="summary-empty" x-show="$store.cart.qtyTotal === 0">Seleccioná al menos una entrada.</p>
+
+          <dl>
+            <dt>Subtotal</dt><dd x-text="'$' + $store.cart.subtotal.toFixed(2)"></dd>
+            <dt>Comisión Vibe (5%)</dt><dd x-text="'$' + $store.cart.fee.toFixed(2)"></dd>
+            <template x-if="$store.cart.couponDiscount > 0">
+              <div class="discount-row" style="display:contents;">
+                <dt>
+                  <span x-text="'Descuento' + ($store.cart.couponCode ? ' (' + $store.cart.couponCode + ')' : '')"></span>
+                  <button type="button" class="coupon-remove-inline" @click="removeCoupon()" aria-label="Quitar cupón">×</button>
+                </dt>
+                <dd class="discount" x-text="'-$' + $store.cart.couponDiscount.toFixed(2)"></dd>
+              </div>
+            </template>
+            <dt class="total">Total</dt><dd class="total" x-text="'$' + $store.cart.total.toFixed(2)"></dd>
+          </dl>
+          <button class="btn-accent checkout-cta" @click="toDetails()" :disabled="$store.cart.qtyTotal === 0">
+            Continuar
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </aside>
+      </div>
+
+      <!-- Mobile cart bar: resumen flotante + CTA para continuar -->
+      <div class="mobile-cart-bar" x-show="$store.cart.qtyTotal > 0" x-cloak>
+        <div class="mobile-cart-bar-inner">
+          <div class="mobile-cart-bar-info">
+            <span class="mobile-cart-bar-label" x-text="$store.cart.qtyTotal + ' ' + ($store.cart.qtyTotal === 1 ? 'entrada' : 'entradas')"></span>
+            <span class="mobile-cart-bar-total" x-text="'$' + $store.cart.total.toFixed(2)"></span>
+          </div>
+          <button class="btn-accent mobile-cart-bar-cta" @click="toDetails()">
+            Continuar
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- STEP 2a: IDENTITY (guest vs login) ----------
+         Matchea prototipo líneas 8899-8927. Solo se muestra a guests; si el
+         user está autenticado, toDetails() salta directo a 'details'. Acá
+         elige entre:
+           (a) "Continuar como invitado" → continueAsGuest() → details
+           (b) "Continuar con Google"    → mock, manda a details directo
+           (c) "Continuar con email"     → redirige a auth.html passwordless
+         Estado auth local (autoEmail) es efímero: solo vive en esta vista. -->
+    <div x-show="step === 'identity'" x-cloak class="checkout-step checkout-step-identity" x-data="{ authEmail: '' }">
+      <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver a entradas
+      </a>
+      <h1 class="checkout-h1">¿Cómo querés <em>continuar</em>?</h1>
+
+      <!-- Identity step: sin sidebar. Las entradas reservadas se muestran
+           inline arriba (al lado del timer) y removimos el summary + total
+           de abajo — el user ya los vio en el cart y va a verlos de nuevo
+           en el paso de pago. Menos ruido = mejor decisión acá.             -->
+      <div class="identity-main">
+        <!-- Timer + ticket lines (inline, juntos arriba) -->
+        <div class="identity-reservation" x-show="countdownRemaining > 0 || $store.cart.qtyTotal > 0" x-cloak>
+          <div class="checkout-timer">
+            <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+            <span>Reservadas · <span x-text="countdownMMSS"></span></span>
+          </div>
+          <div class="identity-tickets" x-show="$store.cart.qtyTotal > 0">
+            <template x-for="t in $store.cart.tickets" :key="t.tierId">
+              <div class="identity-ticket-line">
+                <span x-text="t.qty + ' × ' + t.name"></span>
+                <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Sin lead paragraph — el h1 "¿Cómo querés continuar?" ya
+             encuadra la decisión, y las cards de abajo son auto-explicativas
+             (guest con descripción + divider "O ingresá o creá una cuenta").
+             Un paragraph intermedio era redundante y creaba espacio raro.  -->
+
+        <!-- Primary: guest card. Layout actualizado — flecha centrada
+             verticalmente contra el bloque title+desc (no justified arriba). -->
+        <button class="identity-card identity-card-v2" type="button" @click="continueAsGuest()">
+          <div class="identity-card-body">
+            <span class="identity-card-title">Continuar como invitado</span>
+            <div class="identity-card-desc">Te enviaremos las entradas al correo.</div>
+          </div>
+          <span class="identity-card-arrow"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </button>
+
+        <div class="identity-divider">O ingresá o creá una cuenta</div>
+
+        <!-- Passwordless: Google social + Email OTP. Refino layout:
+             - Social Google ocupa ancho completo, estándar (G + label).
+             - Email con label arriba del input.
+             - CTA "Continuar con email" con consistencia visual al Google btn. -->
+        <div class="checkout-auth checkout-auth-v2">
+          <button class="auth-social-btn" type="button" @click="continueAsGuest()">
+            <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+            <span>Continuar con Google</span>
+          </button>
+          <form class="auth-form checkout-email-form" @submit.prevent="continueWithEmailLogin(authEmail)">
+            <div class="form-field">
+              <label class="form-label" for="identity-email">Email</label>
+              <input class="form-input" id="identity-email" type="email" x-model="authEmail" placeholder="tu@email.com" required autocomplete="email">
+            </div>
+            <button type="submit" class="auth-submit">Continuar con email</button>
+          </form>
+          <p class="checkout-auth-note">Te enviaremos un código de 6 dígitos. Sin contraseñas.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- STEP 2b: DETAILS (buyer form) ---------- -->
+    <div x-show="step === 'details'" x-cloak class="checkout-step checkout-step-details">
+      <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver a entradas
+      </a>
+      <h1 class="checkout-h1">Tus <em>datos</em></h1>
+
+      <!-- Details step: mismo patrón que identity. Sin sidebar — timer +
+           ticket lines arriba en un único card de reserva, sin resumen +
+           total abajo. El usuario llega acá post-identity, ya vio el total
+           y lo va a reconfirmar en el paso de pago.                         -->
+      <div class="identity-main">
+        <!-- Reservation card: timer + tickets juntos arriba -->
+        <div class="identity-reservation" x-show="countdownRemaining > 0 || $store.cart.qtyTotal > 0" x-cloak>
+          <div class="checkout-timer">
+            <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+            <span>Reservadas · <span x-text="countdownMMSS"></span></span>
+          </div>
+          <div class="identity-tickets" x-show="$store.cart.qtyTotal > 0">
+            <template x-for="t in $store.cart.tickets" :key="t.tierId">
+              <div class="identity-ticket-line">
+                <span x-text="t.qty + ' × ' + t.name"></span>
+                <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <p class="checkout-lead" x-show="!$store.session.isAuthed">Podés comprar sin registrarte. Si preferís guardar tus datos para la próxima, <a href="auth.html?mode=login&amp;redirect=checkout">iniciá sesión</a> o <a href="auth.html?mode=signup&amp;redirect=checkout">creá una cuenta</a>.</p>
+
+          <form class="buyer-form" @submit.prevent="submitDetails()">
+            <!-- Sección 1a: Identity card (logged-in). Muestra avatar + nombre +
+                 email + botón "Cambiar" que abre el form. Matchea prototipo
+                 líneas 9033-9046. -->
+            <div class="checkout-section"
+                 x-show="$store.session.isAuthed && !editBuyer"
+                 x-cloak>
+              <div class="buyer-identity">
+                <div class="buyer-identity-avatar"
+                     x-text="((buyer.firstName || '?').charAt(0) + (buyer.lastName || '').charAt(0)).toUpperCase() || '?'"></div>
+                <div class="buyer-identity-info">
+                  <span class="buyer-identity-name"
+                        x-text="((buyer.firstName || '') + ' ' + (buyer.lastName || '')).trim() || 'Sin nombre'"></span>
+                  <span class="buyer-identity-email" x-text="buyer.email || '—'"></span>
+                </div>
+                <button class="buyer-identity-edit" type="button" @click="editBuyer = true">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.4-9.6a2 2 0 112.8 2.8L11.8 15.6 8 16.6l1-3.8 9.6-9.6z"/></svg>
+                  Cambiar
+                </button>
+              </div>
+            </div>
+
+            <!-- Sección 1b: datos de contacto del comprador (nombre + email).
+                 Guest: siempre visible. Logged-in: solo si editBuyer === true.
+                 Matchea prototipo líneas 9049-9068. -->
+            <div class="checkout-section"
+                 x-show="!$store.session.isAuthed || editBuyer"
+                 x-cloak>
+              <div class="checkout-section-head">
+                <span class="checkout-section-title">Tus datos de contacto</span>
+                <span class="checkout-section-hint">Te mandamos las entradas acá</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label" for="bf-fn">Nombre</label>
+                  <input class="form-input" id="bf-fn" type="text" x-model="buyer.firstName" required autocomplete="given-name" placeholder="Tu nombre">
+                </div>
+                <div class="form-field">
+                  <label class="form-label" for="bf-ln">Apellido</label>
+                  <input class="form-input" id="bf-ln" type="text" x-model="buyer.lastName" required autocomplete="family-name" placeholder="Tu apellido">
+                </div>
+                <div class="form-field full">
+                  <label class="form-label" for="bf-email">Email</label>
+                  <!-- Si el usuario está logueado, el email está atado a la
+                       cuenta y no se puede editar desde el checkout. Matchea
+                       la lógica de `.buyer-identity` que ya muestra el mail. -->
+                  <input class="form-input" id="bf-email" type="email"
+                         x-model="buyer.email"
+                         :readonly="$store.session.isAuthed"
+                         :class="{ 'is-readonly': $store.session.isAuthed }"
+                         required autocomplete="email" placeholder="tu@email.com">
+                  <span class="form-hint" x-show="$store.session.isAuthed" x-cloak>
+                    Está vinculado a tu cuenta. Cerrá sesión si querés comprar con otro email.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 2: teléfono (siempre visible) + DNI (solo si +18).
+                 Matchea el prototipo (líneas 9071-9099). El teléfono usa
+                 `.form-phone` con prefijo de país como <select>. El DNI
+                 aparece únicamente cuando el evento tiene `ageRestricted`. -->
+            <div class="checkout-section">
+              <div class="checkout-section-head">
+                <span class="checkout-section-title">Celular para notificaciones</span>
+                <span class="checkout-section-hint">Te avisamos cambios de último momento</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-field full">
+                  <label class="form-label" for="bf-phone">Teléfono</label>
+                  <!-- Dropdown custom con bandera SVG — reemplaza al <select>
+                       nativo para mostrar la bandera del país junto al dial code.
+                       Mantiene el valor en buyer.phonePrefix con el formato
+                       "CR +506" (sin cambios en consumers downstream). -->
+                  <div class="form-phone"
+                       x-data="phonePrefixDropdown()"
+                       @click.outside="open = false"
+                       @keydown.escape.window="open = false">
+                    <button type="button"
+                            class="phone-prefix phone-prefix-btn"
+                            :class="{ 'is-open': open }"
+                            @click="open = !open"
+                            :aria-expanded="open ? 'true' : 'false'"
+                            aria-haspopup="listbox"
+                            id="bf-phone-prefix">
+                      <span class="phone-prefix-flag" x-html="selectedFlagHtml"></span>
+                      <span class="phone-prefix-dial" x-text="selectedDial"></span>
+                      <svg class="phone-prefix-chev" fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <ul class="phone-prefix-menu"
+                        x-show="open"
+                        x-transition.opacity.duration.120ms
+                        x-cloak
+                        role="listbox"
+                        :aria-activedescendant="'phone-opt-' + (selected && selected.code)">
+                      <template x-for="c in countries" :key="c.code">
+                        <li class="phone-prefix-opt"
+                            :id="'phone-opt-' + c.code"
+                            :class="{ 'is-selected': selected && selected.code === c.code }"
+                            role="option"
+                            :aria-selected="selected && selected.code === c.code ? 'true' : 'false'"
+                            @click="pick(c)">
+                          <span class="phone-prefix-flag" x-html="flagFor(c.code)"></span>
+                          <span class="phone-prefix-name" x-text="c.name"></span>
+                          <span class="phone-prefix-dial" x-text="c.dial"></span>
+                        </li>
+                      </template>
+                    </ul>
+                    <input class="form-input" id="bf-phone" type="tel" x-model="buyer.phone" required autocomplete="tel" placeholder="7000 0000">
+                  </div>
+                  <span class="form-hint">Te contactamos por WhatsApp si hay cambios importantes.</span>
+                </div>
+                <div class="form-field full" x-show="isAttendeeAgeRestricted" x-cloak>
+                  <label class="form-label" for="bf-id">Documento de identidad</label>
+                  <input class="form-input" id="bf-id" type="text" x-model="buyer.idDoc" :required="isAttendeeAgeRestricted" placeholder="Cédula, DNI o pasaporte">
+                  <span class="form-hint">Se verificará al ingresar al evento (+18).</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Titulares de las entradas (P0-2): 1 card por ticket.
+                 Matchea el prototipo (9101-9117 + renderAttendees 13845).
+                 Patrón radio "Es para mí" / "Es para otra persona": si "mí",
+                 reusamos los datos del comprador; si "otra persona", pedimos
+                 nombre + apellido + email (y DNI si el evento es +18). -->
+            <div class="checkout-section" x-show="$store.cart.qtyTotal > 0" x-cloak>
+              <!-- Banner +18 cuando el evento lo requiere -->
+              <div class="age-notice" x-show="isAttendeeAgeRestricted" x-cloak>
+                <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg>
+                <div>
+                  <strong>Evento para mayores de <span x-text="activeEvent?.ageRestricted || 18"></span> años.</strong>
+                  <span>Cada titular debe presentar su documento de identidad al ingresar al evento.</span>
+                </div>
+              </div>
+
+              <div class="checkout-section-head">
+                <span class="checkout-section-title">Titulares de las entradas</span>
+                <span class="checkout-section-hint">
+                  <span x-text="attendees.length"></span>
+                  <span x-text="attendees.length === 1 ? ' entrada' : ' entradas'"></span>
+                </span>
+              </div>
+
+              <div class="attendees-list">
+                <template x-for="(a, idx) in attendees" :key="idx">
+                  <div class="attendee-card" :data-idx="idx">
+                    <div class="attendee-card-head">
+                      <span class="attendee-num" x-text="idx + 1"></span>
+                      <span class="attendee-card-title" x-text="'Entrada ' + (idx + 1)"></span>
+                      <span class="attendee-card-type" x-text="a.ticketType"></span>
+                    </div>
+
+                    <!-- Opción 1: es para mí (reusa datos del comprador) -->
+                    <button type="button"
+                            class="radio-option"
+                            :class="{ selected: a.mode === 'me' }"
+                            @click="setAttendeeMode(idx, 'me')">
+                      <span class="radio-option-dot"></span>
+                      <span class="radio-option-body">
+                        <span class="radio-option-label">Es para mí</span>
+                        <span class="radio-option-sub"
+                              x-text="(buyer.firstName || buyer.lastName)
+                                ? ((buyer.firstName || '') + ' ' + (buyer.lastName || '')).trim()
+                                : 'Usaremos los datos que completaste arriba'"></span>
+                      </span>
+                    </button>
+
+                    <!-- Opción 2: es para otra persona -->
+                    <button type="button"
+                            class="radio-option"
+                            :class="{ selected: a.mode === 'other' }"
+                            @click="setAttendeeMode(idx, 'other')">
+                      <span class="radio-option-dot"></span>
+                      <span class="radio-option-body">
+                        <span class="radio-option-label">Es para otra persona</span>
+                        <template x-if="a.mode !== 'other'">
+                          <span class="radio-option-sub">Vas a pedirle sus datos</span>
+                        </template>
+                      </span>
+                    </button>
+
+                    <!-- Campos del titular "otra persona" -->
+                    <div class="attendee-guest-fields" :class="{ show: a.mode === 'other' }">
+                      <div class="form-grid">
+                        <div class="form-field">
+                          <label class="form-label" :for="'at-fn-' + idx">Nombre</label>
+                          <input class="form-input" :id="'at-fn-' + idx" type="text"
+                                 x-model="attendees[idx].firstName"
+                                 placeholder="Nombre del titular"
+                                 :required="a.mode === 'other'">
+                        </div>
+                        <div class="form-field">
+                          <label class="form-label" :for="'at-ln-' + idx">Apellido</label>
+                          <input class="form-input" :id="'at-ln-' + idx" type="text"
+                                 x-model="attendees[idx].lastName"
+                                 placeholder="Apellido"
+                                 :required="a.mode === 'other'">
+                        </div>
+                        <div class="form-field full">
+                          <label class="form-label" :for="'at-em-' + idx">Email del titular</label>
+                          <input class="form-input" :id="'at-em-' + idx" type="email"
+                                 x-model="attendees[idx].email"
+                                 placeholder="titular@email.com"
+                                 :required="a.mode === 'other'">
+                          <span class="form-hint">Le mandaremos su entrada directamente a este correo.</span>
+                        </div>
+                        <template x-if="isAttendeeAgeRestricted">
+                          <div class="form-field full">
+                            <label class="form-label" :for="'at-id-' + idx">Documento de identidad</label>
+                            <input class="form-input" :id="'at-id-' + idx" type="text"
+                                   x-model="attendees[idx].idDoc"
+                                   placeholder="Cédula, DNI o pasaporte"
+                                   :required="a.mode === 'other' && isAttendeeAgeRestricted">
+                            <span class="form-hint">Se verificará al ingresar al evento (+18).</span>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <button type="submit" class="checkout-continue" :disabled="!detailsValid">
+              Ir al pago
+              <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <!-- Disclaimer legal debajo del CTA. Es el momento correcto
+                 (pre-acción) para presentar T&C / privacidad.             -->
+            <p class="checkout-terms-note">
+              Al continuar aceptás los
+              <a href="#" @click.prevent>Términos</a> y la
+              <a href="#" @click.prevent>Política de Privacidad</a> de VIBE.
+            </p>
+          </form>
+      </div>
+    </div>
+
+    <!-- ---------- STEP 3: PAYMENT ---------- -->
+    <div x-show="step === 'payment'" x-cloak class="checkout-step checkout-step-payment">
+      <a href="#" @click.prevent="gotoStep('details')" class="detail-back">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver a datos
+      </a>
+      <h1 class="checkout-h1">Método de <em>pago</em></h1>
+
+      <!-- Payment: single-column como identity/details. Reemplazamos el
+           aside con un .payment-summary arriba que muestra: timer +
+           ticket lines + breakdown completo (subtotal/comisión/descuento
+           + total destacado). El total está arriba porque es la info
+           más crítica antes de ingresar tarjeta.                         -->
+      <div class="identity-main">
+        <div class="payment-summary">
+          <div class="checkout-timer" x-show="countdownRemaining > 0" x-cloak>
+            <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+            <span>Reservadas · <span x-text="countdownMMSS"></span></span>
+          </div>
+          <div class="payment-summary-tickets" x-show="$store.cart.qtyTotal > 0">
+            <template x-for="t in $store.cart.tickets" :key="t.tierId">
+              <div class="identity-ticket-line">
+                <span x-text="t.qty + ' × ' + t.name"></span>
+                <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+              </div>
+            </template>
+          </div>
+          <!-- Breakdown: simple flex rows. Evita cualquier conflicto con
+               reset de `dl/dt/dd` de Tailwind preflight o browser default. -->
+          <div class="payment-summary-breakdown">
+            <div class="breakdown-row">
+              <span>Subtotal</span>
+              <span class="breakdown-amt" x-text="'$' + $store.cart.subtotal.toFixed(2)"></span>
+            </div>
+            <div class="breakdown-row">
+              <span>Comisión Vibe (5%)</span>
+              <span class="breakdown-amt" x-text="'$' + $store.cart.fee.toFixed(2)"></span>
+            </div>
+            <div class="breakdown-row breakdown-discount" x-show="$store.cart.couponDiscount > 0" x-cloak>
+              <span class="breakdown-discount-label">
+                <span x-text="'Descuento' + ($store.cart.couponCode ? ' (' + $store.cart.couponCode + ')' : '')"></span>
+                <button type="button" class="coupon-remove-inline" @click="removeCoupon()" aria-label="Quitar cupón">×</button>
+              </span>
+              <span class="breakdown-amt discount" x-text="'-$' + $store.cart.couponDiscount.toFixed(2)"></span>
+            </div>
+            <div class="breakdown-row breakdown-total">
+              <span>Total</span>
+              <span class="breakdown-amt" x-text="'$' + $store.cart.total.toFixed(2)"></span>
+            </div>
+          </div>
+        </div>
+
+        <p class="checkout-lead payment-notice">Pago de prueba — no se procesa ninguna tarjeta real.</p>
+
+        <form class="payment-form" @submit.prevent="submitPayment()">
+            <!-- ========= MODO SAVED CARDS (solo logged-in con tarjetas) =========
+                 Lista de radios con brand + last4 + exp. La tarjeta seleccionada
+                 expande un input de CVV inline (required, 3-4 dígitos). Al
+                 final, opción "Agregar otra tarjeta" que cambia a modo 'new'.
+            -->
+            <div class="checkout-section" x-show="cardMode === 'saved' && hasSavedCards" x-cloak id="pay-saved-cards-section">
+              <div class="checkout-section-head">
+                <span class="checkout-section-title">Elegí una tarjeta</span>
+              </div>
+              <div class="saved-cards-list">
+                <template x-for="card in savedCards" :key="card.id">
+                  <label class="saved-card-row" :class="{ 'is-selected': selectedCardId === card.id }">
+                    <input type="radio" name="saved-card" :value="card.id"
+                           x-model="selectedCardId"
+                           @change="savedCvv = ''">
+                    <span class="saved-card-brand">
+                      <template x-if="card.brand === 'visa'">
+                        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="24" rx="3" fill="#1434CB"/><text x="20" y="16" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="8" fill="#fff" font-weight="900" letter-spacing="0.5">VISA</text></svg>
+                      </template>
+                      <template x-if="card.brand === 'mc'">
+                        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="24" rx="3" fill="#000"/><circle cx="16" cy="12" r="6" fill="#EB001B"/><circle cx="24" cy="12" r="6" fill="#F79E1B" opacity="0.9"/></svg>
+                      </template>
+                      <template x-if="card.brand === 'amex'">
+                        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="24" rx="3" fill="#2E77BB"/><text x="20" y="15" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="6.5" fill="#fff" font-weight="900" letter-spacing="0.3">AMEX</text></svg>
+                      </template>
+                    </span>
+                    <span class="saved-card-info">
+                      <span class="saved-card-number">•••• <span x-text="card.last4"></span></span>
+                      <span class="saved-card-exp">Vence <span x-text="card.exp"></span></span>
+                    </span>
+                    <!-- CVV inline: solo en la tarjeta seleccionada.
+                         `required` CONDICIONAL: solo cuando este card está
+                         seleccionado. Si dejamos required siempre, Chrome
+                         intenta validar las CVV inputs ocultas de los otros
+                         cards y BLOQUEA el submit (error "invalid form
+                         control is not focusable").                          -->
+                    <span class="saved-card-cvv" x-show="selectedCardId === card.id">
+                      <input type="text"
+                             class="form-input saved-cvv-input"
+                             :id="'savedcvv-' + card.id"
+                             x-model="savedCvv"
+                             @input="savedCvv = $event.target.value.replace(/\D/g, '')"
+                             @click.stop
+                             :required="selectedCardId === card.id && cardMode === 'saved'"
+                             placeholder="CVV"
+                             inputmode="numeric"
+                             autocomplete="cc-csc"
+                             maxlength="4"
+                             aria-label="CVV de la tarjeta">
+                    </span>
+                    <button type="button" class="saved-card-remove"
+                            @click.prevent="removeSavedCard(card.id)"
+                            aria-label="Eliminar tarjeta"
+                            x-show="selectedCardId === card.id">
+                      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
+                    </button>
+                  </label>
+                </template>
+                <!-- Opción final: agregar nueva tarjeta (cambia modo a 'new') -->
+                <button type="button" class="saved-card-add" @click="switchToNewCard()">
+                  <span class="saved-card-add-icon">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                  </span>
+                  <span>Agregar otra tarjeta</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ========= MODO NEW CARD (guests siempre + logged-in que elige agregar) ========= -->
+            <!-- Card form: estructura 1:1 del prototipo (líneas 9218-9264).
+                 .card-form contiene .card-number-wrap con iconos SVG de marca
+                 a la derecha (opacity 0.3 → 1 cuando la detectás), form-grid
+                 para MM/AA + CVV (con tooltip), y el nombre del titular. -->
+            <!-- Fallback seguro: la sección new se muestra SIEMPRE que no
+                 estemos explícitamente en modo 'saved' con tarjetas. Así,
+                 si `cardMode` queda en 'saved' pero `hasSavedCards=false`
+                 (por logout o reset), el user igual ve el form nuevo. -->
+            <div class="checkout-section" x-show="!(cardMode === 'saved' && hasSavedCards)" x-cloak id="pay-new-card-section">
+              <div class="checkout-section-head">
+                <span class="checkout-section-title">Tarjeta de crédito o débito</span>
+                <!-- Si logged-in con tarjetas guardadas, botón para volver -->
+                <button type="button" class="checkout-section-link"
+                        x-show="hasSavedCards"
+                        @click="switchToSavedCards()">
+                  ← Usar tarjeta guardada
+                </button>
+              </div>
+
+              <div class="card-form">
+                <div class="form-field">
+                  <label class="form-label" for="pf-num">Número de tarjeta</label>
+                  <div class="card-number-wrap">
+                    <!-- required condicional al modo 'new' — si estás en modo
+                         saved, este form está hidden y no debe bloquear submit. -->
+                    <input class="form-input card-input" id="pf-num" type="text"
+                           x-model="pay.cardNumber"
+                           @input="formatCardNumber($event)"
+                           :required="cardMode === 'new'"
+                           placeholder="1234 5678 9012 3456"
+                           inputmode="numeric" autocomplete="cc-number"
+                           maxlength="19">
+                    <div class="card-brand-icons" id="pf-num-brand">
+                      <span class="card-brand visa" :class="{ active: cardBrand === 'visa' }">
+                        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="24" rx="3" fill="#1434CB"/><text x="20" y="16" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="8" fill="#fff" font-weight="900" letter-spacing="0.5">VISA</text></svg>
+                      </span>
+                      <span class="card-brand mc" :class="{ active: cardBrand === 'mc' }">
+                        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="24" rx="3" fill="#000"/><circle cx="16" cy="12" r="6" fill="#EB001B"/><circle cx="24" cy="12" r="6" fill="#F79E1B" opacity="0.9"/></svg>
+                      </span>
+                      <span class="card-brand amex" :class="{ active: cardBrand === 'amex' }">
+                        <svg viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="24" rx="3" fill="#2E77BB"/><text x="20" y="15" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="6.5" fill="#fff" font-weight="900" letter-spacing="0.3">AMEX</text></svg>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label class="form-label" for="pf-exp">Vencimiento</label>
+                    <input class="form-input card-input" id="pf-exp" type="text"
+                           x-model="pay.exp"
+                           @input="formatCardExpiry($event)"
+                           :required="cardMode === 'new'"
+                           placeholder="MM/AA"
+                           inputmode="numeric" autocomplete="cc-exp"
+                           maxlength="5">
+                  </div>
+                  <div class="form-field">
+                    <label class="form-label" for="pf-cvv">
+                      CVV
+                      <span class="cvv-info" title="El código de 3 dígitos al reverso de tu tarjeta (4 en Amex).">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4m0-4h.01"/></svg>
+                      </span>
+                    </label>
+                    <input class="form-input card-input" id="pf-cvv" type="text"
+                           x-model="pay.cvv"
+                           @input="pay.cvv = $event.target.value.replace(/\D/g, '')"
+                           :required="cardMode === 'new'"
+                           placeholder="123"
+                           inputmode="numeric" autocomplete="cc-csc"
+                           maxlength="4">
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label" for="pf-name">Nombre del titular</label>
+                  <input class="form-input card-input" id="pf-name" type="text"
+                         x-model="pay.holder"
+                         :required="cardMode === 'new'"
+                         autocomplete="cc-name"
+                         placeholder="Tal como aparece en la tarjeta">
+                </div>
+
+                <!-- "Guardar esta tarjeta": solo ofrecido a usuarios autenticados.
+                     Visual: checkbox con top-border punteado, mismo patrón que prototipo. -->
+                <div class="card-save-row" x-show="$store.session.isAuthed" x-cloak>
+                  <label class="checkbox-line">
+                    <input type="checkbox" x-model="pay.saveCard">
+                    <span>Guardar esta tarjeta para próximas compras</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coupon disclosure: réplica 1:1 del prototipo (líneas 9267-9294).
+                 Trigger "¿Tenés un cupón?" → expande a input + Aplicar.
+                 Si ya hay cupón en el store, muestra la card "aplicado" con × para quitar. -->
+            <div class="coupon-disclosure"
+                 :class="{ 'open': couponOpen, 'has-applied': $store.cart.couponDiscount > 0 }"
+                 x-data="{ couponOpen: false, couponInput: '', couponMsg: '', couponMsgKind: '' }">
+
+              <!-- Trigger: solo visible cuando no hay cupón aplicado y el panel está cerrado -->
+              <button class="coupon-trigger" type="button"
+                      x-show="$store.cart.couponDiscount === 0 && !couponOpen"
+                      @click="couponOpen = true; $nextTick(() => $refs.couponInput?.focus())">
+                <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H5a2 2 0 00-2 2v4a2 2 0 012 2 2 2 0 00-2 2v4a2 2 0 002 2h4m0-16v16m0-16h10a2 2 0 012 2v4a2 2 0 00-2 2 2 2 0 012 2v4a2 2 0 01-2 2H9"/></svg>
+                <span>¿Tenés un cupón?</span>
+              </button>
+
+              <!-- Panel expandido: input + Aplicar + Cerrar -->
+              <div class="coupon-panel"
+                   x-show="couponOpen && $store.cart.couponDiscount === 0"
+                   x-cloak>
+                <div class="coupon-form" :class="{ 'error': couponMsgKind === 'error' }">
+                  <input type="text" class="coupon-input" x-ref="couponInput" x-model="couponInput"
+                         placeholder="Ej. VIBE10" autocomplete="off" spellcheck="false" maxlength="20"
+                         aria-label="Código de cupón"
+                         @keydown.enter.prevent="couponMsg = applyCoupon(couponInput); couponMsgKind = ($store.cart.couponDiscount > 0 ? 'success' : 'error');" />
+                  <button type="button" class="coupon-submit"
+                          @click="couponMsg = applyCoupon(couponInput); couponMsgKind = ($store.cart.couponDiscount > 0 ? 'success' : 'error');">Aplicar</button>
+                  <button type="button" class="coupon-close"
+                          @click="couponOpen = false; couponInput = ''; couponMsg = ''; couponMsgKind = '';"
+                          aria-label="Cerrar">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                </div>
+                <div class="coupon-feedback" :class="'is-' + couponMsgKind" x-show="couponMsg" x-text="couponMsg"></div>
+              </div>
+
+              <!-- Estado "aplicado": se muestra si ya hay un cupón activo en el store -->
+              <div class="coupon-applied" x-show="$store.cart.couponDiscount > 0" x-cloak>
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="coupon-applied-info">
+                  <span class="coupon-applied-code" x-text="$store.cart.couponCode"></span>
+                  <span class="coupon-applied-sub" x-text="'-$' + $store.cart.couponDiscount.toFixed(2) + ' aplicado'"></span>
+                </div>
+                <button type="button" class="coupon-remove" @click="removeCoupon(); couponOpen = false; couponInput = ''; couponMsg = '';" aria-label="Quitar cupón">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Checkbox de términos: obligatorio para habilitar el botón Pagar.
+                 En el prototipo (líneas 9306-9316) es un checkbox con label inline
+                 y los dos enlaces como texto subrayado abriendo en nueva pestaña. -->
+            <label class="checkbox-line terms-check">
+              <input type="checkbox" x-model="pay.termsAccepted">
+              <span>
+                Acepto los <a href="#" target="_blank" rel="noopener">Términos</a>
+                y la <a href="#" target="_blank" rel="noopener">Política de Privacidad</a>.
+              </span>
+            </label>
+
+            <!-- CTA Pagar: usa el mismo patrón del prototipo (pay-cta con
+                 estado is-loading: muestra spinner + "Procesando pago…"). -->
+            <button type="submit" class="pay-cta"
+                    :class="{ 'is-loading': paying }"
+                    :disabled="paying || !payValid">
+              <span class="pay-cta-text" x-text="'Pagar $' + $store.cart.total.toFixed(2)"></span>
+              <span class="pay-cta-loading">
+                <span class="pay-spinner"></span>
+                Procesando pago…
+              </span>
+            </button>
+
+            <!-- Trust row: SSL + no-storage -->
+            <div class="payment-trust-row">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              <span>Pago seguro con encriptación SSL. No guardamos tu tarjeta.</span>
+            </div>
+          </form>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================= -->
+  <!-- STEP 4: SUCCESS — Full-width hero + body       -->
+  <!-- Matchea prototipo líneas 9361-9416. La hero va -->
+  <!-- en full-width con background oscuro; el body   -->
+  <!-- contiene la event card + notice + CTAs.        -->
+  <!-- ============================================= -->
+  <template x-if="step === 'success'">
+    <div>
+      <!-- Hero oscuro con check animado. `x-init` fuerza reflow para
+           garantizar que las @keyframes (successPop + drawCircle + drawCheck)
+           corran cuando este nodo entra al DOM via x-if. Sin el reflow, si
+           el browser ya tiene la clase aplicada puede saltar la animación. -->
+      <section class="success-hero">
+        <div class="container success-hero-inner">
+          <div class="success-check" aria-hidden="true"
+               x-init="$el.offsetWidth; $el.classList.remove('success-check'); $el.classList.add('success-check');">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="32" cy="32" r="29" class="success-check-circle"/>
+              <path d="M20 33l8 8 16-18" class="success-check-mark"/>
+            </svg>
+          </div>
+          <p class="success-kicker">Compra confirmada</p>
+          <h1 class="success-title">¡Entradas <em>aseguradas!</em></h1>
+          <p class="success-sub" x-text="$store.session.isAuthed
+            ? ('Tu compra se completó con éxito' + (buyer.firstName ? ', ' + buyer.firstName : '') + '.')
+            : ('Enviamos tu entrada a ' + (buyer.email || 'tu email') + '. Revisá tu bandeja.')"></p>
+          <div class="success-ref">Orden <span x-text="orderRef || '—'"></span></div>
+        </div>
+      </section>
+
+      <!-- Body con event card, notice y CTAs -->
+      <section class="success-body">
+        <div class="container">
+          <!-- Event ticket card -->
+          <div class="success-event-card">
+            <div class="success-event-thumb">
+              <div :class="(activeEvent && activeEvent.bg) || 'art-reggaeton'"></div>
+            </div>
+            <div class="success-event-info">
+              <p class="success-event-kicker" x-text="(activeEvent && activeEvent.kicker) || 'VIBE · EVENTO'"></p>
+              <h2 class="success-event-title" x-text="(activeEvent && String(activeEvent.title || '').replace(/<br\s*\/?>(\s*)/gi,' ').replace(/<\/?em>/gi,'').replace(/\s+/g,' ').trim()) || 'Tu evento'"></h2>
+              <div class="success-event-meta">
+                <span>
+                  <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  <span x-text="(activeEvent ? [activeEvent.date, activeEvent.time].filter(Boolean).join(' · ') : '') || 'Fecha por confirmar'"></span>
+                </span>
+                <span>
+                  <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 22s-8-7-8-13a8 8 0 1116 0c0 6-8 13-8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                  <span x-text="(activeEvent && activeEvent.venue) || 'Venue por confirmar'"></span>
+                </span>
+              </div>
+              <div class="success-tickets-list">
+                <template x-for="t in $store.cart.tickets" :key="t.tierId">
+                  <div class="success-ticket-line" x-text="t.qty + '× ' + t.name"></div>
+                </template>
+                <template x-if="!$store.cart.tickets || !$store.cart.tickets.length">
+                  <div class="success-ticket-line">1× Entrada</div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notice: variante logged-in vs guest -->
+          <template x-if="$store.session.isAuthed">
+            <div class="success-notice is-highlighted">
+              <div class="success-notice-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+              </div>
+              <div class="success-notice-body">
+                <h3 class="success-notice-title">Tus entradas ya están en Mi Cuenta</h3>
+                <p class="success-notice-copy">También te enviamos una copia a <strong x-text="buyer.email || 'tu email'"></strong>. Podés presentar el QR desde la app o desde el email.</p>
+              </div>
+            </div>
+          </template>
+          <template x-if="!$store.session.isAuthed">
+            <div class="success-notice is-highlighted">
+              <div class="success-notice-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </div>
+              <div class="success-notice-body">
+                <h3 class="success-notice-title">Te enviamos las entradas por email</h3>
+                <p class="success-notice-copy">Revisá tu bandeja en <strong x-text="buyer.email || 'tu email'"></strong> en los próximos minutos. Desde ahí podés agregarlas a tu wallet o reenviártelas si hace falta.</p>
+              </div>
+            </div>
+          </template>
+
+          <!-- CTAs principales: logged-in vs guest -->
+          <div class="success-actions">
+            <template x-if="$store.session.isAuthed">
+              <a href="account.html?tab=tickets" class="success-cta-primary accent">
+                Ver mis entradas
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </template>
+            <template x-if="!$store.session.isAuthed">
+              <a :href="'auth.html?mode=signup&email=' + encodeURIComponent(buyer.email || '') + '&redirect=account'" class="success-cta-primary accent">
+                Crear cuenta para no perder tus entradas
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </template>
+            <a href="index.html" class="success-cta-secondary">Volver al inicio</a>
+          </div>
+
+          <!-- Secondary actions -->
+          <div class="success-secondary-row">
+            <button class="success-secondary-btn" type="button" @click="alert('En la versión real, descargaría un archivo .ics con el evento.')">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18M12 14v4m-2-2h4"/></svg>
+              Añadir al calendario
+            </button>
+            <button class="success-secondary-btn" type="button"
+                    @click="(function(){
+                      const text = 'Voy a ' + ((activeEvent && String(activeEvent.title || '').replace(/<br\s*\/?>(\s*)/gi,' ').replace(/<\/?em>/gi,'').replace(/\s+/g,' ').trim()) || 'un evento') + ', ¿vas?';
+                      const url = window.location.href;
+                      if (navigator.share) { navigator.share({ title: 'VIBE', text, url }).catch(()=>{}); }
+                      else if (navigator.clipboard) { navigator.clipboard.writeText(text + ' ' + url); alert('Link copiado al portapapeles.'); }
+                      else { alert(text); }
+                    })()">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path stroke-linecap="round" d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+              Compartir
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </template>
+</main>
+
+<!-- Estilos específicos del checkout (no estaban en el prototipo 1:1) -->
+<style>
+  [x-cloak] { display: none !important; }
+
+  .checkout-body { background: var(--bg-soft); min-height: 100vh; }
+  /* Solo vertical — el horizontal lo da `.container` (20px mobile,
+     32px tablet, 40px desktop). Antes teníamos `padding: 24px 0 80px`
+     que anulaba el horizontal del container y pegaba todo al borde. */
+  .checkout-wrap { padding-top: 24px; padding-bottom: 80px; }
+
+  /* Progress alineada a la izquierda + compacta (paridad prototipo L3945+);
+     ya NO carga el countdown — ese vive inline bajo el h1. */
+  .checkout-head {
+    margin-bottom: 14px;
+  }
+
+  /* Timer compacto inline (prototipo L4806+). Pill discreto bajo el h1.
+     Sin margin-bottom — el spacing lo maneja `.checkout-main > * + *`. */
+  .checkout-timer {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--line-strong, #d4d3cd);
+    border-radius: 100px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    color: var(--ink-mid);
+    letter-spacing: 0.04em;
+  }
+  .checkout-timer svg {
+    width: 13px; height: 13px; stroke: currentColor; flex: 0 0 auto;
+  }
+
+  /* H1 con margen bottom reducido — antes 20px se acumulaba con el gap del
+     .checkout-main para dejar un espacio enorme hacia la primera sección. */
+  .checkout-h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4.4vw, 44px);
+    font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin: 6px 0 14px;
+  }
+  .checkout-h1 em {
+    font-family: var(--font-serif);
+    font-style: italic; font-weight: 500;
+  }
+
+  .checkout-layout {
+    display: grid; gap: 24px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 960px) {
+    .checkout-layout { grid-template-columns: 1fr 360px; gap: 40px; align-items: start; }
+  }
+
+  /* Gap vertical entre children del main — antes 20px, ahora 14px para
+     que el step de pago se sienta más compacto (paridad prototipo). */
+  .checkout-main > * + * { margin-top: 14px; }
+  .checkout-lead { color: var(--ink-mid); font-size: 14.5px; line-height: 1.5; }
+
+  /* Override global de .checkout-section (proto.css 28px) para pago — el
+     step acumula varios .checkout-section dentro del mismo form. */
+  .checkout-step .checkout-section { margin-bottom: 18px; }
+  .checkout-step .checkout-section:last-child { margin-bottom: 0; }
+  .payment-form .checkout-section-head { margin-bottom: 10px; }
+
+  /* Header compacto del step=cart (paridad prototipo L3932-3942).
+     Context + progress + h2 stacked con spacing ajustado. */
+  .tickets-header { margin-bottom: 12px; }
+  .tickets-header .tickets-context {
+    /* sobrescribe el card de arriba-abajo por el patrón prototipo
+       (línea horizontal fina bajo el context, sin card). */
+    padding: 12px 0; background: transparent; border: none;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    margin-bottom: 16px;
+  }
+  .tickets-header .tickets-context-title {
+    font-weight: 800; font-size: 15px;
+  }
+  .tickets-header .step-progress { margin-bottom: 12px; }
+  .tickets-header .checkout-h1 { margin: 4px 0 0; }
+
+  /* Tickets context (header arriba de la lista de tiers) */
+  .tickets-context {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .tickets-context-info { min-width: 0; flex: 1; }
+  .tickets-context-title { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+  .tickets-context-title em { font-family: var(--font-serif); font-style: italic; font-weight: 500; }
+  .tickets-context-meta { font-size: 12px; color: var(--ink-mid); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--font-mono); }
+  .tickets-context-change {
+    flex: 0 0 auto;
+    font-size: 13px; color: var(--ink-mid); text-decoration: underline;
+    white-space: nowrap;
+  }
+  .tickets-context-change:hover { color: var(--ink); }
+
+  /* Banner GA: solo aparece cuando ticketMode === 'ga'. Informa que es
+     acceso general (sin asiento asignado). No reemplaza a la lista de tiers
+     — la complementa con contexto. */
+  .ga-info {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; margin-top: 14px;
+    background: #f5f8f1; border: 1px solid #dce7cc; border-radius: 12px;
+    color: #1c2b12;
+  }
+  .ga-info svg { width: 20px; height: 20px; stroke: #4a7a1f; flex: 0 0 auto; margin-top: 2px; }
+  .ga-info-title { font-weight: 700; font-size: 14px; letter-spacing: -0.01em; }
+  .ga-info-body  { font-size: 13px; color: #3c5424; margin-top: 2px; line-height: 1.45; }
+
+  /* Ticket list — cada tier es una card independiente con su propio borde
+     y radius (definidos en proto.css). El `.ticket-list` solo agrupa con
+     gap vertical; NO lleva borde ni radius exterior porque las esquinas
+     de las cards internas sobresalían y creaban "notches" en los corners
+     (proto.css L4270: display: flex; gap: 10px ya maneja el spacing).    */
+  .ticket {
+    /* Override del display + padding + gap interno. Conserva el border
+       1.5px + border-radius 12px de proto.css para look de "card". */
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 16px; align-items: center;
+    padding: 16px 18px;
+  }
+  .ticket.sold-out { opacity: 0.55; }
+  .ticket.sold-out .ticket-price-now { text-decoration: line-through; }
+
+  .ticket-info { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .ticket-type-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ticket-type { font-weight: 600; font-size: 15px; color: var(--ink); }
+  .ticket-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .ticket-badge-fewleft { background: #fff7e0; color: #a35a00; }
+  .ticket-badge-soldout { background: var(--bg-elev, #f0f0ee); color: var(--ink-mid); }
+
+  .ticket-desc { font-size: 13px; color: var(--ink-mid); line-height: 1.4; }
+  .ticket-price-row { display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .ticket-price-before { color: var(--ink-dim); font-size: 13px; text-decoration: line-through; }
+  .ticket-price-now { font-weight: 600; font-size: 15px; color: var(--ink); }
+
+  .ticket-qty { display: flex; align-items: center; gap: 10px; }
+  .ticket-qty-inner { display: flex; align-items: center; gap: 10px; }
+  .ticket-qty button {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    font-size: 16px; color: var(--ink); cursor: pointer;
+    display: grid; place-items: center; transition: all 120ms ease;
+  }
+  .ticket-qty button:hover:not(:disabled) { background: var(--bg-soft); border-color: var(--ink); }
+  .ticket-qty button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ticket-qty span { min-width: 20px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Summary lines (líneas por tier dentro del resumen) */
+  .summary-lines {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line-soft, var(--line));
+  }
+  .summary-line { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+  .summary-line-name { color: var(--ink); }
+  .summary-line-amt { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 500; }
+  .summary-empty { font-size: 13px; color: var(--ink-dim); margin: 0 0 12px; }
+
+  /* Coupon disclosure — portado 1:1 del prototipo (líneas 4951-5080).
+     Trigger plano → expande panel con input + Aplicar. Cuando hay cupón
+     aplicado, muestra card verde claro con check + código + botón ×. */
+  .coupon-disclosure { margin: 4px 0 0; }
+  .coupon-trigger {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: none; border: none; padding: 6px 0;
+    font-size: 13px; font-weight: 500; color: var(--ink);
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .coupon-trigger:hover { color: var(--ink-mid); }
+  .coupon-trigger svg { width: 15px; height: 15px; stroke: currentColor; }
+
+  .coupon-panel { animation: couponIn 0.2s ease; }
+  @keyframes couponIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .coupon-form {
+    display: flex; align-items: stretch; gap: 0;
+    border: 1.5px solid var(--line-strong); border-radius: 10px;
+    overflow: hidden; transition: border-color 0.15s;
+  }
+  .coupon-form:focus-within { border-color: var(--ink); }
+  .coupon-form.error { border-color: #c01010; }
+  .coupon-input {
+    flex: 1; padding: 12px 14px; border: none; outline: none;
+    background: var(--bg); font-size: 15px; color: var(--ink);
+    font-family: inherit; letter-spacing: 0.02em;
+  }
+  .coupon-input::placeholder { color: var(--ink-dim); letter-spacing: normal; }
+  .coupon-submit {
+    padding: 0 18px; border: none; border-left: 1px solid var(--line-strong);
+    background: var(--ink); color: #fff;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    cursor: pointer; transition: background 0.12s, transform 0.12s;
+  }
+  .coupon-submit:hover { background: #000; }
+  .coupon-submit:active { transform: scale(0.97); }
+  .coupon-close {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; border: none; border-left: 1px solid var(--line-strong);
+    background: var(--bg); color: var(--ink-dim); cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+  }
+  .coupon-close:hover { background: var(--bg-soft); color: var(--ink); }
+  .coupon-close svg { width: 14px; height: 14px; }
+
+  .coupon-feedback { margin-top: 8px; font-size: 13px; color: var(--ink-mid); }
+  .coupon-feedback.is-error   { color: #c01010; }
+  .coupon-feedback.is-success { color: #0e7a3a; }
+
+  .coupon-applied {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: #f1f8ec; border: 1px solid #cfe4b9; border-radius: 10px;
+    color: #1c2b12;
+  }
+  .coupon-applied > svg { width: 20px; height: 20px; stroke: #4a7a1f; flex: 0 0 auto; }
+  .coupon-applied-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .coupon-applied-code { font-family: var(--font-mono); font-weight: 700; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .coupon-applied-sub  { font-size: 12px; color: #3c5424; }
+  .coupon-remove {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: transparent; border: none; color: #3c5424;
+    cursor: pointer; transition: background 0.12s, color 0.12s;
+  }
+  .coupon-remove:hover { background: #fff; color: var(--ink); }
+  .coupon-remove svg { width: 14px; height: 14px; }
+
+  /* Botón × inline dentro del <dt> del summary (cart/details/payment).
+     Más chico que .coupon-remove (que vive en la coupon-applied card). */
+  .coupon-remove-inline {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; margin-left: 6px;
+    border-radius: 50%;
+    background: transparent; border: 1px solid var(--line-strong);
+    color: var(--ink-mid);
+    font-size: 13px; line-height: 1;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: color 0.12s, border-color 0.12s, background 0.12s;
+  }
+  .coupon-remove-inline:hover { color: var(--ink); border-color: var(--ink); background: var(--bg-soft); }
+
+  /* Forms: los estilos base (.form-field, .form-label, .form-input, .form-grid,
+     .age-notice, .attendee-card, .radio-option, .card-form, .card-brand, etc.)
+     viven en proto.css (portados 1:1 del prototipo). Acá solo agregamos los
+     atajos de layout que el prototipo no define a nivel global. */
+
+  /* form-row: 2 columnas para pares de campos (Nombre/Apellido, Tel/ID).
+     Compactado para no romper el ritmo vertical de .form-grid del prototipo. */
+  .form-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 560px) { .form-row { grid-template-columns: 1fr 1fr; gap: 16px; } }
+
+  /* No boxed look en los forms — el prototipo no usa container.
+     Cada .checkout-section es su propio bloque (title + content). */
+  .buyer-form, .payment-form {
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  /* Checkbox line: checkbox + label inline. Usado para términos (pay step) */
+  .checkbox-line {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: var(--ink-mid); line-height: 1.45;
+    cursor: pointer;
+  }
+  .checkbox-line input[type="checkbox"] {
+    width: 16px; height: 16px; margin-top: 2px;
+    accent-color: var(--ink);
+    flex: 0 0 auto;
+  }
+  .checkbox-line a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+  .checkbox-line a:hover { color: var(--ink-mid); }
+  .terms-check { margin-top: 2px; }
+
+  /* Summary */
+  .checkout-summary {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px 22px;
+    position: sticky; top: 80px;
+  }
+  .checkout-summary h3 { font-family: var(--font-display); font-weight: 700; font-size: 16px; margin-bottom: 14px; }
+  .checkout-summary dl { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; margin-bottom: 16px; }
+  .checkout-summary dt { font-size: 14px; color: var(--ink-mid); }
+  .checkout-summary dd { font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+  .checkout-summary dt.total, .checkout-summary dd.total {
+    font-size: 18px; font-weight: 700; color: var(--ink);
+    padding-top: 8px; border-top: 1px solid var(--line-soft); margin-top: 4px;
+  }
+  .checkout-summary dd.discount { color: var(--success); }
+  .checkout-cta { width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
+  .checkout-cta:disabled { opacity: 0.45; cursor: not-allowed; }
+  .checkout-note { font-size: 12px; color: var(--ink-dim); line-height: 1.4; margin-top: 10px; text-align: center; }
+  .checkout-note a { color: var(--ink-mid); text-decoration: underline; }
+
+  /* Step progress (inline styles; proto.css may override) */
+  .step-progress { display: flex; align-items: center; gap: 10px; }
+  .step-progress-bars { display: flex; gap: 4px; }
+  .step-progress-bar { width: 36px; height: 4px; background: var(--line); border-radius: 2px; transition: background 200ms ease; }
+  .step-progress-bar.active { background: var(--ink); }
+  .step-progress-label { font-size: 12px; color: var(--ink-mid); font-weight: 500; }
+
+  /* Success styles viven en proto.css (success-hero, success-body,
+     success-event-card, success-notice, success-actions, success-cta-*,
+     success-secondary-row/btn). No agregamos overrides acá. */
+
+  /* Mobile cart bar (solo en step=cart, mobile) — duplica la CTA del aside */
+  .mobile-cart-bar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 90;
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -6px 24px rgba(10,10,10,0.08);
+  }
+  .mobile-cart-bar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    max-width: 560px; margin: 0 auto;
+  }
+  .mobile-cart-bar-info { display: flex; flex-direction: column; min-width: 0; }
+  .mobile-cart-bar-label {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-mid);
+  }
+  .mobile-cart-bar-total {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .mobile-cart-bar-cta {
+    white-space: nowrap;
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+  @media (min-width: 960px) {
+    .mobile-cart-bar { display: none; }
+  }
+  @media (max-width: 959.98px) {
+    .checkout-wrap { padding-bottom: 88px; }
+  }
+</style>
+
+</body>
+</html>
