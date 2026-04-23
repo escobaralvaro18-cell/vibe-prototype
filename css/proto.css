@@ -3709,9 +3709,12 @@ body.menu-open .mobile-menu {
    CTA con toda la info (fecha + venue + precio), así que el CTA inline
    del datepicker se vuelve redundante — dos "Continuar" compiten. Lo
    ocultamos abajo del breakpoint. En desktop (≥900px) la bar mobile se
-   oculta y este CTA vuelve a ser el primario, sin duplicación. */
+   oculta y este CTA vuelve a ser el primario, sin duplicación.
+   `!important` por defensa: el CTA inline tiene `display: flex` sin
+   media query, y queremos que cualquier cache stale u override agresivo
+   respete la ocultación en mobile. */
 @media (max-width: 899.98px) {
-  .continue-cta { display: none; }
+  .continue-cta { display: none !important; }
 }
 
 .see-all-dates {

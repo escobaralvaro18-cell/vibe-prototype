@@ -883,18 +883,38 @@
   .mobile-buy-bar-price {
     display: flex; flex-direction: column;
     min-width: 0;
+    flex: 1 1 auto; /* puede encogerse para no empujar el CTA afuera */
+  }
+  /* El wrapper div interno (bajo el x-if) es block por default. Forzamos
+     que los hijos span se muestren como block para que label y value
+     queden stackeados en 2 líneas en vez de inline (la vieja versión
+     quedaba "VIE 13 · TEATRO MELICO SALAZAR $38.00" en una sola línea
+     apretada sin jerarquía). Ahora: línea 1 contexto, línea 2 precio. */
+  .mobile-buy-bar-price > div,
+  .mobile-buy-bar-price > template + span,
+  .mobile-buy-bar-price > span {
+    min-width: 0;
   }
   .mobile-buy-bar-label {
+    display: block;
     font-family: var(--font-mono);
     font-size: 10px; font-weight: 500;
     letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--ink-mid);
+    margin-bottom: 2px;
+    /* Truncation para venues largos ("TEATRO MELICO SALAZAR") */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
   .mobile-buy-bar-value {
+    display: block;
     font-family: var(--font-display);
     font-size: 18px; font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--ink);
+    line-height: 1.1;
   }
   .mobile-buy-bar-countdown {
     font-family: var(--font-mono);
