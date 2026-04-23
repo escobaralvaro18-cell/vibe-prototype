@@ -141,8 +141,10 @@
   <section class="container checkout-wrap" x-show="step !== 'success' && ((step === 'cart' && activeEvent) || (!cartEmpty && step !== 'cart'))" x-cloak>
 
     <!-- Step progress compacta (identity/details/payment). En cart el progress
-         vive dentro del .tickets-header para seguir el patrón del prototipo. -->
-    <div class="checkout-head" x-show="step !== 'success' && step !== 'cart'" x-cloak>
+         vive dentro del .tickets-header. Durante la vista OTP (otpSent=true)
+         también se oculta — la pantalla OTP es un takeover tipo auth y no
+         queremos distracciones: sin stepper, sin breadcrumb, sin reserva. -->
+    <div class="checkout-head" x-show="step !== 'success' && step !== 'cart' && !(step === 'identity' && otpSent)" x-cloak>
       <div class="step-progress" :aria-label="'Paso ' + stepNumber + ' de 3'">
         <div class="step-progress-bars">
           <span class="step-progress-bar" :class="{ active: stepNumber >= 1 }"></span>
@@ -390,70 +392,109 @@
            (b) "Continuar con Google"    → mock, manda a details directo
            (c) "Continuar con email"     → redirige a auth.html passwordless
          Estado auth local (autoEmail) es efímero: solo vive en esta vista. -->
-    <div x-show="step === 'identity'" x-cloak class="checkout-step checkout-step-identity" x-data="{ authEmail: '' }">
-      <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
-        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Volver a entradas
-      </a>
-      <h1 class="checkout-h1">¿Cómo querés <em>continuar</em>?</h1>
+    <div x-show="step === 'identity'" x-cloak class="checkout-step checkout-step-identity" :class="{ 'checkout-step-identity-otp': otpSent }">
 
-      <!-- Identity step: sin sidebar. Las entradas reservadas se muestran
-           inline arriba (al lado del timer) y removimos el summary + total
-           de abajo — el user ya los vio en el cart y va a verlos de nuevo
-           en el paso de pago. Menos ruido = mejor decisión acá.             -->
-      <div class="identity-main">
-        <!-- Timer + ticket lines (inline, juntos arriba) -->
-        <div class="identity-reservation" x-show="countdownRemaining > 0 || $store.cart.qtyTotal > 0" x-cloak>
-          <div class="checkout-timer">
-            <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
-            <span>Reservadas · <span x-text="countdownMMSS"></span></span>
-          </div>
-          <div class="identity-tickets" x-show="$store.cart.qtyTotal > 0">
-            <template x-for="t in $store.cart.tickets" :key="t.tierId">
-              <div class="identity-ticket-line">
-                <span x-text="t.qty + ' × ' + t.name"></span>
-                <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+      <!-- ============ VISTA 1: Elegir método (!otpSent) ============
+           Back link, stepper, reservation, guest card, email form.
+           Es la pantalla "funnel" clásica del checkout.               -->
+      <template x-if="!otpSent">
+        <div>
+          <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
+            <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Volver a entradas
+          </a>
+          <h1 class="checkout-h1">¿Cómo querés <em>continuar</em>?</h1>
+          <div class="identity-main">
+            <!-- Timer + ticket lines -->
+            <div class="identity-reservation" x-show="countdownRemaining > 0 || $store.cart.qtyTotal > 0" x-cloak>
+              <div class="checkout-timer">
+                <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+                <span>Reservadas · <span x-text="countdownMMSS"></span></span>
               </div>
-            </template>
-          </div>
-        </div>
-
-        <!-- Sin lead paragraph — el h1 "¿Cómo querés continuar?" ya
-             encuadra la decisión, y las cards de abajo son auto-explicativas
-             (guest con descripción + divider "O ingresá o creá una cuenta").
-             Un paragraph intermedio era redundante y creaba espacio raro.  -->
-
-        <!-- Primary: guest card. Layout actualizado — flecha centrada
-             verticalmente contra el bloque title+desc (no justified arriba). -->
-        <button class="identity-card identity-card-v2" type="button" @click="continueAsGuest()">
-          <div class="identity-card-body">
-            <span class="identity-card-title">Continuar como invitado</span>
-            <div class="identity-card-desc">Te enviaremos las entradas al correo.</div>
-          </div>
-          <span class="identity-card-arrow"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-        </button>
-
-        <div class="identity-divider">O ingresá o creá una cuenta</div>
-
-        <!-- Passwordless: Google social + Email OTP. Refino layout:
-             - Social Google ocupa ancho completo, estándar (G + label).
-             - Email con label arriba del input.
-             - CTA "Continuar con email" con consistencia visual al Google btn. -->
-        <div class="checkout-auth checkout-auth-v2">
-          <button class="auth-social-btn" type="button" @click="continueAsGuest()">
-            <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
-            <span>Continuar con Google</span>
-          </button>
-          <form class="auth-form checkout-email-form" @submit.prevent="continueWithEmailLogin(authEmail)">
-            <div class="form-field">
-              <label class="form-label" for="identity-email">Email</label>
-              <input class="form-input" id="identity-email" type="email" x-model="authEmail" placeholder="tu@email.com" required autocomplete="email">
+              <div class="identity-tickets" x-show="$store.cart.qtyTotal > 0">
+                <template x-for="t in $store.cart.tickets" :key="t.tierId">
+                  <div class="identity-ticket-line">
+                    <span x-text="t.qty + ' × ' + t.name"></span>
+                    <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+                  </div>
+                </template>
+              </div>
             </div>
-            <button type="submit" class="auth-submit">Continuar con email</button>
-          </form>
-          <p class="checkout-auth-note">Te enviaremos un código de 6 dígitos. Sin contraseñas.</p>
+
+            <!-- Primary: guest card -->
+            <button class="identity-card identity-card-v2" type="button" @click="continueAsGuest()">
+              <div class="identity-card-body">
+                <span class="identity-card-title">Continuar como invitado</span>
+                <div class="identity-card-desc">Te enviaremos las entradas al correo.</div>
+              </div>
+              <span class="identity-card-arrow"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            </button>
+
+            <div class="identity-divider">O ingresá o creá una cuenta</div>
+
+            <div class="checkout-auth checkout-auth-v2">
+              <button class="auth-social-btn" type="button" @click="continueAsGuest()">
+                <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+                <span>Continuar con Google</span>
+              </button>
+              <form class="auth-form checkout-email-form" @submit.prevent="sendOtp()">
+                <div class="form-field">
+                  <label class="form-label" for="identity-email">Email</label>
+                  <input class="form-input" id="identity-email" type="email" x-model="authEmail" placeholder="tu@email.com" required autocomplete="email">
+                </div>
+                <button type="submit" class="auth-submit">Continuar con email</button>
+              </form>
+              <p class="checkout-auth-note">Te enviaremos un código de 6 dígitos. Sin contraseñas.</p>
+            </div>
+          </div>
         </div>
-      </div>
+      </template>
+
+      <!-- ============ VISTA 2: OTP standalone (otpSent) ============
+           Pantalla auth tipo "takeover": stepper oculto (condicional en
+           .checkout-head arriba), sin breadcrumb, sin reservation card,
+           sin metadata del evento. Layout centrado vertical/horizontal,
+           foco único en el código. Patrón estándar auth (Stripe, Linear,
+           Slack, Notion). Cambiar email vive inline en el subtítulo.    -->
+      <template x-if="otpSent">
+        <div class="otp-standalone">
+          <div class="otp-card">
+            <h1 class="otp-standalone-title">Ingresá el <em>código</em></h1>
+            <p class="otp-standalone-sub">
+              Te enviamos un código de 6 dígitos a <strong x-text="authEmail"></strong>.
+              <button type="button" class="otp-change" @click="backToEmail()">Cambiar</button>
+            </p>
+
+            <form class="otp-standalone-form" @submit.prevent="verifyOtp()">
+              <div class="otp-group" @paste="handleOtpPaste($event)">
+                <template x-for="idx in [0,1,2,3,4,5]" :key="idx">
+                  <input
+                    class="otp-input"
+                    :class="{ filled: otpDigits[idx], error: otpError }"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="1"
+                    :id="'identity-otp-' + idx"
+                    :aria-label="'Dígito ' + (idx + 1)"
+                    :value="otpDigits[idx]"
+                    @input="handleOtpInput($event, idx)"
+                    @keydown="handleOtpKeydown($event, idx)"
+                  >
+                </template>
+              </div>
+              <p class="otp-standalone-error" x-show="otpError" x-text="otpError" x-cloak></p>
+            </form>
+
+            <div class="otp-standalone-resend">
+              <span>¿No te llegó?</span>
+              <button type="button" class="otp-link" @click="sendOtp()">Reenviar código</button>
+            </div>
+
+            <p class="otp-standalone-hint">Pista para el demo: cualquier código de 6 dígitos funciona.</p>
+          </div>
+        </div>
+      </template>
     </div>
 
     <!-- ---------- STEP 2b: DETAILS (buyer form) ---------- -->

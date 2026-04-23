@@ -831,6 +831,15 @@ document.addEventListener('alpine:init', () => {
     tooltipY: 0,
     _venueCache: null,
 
+    // ---- OTP flow (identity step) ----------------------------------------
+    // Estado global en checkoutPage para que el stepper + back link puedan
+    // reaccionar (ocultarse cuando otpSent=true — pantalla auth standalone).
+    authEmail: '',
+    otpSent: false,
+    otpDigits: ['', '', '', '', '', ''],
+    otpError: '',
+    get otpCode() { return this.otpDigits.join(''); },
+
     // Titulares de entradas: 1 por ticket. Prototipo: líneas 9101-9117 +
     // renderAttendees() en 13845.
     // Estructura por titular:
@@ -1384,6 +1393,83 @@ document.addEventListener('alpine:init', () => {
       params.set('redirect', 'checkout.html?step=details'
         + (this.$store.cart.eventId ? '&event=' + encodeURIComponent(this.$store.cart.eventId) : ''));
       location.href = 'auth.html?' + params.toString();
+    },
+
+    // ---- OTP flow methods -------------------------------------------------
+    // Mock de passwordless: el user mete email → mandamos a vista OTP (misma
+    // página, se oculta el stepper para que sea pantalla auth standalone).
+    // Al completar los 6 dígitos auto-verifica y avanza a details.
+    sendOtp() {
+      const e = String(this.authEmail || '').trim().toLowerCase();
+      if (!e || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return;
+      this.authEmail = e;
+      this.otpSent = true;
+      this.otpDigits = ['', '', '', '', '', ''];
+      this.otpError = '';
+      this.$nextTick(() => this.focusOtp(0));
+    },
+    backToEmail() {
+      this.otpSent = false;
+      this.otpDigits = ['', '', '', '', '', ''];
+      this.otpError = '';
+    },
+    focusOtp(idx) {
+      const el = document.getElementById('identity-otp-' + idx);
+      if (el) { el.focus(); if (typeof el.select === 'function') el.select(); }
+    },
+    handleOtpInput(ev, idx) {
+      const raw = String(ev.target.value || '');
+      const digit = (raw.match(/\d/) || [''])[0];
+      this.otpDigits[idx] = digit;
+      ev.target.value = digit;
+      this.otpError = '';
+      if (digit && idx < 5) this.focusOtp(idx + 1);
+      // Auto-submit cuando los 6 boxes tienen dígito
+      if (this.otpDigits.every(d => d !== '')) {
+        this.$nextTick(() => this.verifyOtp());
+      }
+    },
+    handleOtpKeydown(ev, idx) {
+      if (ev.key === 'Backspace' && !this.otpDigits[idx] && idx > 0) {
+        ev.preventDefault();
+        this.otpDigits[idx - 1] = '';
+        this.focusOtp(idx - 1);
+      } else if (ev.key === 'ArrowLeft' && idx > 0) {
+        ev.preventDefault();
+        this.focusOtp(idx - 1);
+      } else if (ev.key === 'ArrowRight' && idx < 5) {
+        ev.preventDefault();
+        this.focusOtp(idx + 1);
+      } else if (ev.key === 'Enter') {
+        ev.preventDefault();
+        this.verifyOtp();
+      }
+    },
+    handleOtpPaste(ev) {
+      const cd = ev.clipboardData || window.clipboardData;
+      const text = cd ? cd.getData('text') : '';
+      const digits = String(text || '').replace(/\D/g, '').slice(0, 6);
+      if (!digits) return;
+      ev.preventDefault();
+      for (let i = 0; i < 6; i++) this.otpDigits[i] = digits[i] || '';
+      this.otpError = '';
+      const lastIdx = Math.min(digits.length, 6) - 1;
+      this.focusOtp(lastIdx);
+      if (digits.length === 6) {
+        this.$nextTick(() => this.verifyOtp());
+      }
+    },
+    verifyOtp() {
+      const code = this.otpCode;
+      if (!/^\d{6}$/.test(code)) {
+        this.otpError = 'Ingresá los 6 dígitos.';
+        return;
+      }
+      // Mock: cualquier código de 6 dígitos es válido.
+      this.buyer.email = this.authEmail;
+      this.$store.session.login(this.authEmail);
+      this.otpSent = false;
+      this.gotoStep('details');
     },
 
     // ---- mutaciones sobre $store.cart.tickets -----------------------------

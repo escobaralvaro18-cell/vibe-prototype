@@ -4998,6 +4998,203 @@ body.menu-open .mobile-menu {
   text-align: center;
 }
 
+/* ---- OTP view (inline, después de clickear "Continuar con email") ----
+   Mantiene al user en el checkout en vez de redirigir a auth.html.
+   Header con context ("Revisá tu correo"), input grande de 6 dígitos
+   monoespaciado, y links de "otro email" / "reenviar". */
+.otp-view { display: flex; flex-direction: column; gap: 18px; }
+.otp-head { display: flex; flex-direction: column; gap: 6px; text-align: center; }
+.otp-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent-ink, var(--ink));
+  opacity: 0.7;
+}
+.otp-title {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0; color: var(--ink);
+}
+.otp-sub {
+  font-size: 14px; color: var(--ink-mid);
+  margin: 0; line-height: 1.45;
+}
+/* Inputs del OTP — reutiliza `.otp-group` + `.otp-input` definidos en
+   la zona del prototipo (líneas 699-735 de este mismo archivo). Cada
+   box muestra un dígito, auto-advance al escribir, al completar los 6
+   se auto-verifica. Estilos allá: grid 6 columnas + aspect-ratio 1:1.15. */
+.otp-form { display: flex; flex-direction: column; gap: 14px; margin: 18px 0 0; }
+.otp-error {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #dc2626;
+}
+.otp-sub {
+  font-size: 14.5px; color: var(--ink-mid);
+  margin: 18px 0 0; line-height: 1.5;
+}
+.otp-sub strong { color: var(--ink); }
+
+.otp-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.otp-link {
+  background: none; border: 0; padding: 4px 6px;
+  color: var(--ink); font-family: var(--font-display);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.12s ease;
+}
+.otp-link:hover { color: var(--ink-mid); }
+
+/* Override del .identity-main para la vista OTP: igual max-width pero
+   el form se distingue visualmente del guest card view (spacing más
+   compacto, sin separadores extra). */
+.identity-main-otp { gap: 0; }
+
+/* ========================================================================
+   PANTALLA OTP STANDALONE — Takeover auth-style dentro del checkout
+   ========================================================================
+   Cuando `otpSent=true`, el stepper + breadcrumb del checkout se ocultan
+   y la pantalla se vuelve una card centrada tipo pantalla de login.
+   Es el patrón estándar de auth moderno (Stripe, Linear, Slack, Notion):
+     - Sin navegación arriba
+     - Sin progress indicator
+     - Sin contexto de compra (reservation card, timer, tickets)
+     - Centro vertical/horizontal en el viewport
+     - Foco único en los 6 dígitos
+   El `checkout-step-identity-otp` modifier nulea padding del step wrapper
+   para que el standalone pueda expandirse libremente. --------------------*/
+/* Modifier class aplicado al wrapper del step cuando otpSent=true. No tiene
+   reglas propias — marca para hooks futuros; el centrado vive en .otp-standalone. */
+.otp-standalone {
+  /* Altura flexible: al menos el viewport menos header (estimamos ~72px).
+     Centra vertical + horizontalmente el card. Desktop y mobile. */
+  min-height: calc(100vh - 72px);
+  min-height: calc(100svh - 72px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 20px;
+  box-sizing: border-box;
+}
+.otp-card {
+  width: 100%;
+  max-width: 420px;
+  display: flex; flex-direction: column;
+  gap: 22px;
+  text-align: center;
+}
+.otp-standalone-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--ink);
+  margin: 0;
+}
+.otp-standalone-title em {
+  font-style: italic; font-weight: 500;
+  color: var(--ink-mid);
+}
+.otp-standalone-sub {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-mid);
+  margin: 0;
+  max-width: 360px;
+  margin-left: auto; margin-right: auto;
+}
+.otp-standalone-sub strong {
+  color: var(--ink); font-weight: 600;
+  word-break: break-all; /* emails largos no rompen layout */
+}
+/* Botón inline "Cambiar" al lado del email — se ve como link sutil.
+   Palabra cortita en oposición a "Usar otro email". */
+.otp-change {
+  background: none; border: 0; padding: 0;
+  margin-left: 4px;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.otp-change:hover { color: var(--ink-mid); }
+
+/* Form wrapper: centrar el .otp-group respetando el max-width del card */
+.otp-standalone-form {
+  margin-top: 4px;
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+/* El `.otp-group` base (línea ~699) usa grid 6 columnas — heredamos.
+   Override de tamaño: los boxes del prototipo son 1:1.15 aspect-ratio +
+   width 100% — a 420px de card, cada box da ~60px. Eso se ve bien en
+   desktop, pero forzamos un `max-width` al grid para que no crezca
+   demasiado en viewports muy anchos, y reducimos el gap. */
+.otp-standalone-form .otp-group {
+  gap: 10px;
+  max-width: 380px;
+  margin: 0 auto;
+  width: 100%;
+}
+/* Input grande pero no gigante. Override del aspect-ratio original. */
+.otp-standalone-form .otp-input {
+  aspect-ratio: 1 / 1.1;
+  font-size: clamp(22px, 5vw, 28px);
+  border-radius: 14px;
+  border-width: 1.5px;
+}
+.otp-standalone-form .otp-input.filled {
+  background: #fff; /* clean blanco, no tint */
+  border-color: var(--ink);
+}
+.otp-standalone-error {
+  font-size: 13px;
+  color: var(--danger, #dc2626);
+  margin: 4px 0 0;
+  font-weight: 500;
+}
+
+/* Row del resend — pregunta en texto regular + link subrayado */
+.otp-standalone-resend {
+  display: inline-flex; flex-wrap: wrap;
+  justify-content: center; align-items: baseline;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink-mid);
+  margin-top: 2px;
+}
+.otp-standalone-resend .otp-link {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 0;
+}
+
+.otp-standalone-hint {
+  font-size: 12px;
+  color: var(--ink-dim, var(--ink-mid));
+  margin: 8px 0 0;
+  opacity: 0.7;
+}
+
+@media (max-width: 520px) {
+  .otp-standalone { padding: 32px 16px; }
+  .otp-standalone-form .otp-group { gap: 8px; }
+}
+
 .identity-divider {
   display: flex; align-items: center; gap: 12px;
   margin: 20px 0;
