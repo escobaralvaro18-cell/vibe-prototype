@@ -2030,13 +2030,14 @@ body.menu-open .mobile-menu {
   /* Capa 1-2: glows lime difuminados (mismo efecto que success-hero):
        · Un radial al tope-centro con 18% opacity (fuerte)
        · Un radial abajo-izquierda con 8% opacity (sutil, balance)
-     Capa 3: gradient vertical base del hero (casi negro).
-     Las capas se componen en orden — las radiales quedan encima, fundidas
-     con el base dark gracias al transparent 50% del fade.               */
+     Capa 3: SOLID #0a0a0a como base (antes era un linear-gradient a #111
+     al 60% que hacía que el top del hero no fuera exactamente igual al
+     header, creando una línea visible al sub-pixel rendering del sticky
+     compositor. Con solid match byte-perfect no hay boundary que pintar). */
   background:
     radial-gradient(circle at 50% 0%,  rgba(198,248,0,0.18), transparent 50%),
     radial-gradient(circle at 20% 100%, rgba(198,248,0,0.08), transparent 50%),
-    linear-gradient(180deg, #0a0a0a 0%, #111 60%, #0a0a0a 100%);
+    #0a0a0a;
   pointer-events: none;
 }
 
