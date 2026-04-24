@@ -530,7 +530,7 @@
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Volver a entradas
       </a>
-      <h1 class="checkout-h1">Tus datos</h1>
+      <h1 class="checkout-h1">Ingresá tus datos</h1>
 
       <!-- Details step: mismo patrón que identity. Sin sidebar — timer +
            ticket lines arriba en un único card de reserva, sin resumen +
@@ -609,6 +609,16 @@
                   <span class="form-hint" x-show="$store.session.isAuthed" x-cloak>
                     Está vinculado a tu cuenta. Cerrá sesión si querés comprar con otro email.
                   </span>
+                  <!-- Reassurance para guests: checkout-as-guest es lícito,
+                       pero ofrecemos la opción de login/signup inline si
+                       quieren guardar datos para próximas compras. Los links
+                       abren auth.html con redirect de vuelta al checkout. -->
+                  <p class="form-hint form-hint-guest" x-show="!$store.session.isAuthed" x-cloak>
+                    Podés comprar sin registrarte. Si preferís guardar tus datos para la próxima,
+                    <a :href="'auth.html?mode=login&redirect=' + encodeURIComponent('checkout.html?step=details' + ($store.cart.eventId ? '&event=' + $store.cart.eventId : ''))">iniciá sesión</a>
+                    o
+                    <a :href="'auth.html?mode=signup&redirect=' + encodeURIComponent('checkout.html?step=details' + ($store.cart.eventId ? '&event=' + $store.cart.eventId : ''))">creá una cuenta</a>.
+                  </p>
                 </div>
               </div>
             </div>
@@ -799,7 +809,7 @@
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Volver a datos
       </a>
-      <h1 class="checkout-h1">Método de pago</h1>
+      <h1 class="checkout-h1">Pagá tus entradas</h1>
 
       <!-- Payment: single-column como identity/details. Reemplazamos el
            aside con un .payment-summary arriba que muestra: timer +
