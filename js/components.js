@@ -1512,7 +1512,7 @@ document.addEventListener('alpine:init', () => {
 
     // ---- cupones ----------------------------------------------------------
     // Cupones válidos (mock). key → porcentaje off sobre subtotal.
-    _coupons: { VIBE10: 0.10, VIBE20: 0.20, BRAT: 0.15 },
+    _coupons: { VIBES10: 0.10, VIBES20: 0.20, BRAT: 0.15 },
 
     applyCoupon(code) {
       const k = String(code || '').trim().toUpperCase();

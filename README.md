@@ -1,4 +1,4 @@
-# Vibe — Prototipo
+# Vibes — Prototipo
 
 Plataforma de venta de entradas para eventos en Centroamérica.
 Prototipo multi-página construido con Alpine.js + Tailwind v4 CDN + CSS puro.
