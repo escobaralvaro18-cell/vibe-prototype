@@ -4729,22 +4729,31 @@ body.menu-open .mobile-menu {
   font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.4;
 }
 
-/* Identity + details steps: sin sidebar. El main ocupa un ancho cómodo
-   centrado (mismo feel que auth.html standalone).                        */
-.checkout-step-identity .identity-main {
+/* Identity + details + payment steps: single centered column. ANTES el
+   max-width vivía en `.identity-main` (wrapping el form) pero el H1 y
+   el back-link quedaban afuera, full-width del container — eso creaba
+   un desbalance visual en desktop donde el título quedaba huérfano en
+   el extremo izquierdo mientras el form estaba centrado más a la derecha.
+   Ahora el step WRAPPER entero (back + H1 + form + T&C + CTA) vive en
+   una sola columna centrada — feel de auth.html, consistent jerarquía. */
+.checkout-step-identity {
   max-width: 560px;
   margin: 0 auto;
 }
-/* Details step: el form necesita más ancho que identity (tiene buyer +
-   attendee fields). Se marca con .checkout-step-details en el wrapper.   */
-.checkout-step-details .identity-main {
+.checkout-step-details {
   max-width: 720px;
   margin: 0 auto;
 }
-/* Payment step: similar ancho al details (form + saved cards list).     */
-.checkout-step-payment .identity-main {
-  max-width: 720px;
+.checkout-step-payment {
+  max-width: 680px;
   margin: 0 auto;
+}
+/* OTP standalone: override. Necesita expandirse a todo el viewport para
+   que el `min-height: calc(100vh - 72px)` centre vertical el card de
+   420px correctamente. Sin este override, el step quedaba constrained
+   a 560px y el OTP se veía off-center contra el resto de la página. */
+.checkout-step-identity.checkout-step-identity-otp {
+  max-width: none;
 }
 
 /* ---- Payment summary card (arriba del form) ----
