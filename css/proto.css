@@ -56,7 +56,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, [role="button"]:focu
 }
 /* Make anchors used as buttons behave like buttons */
 a[onclick]:not([href]) { cursor: pointer; }
-html { scroll-behavior: smooth; }
+/* `html` y `body` con overflow-x: clip + max-width: 100% es el "belt &
+   suspenders" para prevenir overflow horizontal en mobile. Si algún
+   descendiente (cartelera card, hero image, carousel) se expande más
+   ancho que el viewport, el clip en BOTH html y body garantiza que no
+   se vea horizontal scroll ni shift de layout. El `100%` en max-width
+   evita que un hijo con width: 100vw + padding pueda empujar el root. */
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100%;
+}
 body {
   background: var(--bg);
   color: var(--ink);
@@ -66,7 +76,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
+  max-width: 100%;
 }
+/* Main wrapper: mismo safeguard — algunos elementos dentro de main
+   (carousels con overflow-x: auto, hero con margin-top negativo) a veces
+   pueden empujar el width en Chrome mobile si el body no fuerza el clip. */
+main { max-width: 100%; overflow-x: clip; }
 img, svg { display: block; max-width: 100%; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 input, select { font-family: inherit; color: inherit; }
