@@ -474,7 +474,7 @@ window.EVENT_DATA = {
     time: '8:30 PM',
     venue: 'Parque Viva',
     city: 'San José',
-    desc: '<p><strong>Feid</strong> trae el <em>Ferxxo World Tour 2026</em> a Costa Rica. El artista colombiano detrás de hits como "Classy 101", "Luna" y "Yandel 150" hace parada obligada en San José.</p><p>La preventa abre pronto para miembros VIBE. Guardalo en favoritos para no perdértelo.</p>',
+    desc: '<p><strong>Feid</strong> trae el <em>Ferxxo World Tour 2026</em> a Costa Rica. El artista colombiano detrás de hits como "Classy 101", "Luna" y "Yandel 150" hace parada obligada en San José.</p><p>La preventa abre pronto para miembros VIBES. Guardalo en favoritos para no perdértelo.</p>',
     lineup: [
       { name: 'Feid', main: true },
       { name: 'Invitados por confirmar' }

@@ -390,9 +390,9 @@ document.addEventListener('alpine:init', () => {
       this.event = data;
       if (data) {
         const plain = String(data.title || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        document.title = 'Vibe — ' + plain;
+        document.title = 'Vibes — ' + plain;
       } else {
-        document.title = 'Vibe — Evento no encontrado';
+        document.title = 'Vibes — Evento no encontrado';
       }
       // Countdown de preventa: tick cada segundo (mientras haya evento).
       if (data) {
@@ -1736,9 +1736,9 @@ document.addEventListener('alpine:init', () => {
       }
       // Simula latencia de pago.
       setTimeout(() => {
-        // Genera orderRef tipo VIBE-XXXX-YYYY.
+        // Genera orderRef tipo VIBES-XXXX-YYYY.
         const rand = () => Math.random().toString(36).slice(2, 6).toUpperCase();
-        const ref = 'VIBE-' + rand() + '-' + rand();
+        const ref = 'VIBES-' + rand() + '-' + rand();
         this.orderRef = ref;
         this.$store.cart.orderRef = ref;
 
@@ -2385,7 +2385,7 @@ document.addEventListener('alpine:init', () => {
           section: 'Platinum',
           seat: 'A — Fila 12',
           qty: 2,
-          orderRef: 'VIBE-20260615-SY',
+          orderRef: 'VIBES-20260615-SY',
           isPast: false,
         },
         {
@@ -2399,7 +2399,7 @@ document.addEventListener('alpine:init', () => {
           section: 'General',
           seat: null,
           qty: 2,
-          orderRef: 'VIBE-20260502-RT',
+          orderRef: 'VIBES-20260502-RT',
           isPast: false,
         },
         {
@@ -2413,7 +2413,7 @@ document.addEventListener('alpine:init', () => {
           section: 'General',
           seat: null,
           qty: 1,
-          orderRef: 'VIBE-20260418-DS',
+          orderRef: 'VIBES-20260418-DS',
           isPast: true,
         },
       ];
