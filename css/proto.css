@@ -1302,62 +1302,38 @@ body.mode-escapes::-webkit-scrollbar-corner { background: #f0f2f1; }
 .account-header-avatar-wrap {
   position: relative;
 }
+/* Avatar — ESTADO ÚNICO UNIVERSAL.
+   Antes había 2 variantes (lima+ink sobre light, gris+lima-ring sobre dark)
+   que creaban carga cognitiva + sacrificaban el lima, que queremos reservar
+   para accents de valor (CTAs, selections, urgency). Ahora un solo estado:
+     · bg      → var(--ink) (~#0a0a0a) — dark circle que se lee sobre
+                 cualquier background (light o dark). Sobre header blanco
+                 es un círculo oscuro contrastante; sobre header oscuro
+                 sigue siendo visible por el border ring blanco sutil.
+     · letter  → #fff — 100% contrast sobre --ink (~21:1, AAA).
+     · border  → hairline blanca sutil (rgba(255,255,255,0.12)) — visible
+                 sobre headers oscuros para darle definición sin gritar,
+                 invisible-ish sobre headers claros (se funde con --ink).
+   Sin estados por contexto. Sin lima. Patrón tipo Linear / Notion: neutral,
+   universal, identifica al user sin competir con nada en la UI. */
 .account-avatar {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--ink);
+  background: var(--ink);
+  color: #fff;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 14px;
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   padding: 0;
 }
 .account-avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-}
-/* Sobre headers oscuros (hero NO scrolled, mode-ticks, checkout flow) el
-   default lime+letra-oscura no funciona: la letra sobre lima tiene un
-   contrast ratio de ~1.9:1 (falla WCAG AA). Invertimos por completo:
-     · bg        → gris oscuro (#1f1f1f) — no negro puro, porque el header
-                   también es negro y el avatar se perdería como aro flotante.
-                   El gris le da "cuerpo" al avatar, lo hace sentir construido
-                   en vez de plano. Contrast lime-sobre-#1f1f1f: ~14:1 (AAA).
-     · border    → lima (accent) — ring distintivo de logged-in
-     · color     → lima (accent) — letra legible sobre el gris
-     · inset     → hairline blanca muy sutil (~5% op) entre el gris y el ring
-                   para separación extra. Da feel premium sin gritar.
-   Patrón de apps con theming dark: Linear, Vercel, Raycast. */
-body:not(.scrolled) .header-hero .account-avatar,
-body.mode-ticks:not(.scrolled) .header-hero .account-avatar,
-.page[data-page="tickets"] .header .account-avatar,
-.page[data-page="checkout"] .header .account-avatar,
-.page[data-page="checkout-details"] .header .account-avatar,
-.page[data-page="checkout-payment"] .header .account-avatar,
-.page[data-page="checkout-success"] .header .account-avatar {
-  background: #1f1f1f;
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 0 2px rgba(198, 248, 0, 0.14);
-}
-body:not(.scrolled) .header-hero .account-avatar:hover,
-body.mode-ticks:not(.scrolled) .header-hero .account-avatar:hover,
-.page[data-page="tickets"] .header .account-avatar:hover,
-.page[data-page="checkout"] .header .account-avatar:hover,
-.page[data-page="checkout-details"] .header .account-avatar:hover,
-.page[data-page="checkout-payment"] .header .account-avatar:hover,
-.page[data-page="checkout-success"] .header .account-avatar:hover {
-  background: #262626; /* un poquito más claro para feedback de hover */
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 0 0 2px rgba(198, 248, 0, 0.32),
-    0 2px 8px rgba(0, 0, 0, 0.35);
+  background: #1a1a1a; /* un toque más claro para feedback de hover */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 .account-avatar-lg {
   width: 44px; height: 44px;
@@ -3624,6 +3600,14 @@ body.menu-open .mobile-menu {
 }
 .date-card:hover { border-color: var(--ink); }
 .date-card:active { transform: scale(0.98); }
+/* Focus visible — ring lima 3px para keyboard users. Solo aparece en
+   :focus-visible (no en clicks del mouse) para evitar ring molesto en
+   interaction de ratón. WCAG 2.2 AA requiere indicador claro de foco. */
+.date-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--ink);
+}
 .date-card.selected {
   border-color: var(--ink); border-width: 2px;
   background: var(--ink); color: #fff;
@@ -3634,6 +3618,8 @@ body.menu-open .mobile-menu {
   border-style: dashed;
 }
 .date-card[data-status="soldout"]:hover { border-color: var(--line-strong); }
+/* Soldout: sin focus-visible porque tabindex=-1 los saca del tab order */
+.date-card[aria-disabled="true"]:focus-visible { outline: none; }
 .date-card .dayname {
   font-family: var(--font-mono); font-size: 10px; font-weight: 600;
   letter-spacing: 0.1em; color: var(--ink-mid);
@@ -4985,8 +4971,80 @@ body.menu-open .mobile-menu {
   background: var(--bg-soft, #f7f7f5);
   border: 1px solid var(--line);
   border-radius: 12px;
+  transition: padding 0.2s ease;
 }
+/* Collapsed: padding vertical reducido para sentirse más chip-like */
+.identity-reservation.is-collapsed { padding: 8px 14px; gap: 0; }
+
 .identity-reservation .checkout-timer { margin: 0; padding: 0; border: 0; background: transparent; }
+
+/* ============== Reservation card — collapsed pill view =================
+   Un solo renglón: ícono reloj + "Reservadas · mm:ss" + separador + total
+   + chevron-down. Todo el row es un botón clickable que expande la card. */
+.reservation-collapsed-row {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+  line-height: 1.2;
+  transition: color 0.12s ease;
+}
+.reservation-collapsed-row:hover { color: var(--ink-mid); }
+.reservation-clock-icon {
+  width: 16px; height: 16px;
+  stroke: var(--ink);
+  flex-shrink: 0;
+}
+.reservation-collapsed-timer {
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.reservation-collapsed-sep {
+  color: var(--ink-dim, var(--ink-mid));
+  opacity: 0.5;
+}
+.reservation-collapsed-total {
+  font-family: var(--font-mono);
+  font-size: 13px; font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;     /* empuja chevron al extremo */
+}
+.reservation-chevron {
+  width: 14px; height: 14px;
+  stroke: var(--ink-mid);
+  margin-left: 4px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+.reservation-collapsed-row:hover .reservation-chevron { transform: translateY(1px); }
+
+/* ============== Reservation card — expanded full view ================== */
+.reservation-expanded-body { display: flex; flex-direction: column; gap: 10px; }
+.reservation-expanded-header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.reservation-collapse-toggle {
+  background: none; border: 0; padding: 4px;
+  cursor: pointer;
+  color: var(--ink-mid);
+  display: inline-flex; align-items: center;
+  border-radius: 6px;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+.reservation-collapse-toggle:hover {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.04);
+}
+.reservation-collapse-toggle svg { width: 16px; height: 16px; }
 .identity-tickets {
   display: flex; flex-direction: column; gap: 4px;
   padding-top: 10px;

@@ -69,7 +69,7 @@
 
     <!-- ==== STEP 1: EMAIL ==== -->
     <div class="auth-card-wrap" x-show="step === 'email'" x-cloak>
-      <h1 class="auth-title">Ingresá a <em>VIBE</em></h1>
+      <h1 class="auth-title">Ingresá a VIBE</h1>
       <p class="auth-sub">Usá tu email o tu cuenta de Google. Sin contraseñas.</p>
 
       <div class="auth-social-row">
@@ -102,7 +102,7 @@
 
     <!-- ==== STEP 2: OTP ==== -->
     <div class="auth-card-wrap" x-show="step === 'otp'" x-cloak>
-      <h1 class="auth-title">Verificá tu <em>email</em></h1>
+      <h1 class="auth-title">Verificá tu email</h1>
       <p class="auth-sub">
         Enviamos un código de 6 dígitos a <strong x-text="email"></strong>.
         <a class="auth-change-email" href="#" @click.prevent="backToEmail()">Cambiar</a>
@@ -142,7 +142,7 @@
 
     <!-- ==== STEP 3: SIGNUP (nombre) ==== -->
     <div class="auth-card-wrap" x-show="step === 'name'" x-cloak>
-      <h1 class="auth-title">Último <em>paso</em></h1>
+      <h1 class="auth-title">Último paso</h1>
       <p class="auth-sub">Contanos tu nombre para personalizar tu experiencia.</p>
 
       <form class="auth-form" @submit.prevent="submitName()">

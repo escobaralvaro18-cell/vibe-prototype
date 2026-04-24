@@ -200,8 +200,8 @@
              no a call-to-action. Ahora:
                · Con plano interactivo → "Elegí tus asientos" (preciso)
                · Resto (tiers / GA)    → "Elegí tus entradas" (unificado)   -->
-        <h1 class="checkout-h1" x-show="isSeated">Elegí tus <em>asientos</em></h1>
-        <h1 class="checkout-h1" x-show="!isSeated">Elegí tus <em>entradas</em></h1>
+        <h1 class="checkout-h1" x-show="isSeated">Elegí tus asientos</h1>
+        <h1 class="checkout-h1" x-show="!isSeated">Elegí tus entradas</h1>
       </div>
 
       <div class="checkout-layout"><!-- cart uses list+aside grid -->
@@ -403,21 +403,47 @@
             <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Volver a entradas
           </a>
-          <h1 class="checkout-h1">¿Cómo querés <em>continuar</em>?</h1>
+          <h1 class="checkout-h1">¿Cómo querés continuar?</h1>
           <div class="identity-main">
             <!-- Timer + ticket lines -->
-            <div class="identity-reservation" x-show="countdownRemaining > 0 || $store.cart.qtyTotal > 0" x-cloak>
-              <div class="checkout-timer">
-                <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
-                <span>Reservadas · <span x-text="countdownMMSS"></span></span>
-              </div>
-              <div class="identity-tickets" x-show="$store.cart.qtyTotal > 0">
-                <template x-for="t in $store.cart.tickets" :key="t.tierId">
-                  <div class="identity-ticket-line">
-                    <span x-text="t.qty + ' × ' + t.name"></span>
-                    <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+            <!-- Reservation card con dos vistas — expanded (detalle completo)
+                 y collapsed (pill one-liner). Alterna con click en el toggle. -->
+            <div class="identity-reservation"
+                 :class="{ 'is-collapsed': !reservationExpanded }"
+                 x-show="countdownRemaining > 0 || $store.cart.qtyTotal > 0" x-cloak>
+              <!-- Collapsed: one-liner pill con timer + total -->
+              <button type="button" class="reservation-collapsed-row"
+                      x-show="!reservationExpanded"
+                      @click="toggleReservation()"
+                      :aria-label="'Expandir detalle de reserva. Reservadas ' + countdownMMSS + '. Total $' + $store.cart.total.toFixed(2)">
+                <svg class="reservation-clock-icon" fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+                <span class="reservation-collapsed-timer">Reservadas · <span x-text="countdownMMSS"></span></span>
+                <span class="reservation-collapsed-sep">·</span>
+                <span class="reservation-collapsed-total" x-text="'$' + $store.cart.total.toFixed(2)"></span>
+                <svg class="reservation-chevron" fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+              </button>
+
+              <!-- Expanded: full card con detalle completo -->
+              <div class="reservation-expanded-body" x-show="reservationExpanded">
+                <div class="reservation-expanded-header">
+                  <div class="checkout-timer">
+                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+                    <span>Reservadas · <span x-text="countdownMMSS"></span></span>
                   </div>
-                </template>
+                  <button type="button" class="reservation-collapse-toggle"
+                          @click="toggleReservation()"
+                          aria-label="Colapsar detalle de reserva">
+                    <svg fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M18 15l-6-6-6 6"/></svg>
+                  </button>
+                </div>
+                <div class="identity-tickets" x-show="$store.cart.qtyTotal > 0">
+                  <template x-for="t in $store.cart.tickets" :key="t.tierId">
+                    <div class="identity-ticket-line">
+                      <span x-text="t.qty + ' × ' + t.name"></span>
+                      <span class="identity-ticket-amt" x-text="'$' + (Number(t.price) * t.qty).toFixed(2)"></span>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
 
@@ -459,7 +485,7 @@
       <template x-if="otpSent">
         <div class="otp-standalone">
           <div class="otp-card">
-            <h1 class="otp-standalone-title">Ingresá el <em>código</em></h1>
+            <h1 class="otp-standalone-title">Ingresá el código</h1>
             <p class="otp-standalone-sub">Te enviamos un código de 6 dígitos a</p>
             <div class="otp-standalone-email">
               <strong x-text="authEmail"></strong>
@@ -504,7 +530,7 @@
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Volver a entradas
       </a>
-      <h1 class="checkout-h1">Tus <em>datos</em></h1>
+      <h1 class="checkout-h1">Tus datos</h1>
 
       <!-- Details step: mismo patrón que identity. Sin sidebar — timer +
            ticket lines arriba en un único card de reserva, sin resumen +
@@ -773,7 +799,7 @@
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Volver a datos
       </a>
-      <h1 class="checkout-h1">Método de <em>pago</em></h1>
+      <h1 class="checkout-h1">Método de pago</h1>
 
       <!-- Payment: single-column como identity/details. Reemplazamos el
            aside con un .payment-summary arriba que muestra: timer +

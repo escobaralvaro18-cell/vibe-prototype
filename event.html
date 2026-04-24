@@ -459,23 +459,30 @@
         <!-- ============================================================ -->
         <div class="datepicker-section" x-show="isMultiDate" x-cloak>
           <div class="datepicker-head">
-            <span class="datepicker-label">Elegí tu fecha</span>
+            <span class="datepicker-label" id="datepicker-label">Elegí tu fecha</span>
             <span class="datepicker-count" x-text="datesCount + ' funciones disponibles'"></span>
           </div>
+          <!-- role="radiogroup" con labelledby para que screen readers sepan
+               que es una selección entre funciones. Los badges "Agotado"/
+               "Últimas" se anuncian via aria-label, no solo via color. -->
           <div class="datepicker-scroll-wrap">
-            <div class="datepicker-scroll">
+            <div class="datepicker-scroll" role="radiogroup" aria-labelledby="datepicker-label">
               <template x-for="d in eventDates" :key="d.id">
                 <button type="button" class="date-card"
                         :data-status="d.status"
                         :disabled="d.status === 'soldout'"
+                        :aria-disabled="d.status === 'soldout' ? 'true' : 'false'"
+                        :aria-pressed="selectedDateId === d.id"
+                        :aria-label="d.dayName + ' ' + d.day + ' de ' + d.month + ', ' + d.price + (d.status === 'soldout' ? ', agotado' : d.status === 'last' ? ', últimas entradas' : '')"
+                        :tabindex="d.status === 'soldout' ? -1 : 0"
                         :class="{ 'selected': selectedDateId === d.id }"
                         @click="selectDate(d.id)">
-                  <span class="date-badge" x-show="d.status === 'last'">Últimas</span>
-                  <span class="date-badge" x-show="d.status === 'soldout'">Agotado</span>
-                  <span class="dayname" x-text="d.dayName"></span>
-                  <span class="daynum" x-text="d.day"></span>
-                  <span class="month" x-text="d.month"></span>
-                  <span class="price" x-text="d.price"></span>
+                  <span class="date-badge" x-show="d.status === 'last'" aria-hidden="true">Últimas</span>
+                  <span class="date-badge" x-show="d.status === 'soldout'" aria-hidden="true">Agotado</span>
+                  <span class="dayname" x-text="d.dayName" aria-hidden="true"></span>
+                  <span class="daynum" x-text="d.day" aria-hidden="true"></span>
+                  <span class="month" x-text="d.month" aria-hidden="true"></span>
+                  <span class="price" x-text="d.price" aria-hidden="true"></span>
                 </button>
               </template>
             </div>
@@ -559,7 +566,7 @@
     <div class="container">
       <div class="section-head">
         <div class="section-head-left">
-          <h2 class="section-title">Eventos <em>similares</em></h2>
+          <h2 class="section-title">Eventos similares</h2>
         </div>
         <div class="section-actions">
           <div class="carousel-controls">

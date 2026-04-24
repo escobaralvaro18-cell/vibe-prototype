@@ -840,6 +840,15 @@ document.addEventListener('alpine:init', () => {
     otpError: '',
     get otpCode() { return this.otpDigits.join(''); },
 
+    // ---- Reservation card (timer + tickets) -------------------------------
+    // UX move: la primera vez que el user ve la card (step 'identity'), se
+    // muestra expandida con el detalle completo. Cuando avanza a details o
+    // payment, colapsa automáticamente a una pill de una línea. El user
+    // puede re-expandirla con click si necesita revisar. Esto reduce la
+    // densidad del checkout sin perder el reassurance del reloj reservando.
+    reservationExpanded: true,
+    toggleReservation() { this.reservationExpanded = !this.reservationExpanded; },
+
     // Titulares de entradas: 1 por ticket. Prototipo: líneas 9101-9117 +
     // renderAttendees() en 13845.
     // Estructura por titular:
@@ -1345,6 +1354,9 @@ document.addEventListener('alpine:init', () => {
       history.pushState({}, '', url.toString());
       // Al entrar a payment: inicializar modo según saved cards.
       if (s === 'payment') this.initPaymentMode();
+      // Reservation card: expanded en identity (primera impression), collapsed
+      // en details/payment (ya lo vio, no necesita la densidad de nuevo).
+      this.reservationExpanded = (s === 'identity' || s === 'cart');
       // Scroll al tope al cambiar de step. Crítico para `success`: el user
       // venía scrolleando el form de payment y si no reseteamos el scroll,
       // aterriza en el success con el hero fuera de viewport (pierde el

@@ -64,7 +64,7 @@
   <section class="auth-page auth-creator" x-show="step === 'email'" x-cloak>
     <div class="auth-card-wrap">
       <span class="auth-badge">✦ Creadores</span>
-      <h1 class="auth-title">Ingresá o creá tu <em>cuenta</em></h1>
+      <h1 class="auth-title">Ingresá o creá tu cuenta</h1>
       <p class="auth-sub">Sin contraseñas. Si es tu primera vez, te creamos la cuenta al verificar tu email.</p>
 
       <div class="auth-social-row">
@@ -99,7 +99,7 @@
   <section class="auth-page auth-creator" x-show="step === 'otp'" x-cloak>
     <div class="auth-card-wrap">
       <span class="auth-badge">✦ Creadores</span>
-      <h1 class="auth-title">Verificá tu <em>email</em></h1>
+      <h1 class="auth-title">Verificá tu email</h1>
       <p class="auth-sub">
         Enviamos un código de 6 dígitos a <strong x-text="email"></strong>.
         <a class="auth-change-email" href="#" @click.prevent="backToEmail()">Cambiar</a>
@@ -142,7 +142,7 @@
   <section class="auth-page auth-creator" x-show="step === 'signup'" x-cloak>
     <div class="auth-card-wrap">
       <span class="auth-badge">✦ Creadores</span>
-      <h1 class="auth-title">Completá tu <em>perfil</em></h1>
+      <h1 class="auth-title">Completá tu perfil</h1>
       <p class="auth-sub">Un último paso antes de acceder a tu panel.</p>
 
       <form class="auth-form" @submit.prevent="submitSignup()">
@@ -179,7 +179,7 @@
     <div class="container creator-redirect-inner">
       <div class="creator-redirect-spinner" aria-hidden="true"></div>
       <span class="auth-badge">✦ Creadores</span>
-      <h1 class="creator-redirect-title">Preparando tu <em>panel…</em></h1>
+      <h1 class="creator-redirect-title">Preparando tu panel…</h1>
       <p class="creator-redirect-sub">
         Te estamos llevando a tu dashboard de organizador,
         <strong x-text="firstName || 'creador'"></strong>.
