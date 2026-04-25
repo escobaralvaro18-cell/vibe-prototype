@@ -268,5 +268,30 @@
   [x-cloak] { display: none !important; }
 </style>
 
+<!-- Scroll listener: agrega body.scrolled cuando el creators-hero pasa
+     fuera de viewport, así el header floating glass transiciona a su
+     estado opaco blanco (mismo patrón que index.html). Sin esto, el
+     header queda transparente siempre y se traslapa con el contenido. -->
+<script>
+  (function() {
+    const CONDENSED_HEIGHT = 52;
+    const onScroll = () => {
+      const hero = document.querySelector('.creators-hero, .hero');
+      if (!hero) {
+        document.body.classList.add('scrolled');
+        return;
+      }
+      const bottom = hero.getBoundingClientRect().bottom;
+      document.body.classList.toggle('scrolled', bottom <= CONDENSED_HEIGHT);
+    };
+    let tk = false;
+    window.addEventListener('scroll', () => {
+      if (!tk) { requestAnimationFrame(() => { onScroll(); tk = false; }); tk = true; }
+    }, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
 </body>
 </html>
