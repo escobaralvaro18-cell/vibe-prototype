@@ -2245,20 +2245,22 @@ body.menu-open .mobile-menu {
    Translucent dark con borde lime sutil + mono uppercase label.
    Cinematográfico, integrado con el dark hero, vibe terminal/film. */
 .hero-search {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   gap: 14px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.06);
+  /* !important defensive — alguna regla vieja podría seguir cacheada en
+     móviles. Forzamos el V7 glass dark sin posibilidad de override. */
+  background: rgba(255, 255, 255, 0.10) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(198, 248, 0, 0.4);
+  border: 1px solid rgba(198, 248, 0, 0.45) !important;
   border-radius: 999px;
   padding: 0 28px;
   height: 58px;
   cursor: pointer;
-  color: #fff;
+  color: #fff !important;
   font-family: var(--font-display);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -2274,18 +2276,18 @@ body.menu-open .mobile-menu {
 }
 .hero-search > svg {
   width: 18px; height: 18px;
-  stroke: var(--accent, #c6f800);
+  stroke: var(--accent, #c6f800) !important;
   stroke-width: 2;
-  fill: none;
+  fill: none !important;
   flex-shrink: 0;
 }
 .hero-search-label {
-  font-family: var(--font-mono, 'Geist Mono', monospace);
+  font-family: var(--font-mono, 'Geist Mono', ui-monospace, monospace);
   font-size: 12.5px;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.92) !important;
 }
 @media (max-width: 480px) {
   .hero-search {
