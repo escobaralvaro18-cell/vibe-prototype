@@ -2228,11 +2228,11 @@ body.menu-open .mobile-menu {
 }
 .hero-stack .hero-title-row { display: block; text-align: center; }
 .hero-stack .hero-title { white-space: nowrap; }
-/* Mobile: el título auto-sizea al texto natural; search lo iguala vía
-   align-items: stretch. NO forzamos width: 100% porque eso desacopla
-   el ancho del search del título. */
+/* Mobile: el título auto-sizea al texto natural pero el stack se expande a
+   100% del container — así el search bar respira y se siente "tap-friendly"
+   en pantallas chicas. Título sigue centrado vía text-align: center. */
 @media (max-width: 720px) {
-  .hero-stack { width: auto; }
+  .hero-stack { width: 100%; }
   .hero-stack .hero-title { white-space: nowrap; }
 }
 /* Smartphones chicos (<480): si "Vibra diferente." no entra, dejamos que
