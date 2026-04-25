@@ -133,7 +133,7 @@
 
     <label class="header-search" @click.prevent="$store.ui.searchOverlayOpen = true">
       <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
-      <input type="text" placeholder="Buscar evento, artista, venue…" readonly />
+      <input type="text" placeholder="Buscá tu próximo plan" readonly />
     </label>
 
     <nav class="nav-desktop" data-vertical-only="ticks"
@@ -245,12 +245,11 @@
         <span class="hero-word hero-word-1">Vibra</span>
         <em class="hero-word hero-word-2">diferente.</em>
       </h1>
-      <p class="hero-sub">Encuentra los eventos que están encendiendo tu ciudad.</p>
     </div>
 
     <form class="hero-search"  @click.prevent="$store.ui.searchOverlayOpen = true">
       <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
-      <input type="text" placeholder="Artista, evento, venue" readonly />
+      <input type="text" placeholder="Buscá tu próximo plan" readonly />
     </form>
   </div>
 </section>
@@ -1423,7 +1422,7 @@
       x-ref="input"
       id="search-overlay-input"
       type="text"
-      placeholder="Buscar evento, artista, venue…"
+      placeholder="Buscá tu próximo plan"
       autocomplete="off"
       x-model="query"
       @keydown.arrow-down.prevent="moveCursor(1)"
