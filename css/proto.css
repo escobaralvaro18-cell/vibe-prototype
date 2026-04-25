@@ -8045,34 +8045,80 @@ body.search-open { overflow: hidden; }
 .search-overlay-close:hover { background: rgba(255,255,255,0.18); }
 .search-overlay-close svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
 
+/* Modal search field — homologado visualmente al .hero-search (Airbnb pill).
+   Mismo radius (18px), mismo glass treatment, mismo tamaño de icon/text.
+   Comparten `view-transition-name` para que el browser haga morph nativo
+   cuando el modal abre/cierra (Chrome/Edge; Safari/FF degradan a fade). */
 .search-overlay-field {
   margin: 28px auto 24px; max-width: 640px; width: 100%;
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 999px;
-  padding: 14px 22px;
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 18px;
+  padding: 16px 18px 16px 26px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.20);
+  view-transition-name: search-bar-morph;
 }
-/* Mobile: el X flotante (top:20 + 40 height = 60) chocaba con el borde
-   superior del pill de búsqueda que arrancaba en y=56. Bajamos el field
-   por debajo del X dándole un claro "header space" al botón de cerrar.  */
 @media (max-width: 720px) {
-  .search-overlay-field { margin-top: 56px; }
+  .search-overlay-field {
+    margin-top: 56px;
+    padding: 14px 14px 14px 22px;
+    gap: 12px;
+    border-radius: 16px;
+  }
 }
 .search-overlay-field:focus-within {
-  border-color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.32);
+  background: rgba(255,255,255,0.10);
 }
 .search-overlay-field svg {
-  width: 20px; height: 20px; stroke: rgba(255,255,255,0.6);
+  width: 22px; height: 22px; stroke: #fff;
   fill: none; stroke-width: 2; flex-shrink: 0;
 }
 .search-overlay-field input {
   flex: 1; background: transparent; border: 0; outline: 0;
   color: #fff; font-family: var(--font-display);
-  font-size: 16px; letter-spacing: -0.005em;
+  font-size: 17px; font-weight: 500;
+  letter-spacing: -0.005em;
 }
-.search-overlay-field input::placeholder { color: rgba(255,255,255,0.45); }
+.search-overlay-field input::placeholder {
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+}
+/* Clear (X) en el modal — pequeño badge glass para no romper la silueta
+   del pill, sin competir con el chip lima del hero (ese vive solo en hero). */
+.search-overlay-clear {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  color: #fff; cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+.search-overlay-clear:hover { background: rgba(255,255,255,0.18); }
+.search-overlay-clear svg { width: 14px; height: 14px; stroke: #fff; }
+@media (max-width: 720px) {
+  .search-overlay-clear { width: 28px; height: 28px; border-radius: 8px; }
+  .search-overlay-clear svg { width: 12px; height: 12px; }
+}
+
+/* View transition: hero-search es el "from", modal field es el "to". */
+.hero-search { view-transition-name: search-bar-morph; }
+/* Cuando el modal está abierto, ocultamos el hero pill (sin layout shift)
+   para que el view-transition-name no esté duplicado en dos elementos
+   visibles al mismo tiempo (eso rompería el morph). */
+body.search-open .hero-search { visibility: hidden; }
+
+/* Custom transition timing del morph — más natural que el default. */
+::view-transition-old(search-bar-morph),
+::view-transition-new(search-bar-morph) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
 
 .search-overlay-results {
   /* Ancho y centrado los heredamos del `.search-overlay-body`; acá sólo grid */

@@ -99,7 +99,7 @@
   <div class="container header-inner">
     <a href="index.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibes</a>
 
-    <label class="header-search" @click.prevent="$store.ui.searchOverlayOpen = true">
+    <label class="header-search" @click.prevent="$store.ui.openSearch()">
       <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
       <input type="text" placeholder="Buscá tu próximo plan" readonly />
     </label>
@@ -109,7 +109,7 @@
     </nav>
 
     <div class="header-actions">
-      <button class="icon-btn search-mobile" @click.prevent="$store.ui.searchOverlayOpen = true" aria-label="Buscar">
+      <button class="icon-btn search-mobile" @click.prevent="$store.ui.openSearch()" aria-label="Buscar">
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
       </button>
 

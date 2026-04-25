@@ -146,7 +146,14 @@ document.addEventListener('alpine:init', () => {
     },
 
     close() {
-      if (this.$store.ui) this.$store.ui.searchOverlayOpen = false;
+      // Usa el wrapper closeSearch() del store: envuelve en startViewTransition
+      // para morphear el modal field → hero pill al cerrar (mismo morph que
+      // al abrir, en reversa). Fallback: setea directo (legacy / no-support).
+      if (this.$store.ui && typeof this.$store.ui.closeSearch === 'function') {
+        this.$store.ui.closeSearch();
+      } else if (this.$store.ui) {
+        this.$store.ui.searchOverlayOpen = false;
+      }
     },
 
     // Construye el index de búsqueda lazily, desde EVENT_DATA.

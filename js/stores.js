@@ -508,6 +508,36 @@ document.addEventListener('alpine:init', () => {
     },
     toggleMenu()   { this.menuOpen = !this.menuOpen; },
     toggleSearch() { this.searchOverlayOpen = !this.searchOverlayOpen; },
+
+    // Open / close del search overlay envueltos en startViewTransition para
+    // que el browser anime el morph del pill hero → input modal usando el
+    // shared `view-transition-name: search-bar-morph` definido en CSS.
+    // En browsers sin soporte (Safari/FF) cae a la mutación directa = fade
+    // del overlay como antes (sin morph, pero funciona).
+    openSearch() {
+      const apply = () => { this.searchOverlayOpen = true; };
+      if (typeof document.startViewTransition === 'function') {
+        // Esperamos 2 RAFs para asegurar que Alpine flusheó el reactive update
+        // (toggle de :class .is-open + body.search-open vía x-effect).
+        document.startViewTransition(() => new Promise(res => {
+          apply();
+          requestAnimationFrame(() => requestAnimationFrame(res));
+        }));
+      } else {
+        apply();
+      }
+    },
+    closeSearch() {
+      const apply = () => { this.searchOverlayOpen = false; };
+      if (typeof document.startViewTransition === 'function') {
+        document.startViewTransition(() => new Promise(res => {
+          apply();
+          requestAnimationFrame(() => requestAnimationFrame(res));
+        }));
+      } else {
+        apply();
+      }
+    },
   });
 
   // ---- MIGRACIÓN LEGACY (one-shot) ---------------------------------------
