@@ -353,11 +353,17 @@ window.EVENT_DATA = {
   // cancellation, host. Mantiene scheduleByMonth del modelo
   // recurring porque el calendario + slots picker ya funciona.
   // ============================================================
+  // PATTERN_NOTE: Las experiencias/clases tienen un `pattern` que define en
+  // qué días de la semana ocurren (0=Dom...6=Sáb, JS getDay()) y a qué hora.
+  // El home (index.html) usa este pattern para calcular la próxima fecha
+  // disponible y mostrarla en el card del carrusel ("SÁB 25 ABR · 7:00 AM"
+  // en lugar del texto genérico "SÁB Y DOM · 7:00 AM"). Se actualiza al cargar.
   comasagua: {
     kind: 'experience',              // performance | experience
     experienceType: 'tour',          // class | tour | adventure | wellness
     eventType: 'recurring',          // reusa calendario para daily slots
     country: 'SV',
+    pattern: { days: [5, 6, 0], time: '4:00 AM' }, // Vie/Sáb/Dom
     kicker: 'JIMNY TRIPS · POWERED BY SUZUKI',
     title: 'Sunrise en el<br><em>Peñón de Comasagua.</em>',
     category: 'Tours · Aventura',
@@ -759,6 +765,7 @@ window.EVENT_DATA = {
   'surf-tamarindo': {
     kind: 'experience', experienceType: 'class', eventType: 'recurring',
     country: 'CR',
+    pattern: { days: [6, 0], time: '7:00 AM' }, // Sáb/Dom
     kicker: 'PURA VIDA SURF · TAMARINDO',
     title: 'Surf lesson en<br><em>Playa Tamarindo.</em>',
     category: 'Clases · Deporte',
@@ -800,6 +807,7 @@ window.EVENT_DATA = {
   'canopy-monteverde': {
     kind: 'experience', experienceType: 'adventure', eventType: 'recurring',
     country: 'CR',
+    pattern: { days: [0, 1, 2, 3, 4, 5, 6], time: '9:00 AM' }, // diario
     kicker: 'SELVATURA · MONTEVERDE',
     title: 'Canopy tour en<br><em>Bosque Nuboso.</em>',
     category: 'Aventura',
@@ -841,6 +849,7 @@ window.EVENT_DATA = {
   'cafe-ataco': {
     kind: 'experience', experienceType: 'tour', eventType: 'recurring',
     country: 'SV',
+    pattern: { days: [3, 5], time: '8:00 AM' }, // Mié/Vie
     kicker: 'RUTA DE LAS FLORES · ATACO',
     title: 'Ruta del café en<br><em>Concepción de Ataco.</em>',
     category: 'Tours · Cultura',
@@ -882,6 +891,7 @@ window.EVENT_DATA = {
   'roatan-snorkel': {
     kind: 'experience', experienceType: 'adventure', eventType: 'recurring',
     country: 'HN',
+    pattern: { days: [0, 1, 2, 3, 4, 5, 6], time: '9:00 AM' }, // diario
     kicker: 'BAY ISLANDS · ROATÁN',
     title: 'Snorkel en<br><em>arrecifes de Roatán.</em>',
     category: 'Aventura · Mar',
@@ -923,6 +933,7 @@ window.EVENT_DATA = {
   'salsa-sansalvador': {
     kind: 'experience', experienceType: 'class', eventType: 'recurring',
     country: 'SV',
+    pattern: { days: [1, 2, 3, 4], time: '7:00 PM' }, // Lun-Jue
     kicker: 'LATIN BEAT · SALSA & BACHATA',
     title: 'Clase abierta de<br><em>Salsa.</em>',
     category: 'Clases · Baile',
@@ -964,6 +975,7 @@ window.EVENT_DATA = {
   'cocina-tegus': {
     kind: 'experience', experienceType: 'class', eventType: 'recurring',
     country: 'HN',
+    pattern: { days: [6, 0], time: '11:00 AM' }, // Sáb/Dom
     kicker: 'COCINA HONDUREÑA · TEGUCIGALPA',
     title: 'Clase de<br><em>Baleadas y Plato Típico.</em>',
     category: 'Clases · Cocina',
@@ -1005,6 +1017,7 @@ window.EVENT_DATA = {
   'copan-ruins': {
     kind: 'experience', experienceType: 'tour', eventType: 'recurring',
     country: 'HN',
+    pattern: { days: [2, 3, 4, 5, 6, 0], time: '8:30 AM' }, // Mar-Dom
     kicker: 'PATRIMONIO UNESCO · COPÁN',
     title: 'Tour guiado a las<br><em>Ruinas de Copán.</em>',
     category: 'Tours · Historia',

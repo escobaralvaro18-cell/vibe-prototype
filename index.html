@@ -1666,6 +1666,56 @@
   })();
 </script>
 
+<!-- ===== EXPERIENCE NEXT-DATE: calcula próxima fecha disponible por pattern ===== -->
+<!-- Para experiencias y clases (kind === 'experience'), reemplaza el texto -->
+<!-- estático ("SÁB Y DOM · 7:00 AM") por la próxima fecha+hora real         -->
+<!-- ("SÁB 25 ABR · 7:00 AM") en cada card del home. Se usa el `pattern`      -->
+<!-- definido en events.js — días de la semana (0-6, getDay()) + hora.        -->
+<script>
+  (function updateExperienceCardDates() {
+    const DAY_NAMES   = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+    const MONTH_NAMES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
+    function nextDateFromPattern(pattern) {
+      if (!pattern || !Array.isArray(pattern.days) || pattern.days.length === 0) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      // Buscar dentro de los próximos 14 días (suficiente para cualquier pattern semanal)
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        if (pattern.days.includes(d.getDay())) {
+          return DAY_NAMES[d.getDay()] + ' ' + d.getDate() + ' ' + MONTH_NAMES[d.getMonth()]
+                 + ' · ' + (pattern.time || '');
+        }
+      }
+      return null;
+    }
+
+    function run() {
+      const data = window.EVENT_DATA || {};
+      // Recorre todos los <a.event-card> que linkean a event.html?id=…
+      document.querySelectorAll('a.event-card[href*="event.html?id="]').forEach(card => {
+        const m = (card.getAttribute('href') || '').match(/[?&]id=([^&]+)/);
+        if (!m) return;
+        const id = m[1];
+        const event = data[id];
+        if (!event || event.kind !== 'experience' || !event.pattern) return;
+        const next = nextDateFromPattern(event.pattern);
+        if (!next) return;
+        const dateEl = card.querySelector('.event-date');
+        if (dateEl) dateEl.textContent = next;
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run);
+    } else {
+      run();
+    }
+  })();
+</script>
+
 <!-- ===== COUNTRY RENDERING: pill en cartelera + prefijo en event-cards ===== -->
 <script>
   // Portado desde MVP_Phoenix_Project.html (renderEventCountryFlags / renderEventCardCountryText).
