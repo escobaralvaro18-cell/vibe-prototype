@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hero search — opciones refinadas</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Geist', -apple-system, sans-serif;
+      background: #0a0a0a; color: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+    a, button { font-family: inherit; cursor: pointer; }
+
+    /* ========= DOC SHELL ========= */
+    .doc-head {
+      background: #0a0a0a;
+      padding: 56px 40px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+    }
+    .doc-head .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px;
+      background: rgba(198,248,0,0.12);
+      border: 1px solid rgba(198,248,0,0.4);
+      color: #c6f800;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; letter-spacing: 0.14em;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    .doc-head .pill::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #c6f800; box-shadow: 0 0 12px #c6f800;
+    }
+    .doc-head h1 {
+      font-size: 36px; font-weight: 800;
+      letter-spacing: -0.02em; line-height: 1.05;
+      margin-bottom: 10px;
+    }
+    .doc-head h1 em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 500;
+      color: #c6f800;
+    }
+    .doc-head p {
+      color: rgba(255,255,255,0.6);
+      font-size: 16px; max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .label-bar {
+      background: #0a0a0a;
+      padding: 28px 40px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .label-bar .num {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.18em; color: #c6f800;
+      text-transform: uppercase;
+      display: inline-block; margin-bottom: 8px;
+    }
+    .label-bar h2 {
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -0.01em; color: #fff;
+      margin-bottom: 6px;
+    }
+    .label-bar h2 em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 500;
+      color: rgba(255,255,255,0.85);
+    }
+    .label-bar p {
+      color: rgba(255,255,255,0.55);
+      font-size: 14px; max-width: 720px;
+      line-height: 1.5;
+    }
+    .label-bar .meta {
+      margin-top: 10px;
+      display: flex; gap: 16px; flex-wrap: wrap;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; letter-spacing: 0.10em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+    .label-bar .meta span {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .label-bar .meta span::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* ========= HERO DEMO STAGE ========= */
+    .stage {
+      position: relative;
+      background: #0a0a0a;
+      padding: 120px 40px 120px;
+      overflow: hidden;
+      min-height: 520px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .stage::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 110% 100% at 50% 0%, rgba(198,248,0,0.32), transparent 65%),
+        radial-gradient(ellipse 70% 80% at 50% 65%, rgba(198,248,0,0.16), transparent 75%),
+        radial-gradient(circle at 88% 18%, rgba(198,248,0,0.12), transparent 50%);
+      pointer-events: none;
+    }
+    .stage > * { position: relative; z-index: 1; }
+
+    /* Shared title */
+    .ht {
+      font-family: 'Geist', sans-serif;
+      font-size: 64px; font-weight: 900;
+      letter-spacing: -0.045em; line-height: 0.95;
+      color: #fff;
+      margin-bottom: 36px;
+      text-align: center;
+    }
+    .ht em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 500;
+      color: #c6f800;
+      letter-spacing: -0.02em;
+    }
+    .ht-sub {
+      font-family: 'Geist', sans-serif;
+      font-size: 17px; font-weight: 400;
+      color: rgba(255,255,255,0.7);
+      margin-top: -22px; margin-bottom: 36px;
+      text-align: center;
+      letter-spacing: 0.005em;
+    }
+
+    /* ============================================
+       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+       OPCIÓN A — Pill Airbnb
+       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+       ============================================ */
+    .opt-a {
+      display: inline-flex; align-items: center;
+      gap: 14px;
+      width: 100%; max-width: 580px;
+      padding: 10px 10px 10px 26px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 999px;
+      color: #fff;
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.20);
+    }
+    .opt-a:hover {
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.28);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+    }
+    .opt-a > svg.search-icon {
+      width: 22px; height: 22px;
+      stroke: #fff; flex-shrink: 0;
+    }
+    .opt-a .text {
+      flex: 1;
+      font-size: 17px; font-weight: 500;
+      color: rgba(255,255,255,0.85);
+      text-align: left;
+      letter-spacing: -0.005em;
+    }
+    .opt-a .chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px;
+      background: #c6f800;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .opt-a:hover .chip { transform: rotate(-12deg) scale(1.05); }
+    .opt-a .chip svg {
+      width: 20px; height: 20px;
+      stroke: #0a0a0a;
+    }
+
+    /* ============================================
+       OPCIÓN B — Mega CTA brutalista
+       ============================================ */
+    .opt-b {
+      display: inline-flex; align-items: center; gap: 16px;
+      padding: 22px 32px;
+      background: #c6f800;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Geist', sans-serif;
+      font-size: 19px; font-weight: 700;
+      letter-spacing: -0.01em;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 0 40px rgba(198,248,0,0.30), 0 12px 32px rgba(0,0,0,0.30);
+    }
+    .opt-b:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 60px rgba(198,248,0,0.55), 0 18px 40px rgba(0,0,0,0.35);
+    }
+    .opt-b svg.lead {
+      width: 22px; height: 22px;
+      stroke: #0a0a0a;
+    }
+    .opt-b .arrow-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      background: #0a0a0a;
+      border-radius: 50%;
+      transition: transform 0.25s ease;
+    }
+    .opt-b:hover .arrow-circle { transform: translateX(4px); }
+    .opt-b .arrow-circle svg {
+      width: 16px; height: 16px;
+      stroke: #c6f800;
+    }
+
+    /* ============================================
+       OPCIÓN C — Glass minimal compact
+       ============================================ */
+    .opt-c {
+      display: inline-flex; align-items: center; gap: 14px;
+      padding: 16px 18px 16px 22px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 14px;
+      color: #fff;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: all 0.25s ease;
+    }
+    .opt-c:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(198,248,0,0.4);
+      transform: translateY(-1px);
+    }
+    .opt-c svg.search-icon {
+      width: 18px; height: 18px;
+      stroke: rgba(255,255,255,0.7);
+    }
+    .opt-c .text {
+      font-size: 15px; font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: -0.005em;
+    }
+    .opt-c .kbd {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 6px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.06em;
+    }
+
+    /* ============================================
+       OPCIÓN D — Editorial pregunta italic
+       ============================================ */
+    .opt-d-wrap {
+      display: inline-flex; flex-direction: column; align-items: center;
+      gap: 28px;
+    }
+    .opt-d-question {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 500;
+      font-size: 72px; line-height: 1;
+      letter-spacing: -0.03em;
+      color: #fff;
+      text-align: center;
+    }
+    .opt-d-question .accent {
+      color: #c6f800;
+      position: relative;
+      display: inline-block;
+    }
+    .opt-d-question .accent::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 8px;
+      height: 2px;
+      background: #c6f800;
+      opacity: 0.4;
+    }
+    .opt-d-trigger {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 14px 22px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px;
+      color: #fff;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+    }
+    .opt-d-trigger:hover {
+      background: #fff;
+      color: #0a0a0a;
+      border-color: #fff;
+    }
+    .opt-d-trigger .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #c6f800;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ============================================
+       OPCIÓN E — Spotlight (Cmd+K style)
+       ============================================ */
+    .opt-e {
+      display: inline-flex; align-items: center;
+      gap: 16px;
+      width: 100%; max-width: 560px;
+      padding: 18px 18px 18px 24px;
+      background: rgba(20,20,20,0.6);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      color: #fff;
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      transition: all 0.25s ease;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 12px 40px rgba(0,0,0,0.4);
+    }
+    .opt-e:hover {
+      border-color: rgba(198,248,0,0.35);
+      background: rgba(20,20,20,0.75);
+      transform: translateY(-2px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.08) inset,
+        0 18px 50px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(198,248,0,0.10);
+    }
+    .opt-e svg.search-icon {
+      width: 20px; height: 20px;
+      stroke: rgba(255,255,255,0.6);
+      flex-shrink: 0;
+    }
+    .opt-e .text {
+      flex: 1;
+      font-size: 16px; font-weight: 400;
+      color: rgba(255,255,255,0.55);
+      text-align: left;
+      letter-spacing: -0.005em;
+    }
+    .opt-e .text strong {
+      color: rgba(255,255,255,0.95); font-weight: 500;
+    }
+    .opt-e .kbd-group {
+      display: inline-flex; gap: 4px;
+      flex-shrink: 0;
+    }
+    .opt-e .kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 28px; height: 28px; padding: 0 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 6px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ============================================
+       OPCIÓN F — Stacked (SeatGeek pattern)
+       ============================================ */
+    .opt-f-wrap {
+      display: inline-flex; flex-direction: column; align-items: center;
+      gap: 36px;
+    }
+    .opt-f-title {
+      font-family: 'Geist', sans-serif;
+      font-size: 88px; font-weight: 900;
+      letter-spacing: -0.05em; line-height: 0.92;
+      color: #fff;
+      text-align: center;
+    }
+    .opt-f-title em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 500;
+      color: #c6f800;
+      letter-spacing: -0.025em;
+    }
+    .opt-f-trigger {
+      display: inline-flex; align-items: center; gap: 14px;
+      padding: 18px 26px 18px 28px;
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Geist', sans-serif;
+      font-size: 17px; font-weight: 600;
+      letter-spacing: -0.01em;
+      transition: all 0.25s ease;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    }
+    .opt-f-trigger:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.32);
+    }
+    .opt-f-trigger svg {
+      width: 18px; height: 18px;
+      stroke: #0a0a0a;
+    }
+    .opt-f-trigger .arrow {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px;
+      background: #c6f800;
+      border-radius: 50%;
+      margin-left: 4px;
+      transition: transform 0.25s ease;
+    }
+    .opt-f-trigger:hover .arrow { transform: translateX(3px); }
+    .opt-f-trigger .arrow svg {
+      width: 14px; height: 14px;
+      stroke: #0a0a0a;
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    .doc-foot {
+      background: #050505;
+      padding: 48px 40px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+    .doc-foot p {
+      color: rgba(255,255,255,0.6);
+      font-size: 15px; line-height: 1.6;
+      max-width: 640px; margin: 0 auto;
+    }
+    .doc-foot p strong {
+      color: #c6f800; font-weight: 600;
+    }
+
+    /* ========= RESPONSIVE ========= */
+    @media (max-width: 768px) {
+      .doc-head { padding: 40px 24px 28px; }
+      .doc-head h1 { font-size: 28px; }
+      .label-bar { padding: 22px 24px 16px; }
+      .label-bar h2 { font-size: 18px; }
+      .stage { padding: 80px 24px; min-height: 420px; }
+      .ht { font-size: 44px; margin-bottom: 28px; }
+      .ht-sub { font-size: 15px; margin-top: -16px; margin-bottom: 28px; }
+      .opt-a { padding: 8px 8px 8px 20px; gap: 10px; }
+      .opt-a .text { font-size: 14.5px; }
+      .opt-a > svg.search-icon { width: 18px; height: 18px; }
+      .opt-a .chip { width: 42px; height: 42px; }
+      .opt-a .chip svg { width: 18px; height: 18px; }
+      .opt-b { padding: 18px 24px; font-size: 16px; gap: 12px; }
+      .opt-b .arrow-circle { width: 30px; height: 30px; }
+      .opt-c { padding: 14px 14px 14px 18px; }
+      .opt-c .text { font-size: 14px; }
+      .opt-d-question { font-size: 44px; }
+      .opt-e { padding: 16px 16px 16px 20px; gap: 12px; }
+      .opt-e .text { font-size: 14.5px; }
+      .opt-f-title { font-size: 56px; }
+      .opt-f-trigger { font-size: 15px; padding: 16px 22px; }
+      .opt-f-wrap { gap: 28px; }
+      .doc-foot { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========= DOC HEADER ========= -->
+<header class="doc-head">
+  <span class="pill">● Hero search · v3</span>
+  <h1>Es un <em>botón</em>, no un input.</h1>
+  <p>Seis direcciones distintas y pulidas para el trigger del modal de búsqueda. Mismo look (glass dark sobre lima), distintas personalidades. Hover sobre cada una para sentir la interacción.</p>
+</header>
+
+<!-- =================================================================
+     OPCIÓN A — Pill Airbnb
+     ================================================================= -->
+<div class="label-bar">
+  <span class="num">A · clásico que funciona</span>
+  <h2>Pill ancho con icon-button — <em>el patrón Airbnb</em></h2>
+  <p>Pill grande que parece input pero todo es un solo botón. Sparkle a la izquierda como ghost, chip lima circular a la derecha indica acción. Es lo más reconocible y lo que todo el mundo entiende inmediatamente.</p>
+  <div class="meta">
+    <span>familiar</span>
+    <span>amplio</span>
+    <span>aria-label limpio</span>
+  </div>
+</div>
+<section class="stage">
+  <h2 class="ht">Vibrá <em>diferente.</em></h2>
+  <button class="opt-a" type="button" aria-label="Abrir buscador">
+    <svg class="search-icon" fill="none" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+    </svg>
+    <span class="text">Conciertos, deportes, experiencias…</span>
+    <span class="chip" aria-hidden="true">
+      <svg fill="none" stroke-width="2.4" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/>
+      </svg>
+    </span>
+  </button>
+</section>
+
+<!-- =================================================================
+     OPCIÓN B — Mega CTA brutalista
+     ================================================================= -->
+<div class="label-bar">
+  <span class="num">B · confianza máxima</span>
+  <h2>Mega CTA lima — <em>imposible no verlo</em></h2>
+  <p>Botón sólido lima, grueso, con glow. Cero ambigüedad: es un CTA. El subtítulo del hero hace el trabajo de explicar qué pasa al apretarlo. Funciona si querés priorizar conversion sobre exploración.</p>
+  <div class="meta">
+    <span>conversión</span>
+    <span>directo</span>
+    <span>brand-forward</span>
+  </div>
+</div>
+<section class="stage">
+  <h2 class="ht">Vibrá <em>diferente.</em></h2>
+  <p class="ht-sub">Conciertos, deportes, festivales y experiencias en CR · SV · HN.</p>
+  <button class="opt-b" type="button" aria-label="Explorar eventos">
+    <svg class="lead" fill="none" stroke-width="2.2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+    </svg>
+    Explorar eventos
+    <span class="arrow-circle">
+      <svg fill="none" stroke-width="2.4" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/>
+      </svg>
+    </span>
+  </button>
+</section>
+
+<!-- =================================================================
+     OPCIÓN C — Glass minimal compact
+     ================================================================= -->
+<div class="label-bar">
+  <span class="num">C · cool y discreto</span>
+  <h2>Glass compacto con badge — <em>tap para buscar</em></h2>
+  <p>Pill chico, glass dark, con un badge "TAP" en mono que reemplaza la idea del Cmd+K en mobile. Honesto: no parece input, parece un control. Ideal si querés que el hero respire y el título sea el protagonista.</p>
+  <div class="meta">
+    <span>respiro visual</span>
+    <span>sutil</span>
+    <span>hero-first</span>
+  </div>
+</div>
+<section class="stage">
+  <h2 class="ht">Vibrá <em>diferente.</em></h2>
+  <button class="opt-c" type="button" aria-label="Abrir buscador">
+    <svg class="search-icon" fill="none" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+    </svg>
+    <span class="text">Buscar eventos</span>
+    <span class="kbd">TAP</span>
+  </button>
+</section>
+
+<!-- =================================================================
+     OPCIÓN D — Editorial pregunta italic
+     ================================================================= -->
+<div class="label-bar">
+  <span class="num">D · editorial premium</span>
+  <h2>Pregunta italic + trigger ghost — <em>boutique vibe</em></h2>
+  <p>La pregunta ES el hero. El trigger es secundario, mono uppercase, ghost. Se siente como una revista o una marca de lujo. Renuncia a un poco de claridad pero gana en personalidad y diferenciación.</p>
+  <div class="meta">
+    <span>diferenciador</span>
+    <span>editorial</span>
+    <span>menos obvio</span>
+  </div>
+</div>
+<section class="stage">
+  <div class="opt-d-wrap">
+    <h2 class="opt-d-question">¿Qué <span class="accent">te late</span> hoy?</h2>
+    <button class="opt-d-trigger" type="button" aria-label="Abrir buscador">
+      <span class="dot"></span>
+      Empezá a buscar
+    </button>
+  </div>
+</section>
+
+<!-- =================================================================
+     OPCIÓN E — Spotlight Cmd+K
+     ================================================================= -->
+<div class="label-bar">
+  <span class="num">E · power user</span>
+  <h2>Spotlight con Cmd+K — <em>se siente como una app premium</em></h2>
+  <p>Inspirado en Linear, Vercel, Raycast. Glass oscuro, kbd visibles, con el placeholder más rico (categoría sugerida en bold). Para usuarios desktop es delicia; en mobile el ⌘K se reemplaza por un chevron.</p>
+  <div class="meta">
+    <span>desktop-first</span>
+    <span>premium</span>
+    <span>tech-feel</span>
+  </div>
+</div>
+<section class="stage">
+  <h2 class="ht">Vibrá <em>diferente.</em></h2>
+  <button class="opt-e" type="button" aria-label="Abrir buscador">
+    <svg class="search-icon" fill="none" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+    </svg>
+    <span class="text">Buscar <strong>conciertos, festivales, experiencias…</strong></span>
+    <span class="kbd-group">
+      <span class="kbd">⌘</span>
+      <span class="kbd">K</span>
+    </span>
+  </button>
+</section>
+
+<!-- =================================================================
+     OPCIÓN F — Stacked (SeatGeek pattern)
+     ================================================================= -->
+<div class="label-bar">
+  <span class="num">F · headline grande + cta limpio</span>
+  <h2>Stack tipográfico — <em>como SeatGeek pero con alma</em></h2>
+  <p>Título XXL como héroe absoluto, CTA blanco sólido con chip lima debajo. La jerarquía es brutal: primero entendés qué es la marca, después das tap. Es lo más cercano al SeatGeek que mencionaste pero con la italic Playfair y el lima propios.</p>
+  <div class="meta">
+    <span>jerárquico</span>
+    <span>seatgeek-ish</span>
+    <span>brand-forward</span>
+  </div>
+</div>
+<section class="stage">
+  <div class="opt-f-wrap">
+    <h2 class="opt-f-title">Vibrá<br><em>diferente.</em></h2>
+    <button class="opt-f-trigger" type="button" aria-label="Buscar eventos">
+      <svg fill="none" stroke-width="2.2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+      </svg>
+      Buscar eventos
+      <span class="arrow">
+        <svg fill="none" stroke-width="2.4" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      </span>
+    </button>
+  </div>
+</section>
+
+<!-- ========= FOOTER ========= -->
+<footer class="doc-foot">
+  <p>Decime <strong>A, B, C, D, E o F</strong> (o un combo, ej. "F con el lima de B") y lo implemento en el <code>index.html</code> real.</p>
+</footer>
+
+</body>
+</html>

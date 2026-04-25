@@ -268,21 +268,13 @@
   [x-cloak] { display: none !important; }
 </style>
 
-<!-- Scroll listener: agrega body.scrolled cuando el creators-hero pasa
-     fuera de viewport, así el header floating glass transiciona a su
-     estado opaco blanco (mismo patrón que index.html). Sin esto, el
-     header queda transparente siempre y se traslapa con el contenido. -->
+<!-- Scroll listener: body.scrolled INMEDIATO al hacer scroll. El header
+     floating glass se vuelve opaco apenas el usuario empieza a scrollear,
+     así nunca se traslapa con el contenido. -->
 <script>
   (function() {
-    const CONDENSED_HEIGHT = 52;
     const onScroll = () => {
-      const hero = document.querySelector('.creators-hero, .hero');
-      if (!hero) {
-        document.body.classList.add('scrolled');
-        return;
-      }
-      const bottom = hero.getBoundingClientRect().bottom;
-      document.body.classList.toggle('scrolled', bottom <= CONDENSED_HEIGHT);
+      document.body.classList.toggle('scrolled', window.scrollY > 8);
     };
     let tk = false;
     window.addEventListener('scroll', () => {

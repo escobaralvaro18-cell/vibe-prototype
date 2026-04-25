@@ -36,7 +36,7 @@
   </style>
 
   <!-- Estilos del prototipo (portados 1:1 para paridad visual) -->
-  <link rel="stylesheet" href="css/proto.css?v=7">
+  <link rel="stylesheet" href="css/proto.css?v=9">
 
   <!-- Orden crítico: persist PRIMERO (para que Alpine.$persist esté registrado
        cuando corre el listener de alpine:init en stores.js), luego data/stores/
@@ -254,9 +254,12 @@
 
       <button type="button" class="hero-search"
               @click.prevent="$store.ui.searchOverlayOpen = true"
-              aria-label="Abrir búsqueda">
+              aria-label="Buscá tu próximo plan">
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
         <span class="hero-search-label">Buscá tu próximo plan</span>
+        <span class="hero-search-chip" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </span>
       </button>
     </div>
   </div>
@@ -1566,21 +1569,17 @@
   </div>
 </div>
 
-<!-- ===== SCROLL-LISTENER para que el header se condense (on-home.scrolled) -->
+<!-- ===== SCROLL-LISTENER: body.scrolled INMEDIATO al hacer scroll ===== -->
 <script>
-  // Sincroniza body.scrolled con el scroll: en home solo se condensa cuando el
-  // hero oscuro ya pasó la línea del header condensado (52px). Fuera del hero
-  // forzamos .scrolled para que el header tenga siempre fondo usable.
+  // Antes esperábamos a que el hero oscuro pasara fuera de viewport para
+  // agregar `body.scrolled`. Eso causaba que el floating glass header
+  // siguiera transparente mientras el contenido (cards, etc.) ya scrolleaba
+  // por debajo, generando un traslape feo. Ahora la transición a opaco
+  // sucede en el primer pixel de scroll — el header se "solidifica"
+  // apenas el usuario empieza a moverse y nunca compite con contenido.
   (function() {
-    const CONDENSED_HEIGHT = 52;
     const onScroll = () => {
-      const hero = document.querySelector('.hero');
-      if (!hero) {
-        document.body.classList.add('scrolled');
-        return;
-      }
-      const bottom = hero.getBoundingClientRect().bottom;
-      document.body.classList.toggle('scrolled', bottom <= CONDENSED_HEIGHT);
+      document.body.classList.toggle('scrolled', window.scrollY > 8);
     };
     let tk = false;
     window.addEventListener('scroll', () => {
