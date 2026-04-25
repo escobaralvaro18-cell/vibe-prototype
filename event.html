@@ -1236,8 +1236,8 @@
             <template x-for="(r, i) in results" :key="'top-' + r.id + '-' + i">
               <a href="#" class="search-result-card" :data-idx="i" :class="{ 'is-focused': cursor === i }" @click.prevent="go(r)">
                 <div class="search-result-thumb"><div :class="r.bg"></div></div>
-                <div class="search-result-meta" x-text="r.kicker || r.date"></div>
-                <div class="search-result-title" x-html="highlight(r.title)"></div>
+                <h4 class="search-result-title" x-html="highlight((r.title || '').replace(/<br>/g, ' ').replace(/<em>(.*?)<\/em>/g, '$1'))"></h4>
+                <div class="search-result-date" x-text="r.date"></div>
                 <div class="search-result-venue" x-html="highlight([r.city, r.venue].filter(Boolean).join(' · '))"></div>
                 <div class="search-result-price">Desde <strong x-text="r.price"></strong></div>
               </a>
@@ -1271,8 +1271,8 @@
               <template x-for="(r, i) in results.slice(0, 6)" :key="'res-' + r.id + '-' + i">
                 <a href="#" class="search-result-card" :data-idx="i" :class="{ 'is-focused': cursor === i }" @click.prevent="go(r)">
                   <div class="search-result-thumb"><div :class="r.bg"></div></div>
-                  <div class="search-result-meta" x-text="r.kicker || r.date"></div>
-                  <div class="search-result-title" x-html="highlight(r.title)"></div>
+                  <h4 class="search-result-title" x-html="highlight((r.title || '').replace(/<br>/g, ' ').replace(/<em>(.*?)<\/em>/g, '$1'))"></h4>
+                  <div class="search-result-date" x-text="r.date"></div>
                   <div class="search-result-venue" x-html="highlight([r.city, r.venue].filter(Boolean).join(' · '))"></div>
                   <div class="search-result-price">Desde <strong x-text="r.price"></strong></div>
                 </a>

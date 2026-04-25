@@ -7934,8 +7934,10 @@ body.search-open { overflow: hidden; }
   gap: 20px;
 }
 @media (max-width: 960px) { .search-overlay-results { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 720px) { .search-overlay-results { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 440px) { .search-overlay-results { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .search-overlay-results { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+/* Mobile chico: mantenemos 2 columnas (no colapsamos a 1) para que el grid
+   se sienta como un grid real, no como una lista vertical. */
+@media (max-width: 440px) { .search-overlay-results { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 
 .search-result-card {
   cursor: pointer; color: #fff; text-decoration: none;
@@ -7951,16 +7953,27 @@ body.search-open { overflow: hidden; }
   position: absolute; inset: 0; width: 100%; height: 100%;
 }
 .search-result-title {
-  margin: 10px 2px 2px; font-weight: 600; font-size: 15px;
+  margin: 10px 2px 4px; font-weight: 600; font-size: 15px;
   color: #fff; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+/* Date: misma estética que `.event-date` del home pero sobre fondo oscuro */
+.search-result-date {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 2px 2px 0;
+}
+.search-result-venue { font-size: 13px; color: rgba(255,255,255,0.65); margin: 2px 2px 0; }
+.search-result-price { font-size: 13px; color: rgba(255,255,255,0.85); margin: 4px 2px 0; }
+.search-result-price strong { color: #fff; font-weight: 700; }
+/* Backwards-compat: cualquier `.search-result-meta` que sobreviva. */
 .search-result-meta {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
-  color: #f5c518; margin: 2px 2px 0;
+  color: rgba(255, 255, 255, 0.75); margin: 2px 2px 0;
 }
-.search-result-venue { font-size: 13px; color: rgba(255,255,255,0.65); margin: 2px 2px 0; }
-.search-result-price { font-size: 13px; color: rgba(255,255,255,0.85); margin: 2px 2px 0; }
 
 .search-empty {
   color: rgba(255,255,255,0.7); text-align: center;
@@ -9231,13 +9244,16 @@ body.scrolled .page[data-page="inicio"] .header.header-hero {
 
 .search-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
   padding: 0 16px;
 }
-@media (max-width: 480px) {
+/* Mobile: 2 columnas con gap reducido para que entren bien las cards. */
+@media (max-width: 600px) {
   .search-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 12px;
   }
 }
 
