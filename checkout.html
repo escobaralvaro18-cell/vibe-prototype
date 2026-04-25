@@ -574,8 +574,6 @@
           </div>
         </div>
 
-        <p class="checkout-lead" x-show="!$store.session.isAuthed">Podés comprar sin registrarte. Si preferís guardar tus datos para la próxima, <a href="auth.html?mode=login&amp;redirect=checkout">iniciá sesión</a> o <a href="auth.html?mode=signup&amp;redirect=checkout">creá una cuenta</a>.</p>
-
           <form class="buyer-form" @submit.prevent="submitDetails()">
             <!-- Sección 1a: Identity card (logged-in). Muestra avatar + nombre +
                  email + botón "Cambiar" que abre el form. Matchea prototipo
