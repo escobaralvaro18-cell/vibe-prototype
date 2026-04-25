@@ -2249,32 +2249,32 @@ body.menu-open .mobile-menu {
 .hero-search {
   display: flex !important;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
   background: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  border-radius: 999px;
-  padding: 6px 6px 6px 22px;
+  border-radius: 18px;
+  padding: 10px 10px 10px 26px;
   cursor: pointer;
   color: #fff !important;
   font-family: var(--font-display);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 .hero-search:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.26) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.13) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+  transform: translateY(-2px);
 }
 .hero-search:focus-visible {
   outline: 2px solid var(--accent, #c6f800);
   outline-offset: 4px;
 }
 .hero-search > svg {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   stroke: #fff !important;
   stroke-width: 2;
   fill: none !important;
@@ -2283,42 +2283,44 @@ body.menu-open .mobile-menu {
 .hero-search-label {
   flex: 1;
   font-family: var(--font-display, 'Geist', sans-serif);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   letter-spacing: -0.005em;
   text-transform: none;
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
   text-align: left;
 }
 .hero-search-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
+  width: 48px; height: 48px;
   background: var(--accent, #c6f800);
-  border-radius: 50%;
+  border-radius: 12px;
   flex-shrink: 0;
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, background 0.25s ease;
 }
 .hero-search:hover .hero-search-chip {
-  transform: rotate(-12deg) scale(1.06);
+  transform: translateX(2px);
+  background: #d6ff2a;
 }
 .hero-search-chip svg {
-  width: 16px; height: 16px;
+  width: 20px; height: 20px;
   stroke: #0a0a0a;
   stroke-width: 2.4;
   fill: none;
 }
 @media (max-width: 480px) {
   .hero-search {
-    padding: 5px 5px 5px 18px;
+    padding: 8px 8px 8px 20px;
     gap: 10px;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.10) !important;
   }
-  .hero-search > svg { width: 16px; height: 16px; }
-  .hero-search-label { font-size: 13.5px; }
-  .hero-search-chip { width: 32px; height: 32px; }
-  .hero-search-chip svg { width: 14px; height: 14px; }
+  .hero-search > svg { width: 18px; height: 18px; }
+  .hero-search-label { font-size: 14.5px; }
+  .hero-search-chip { width: 42px; height: 42px; border-radius: 10px; }
+  .hero-search-chip svg { width: 18px; height: 18px; }
 }
 
 /* ==== BIG CARTELERA CAROUSEL ==== */
