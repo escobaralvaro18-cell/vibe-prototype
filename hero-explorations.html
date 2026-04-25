@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hero search — explorations</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #1a1a1a;
+      color: #0a0a0a;
+    }
+    a { text-decoration: none; }
+
+    /* ─── DOC HEADER ──────────────────────────────────────────────── */
+    .doc-header {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 36px 40px 32px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .doc-header h1 {
+      font-size: 30px; font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .doc-header p {
+      color: rgba(255,255,255,0.65);
+      font-size: 15px;
+    }
+
+    /* ─── VARIANT LABEL ──────────────────────────────────────────── */
+    .label-bar {
+      background: #0a0a0a;
+      color: #fff;
+      padding: 22px 40px 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .label-bar h2 {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.14em;
+      color: #c6f800;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .label-bar h3 {
+      font-size: 19px; font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .label-bar p {
+      color: rgba(255,255,255,0.6);
+      font-size: 13.5px;
+      max-width: 720px;
+    }
+
+    /* ─── HERO DEMO (shared) ─────────────────────────────────────── */
+    .hero-demo {
+      position: relative;
+      background: #0a0a0a;
+      padding: 80px 40px 100px;
+      overflow: hidden;
+      min-height: 380px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .hero-demo.tall { min-height: 480px; }
+    .hero-demo::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 45%, rgba(198,248,0,0.32), transparent 70%),
+        radial-gradient(circle at 85% 15%, rgba(198,248,0,0.14), transparent 45%),
+        radial-gradient(circle at 15% 95%, rgba(198,248,0,0.10), transparent 55%);
+      z-index: 0; pointer-events: none;
+    }
+    .hero-demo > * { position: relative; z-index: 1; }
+    .hero-title {
+      font-family: 'Geist', sans-serif;
+      font-size: 64px; font-weight: 900;
+      letter-spacing: -0.04em; line-height: 0.95;
+      color: #fff;
+      margin-bottom: 36px;
+      text-align: center;
+    }
+    .hero-title em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #c6f800;
+      letter-spacing: -0.02em;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE A — Glass Dark
+       Translucent dark con borde lime sutil. Cinematic, premium.
+       ════════════════════════════════════════════════════════════ */
+    .s-a {
+      display: inline-flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(198,248,0,0.4);
+      border-radius: 999px;
+      padding: 0 28px; height: 58px;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+    .s-a:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(198,248,0,0.8);
+      box-shadow: 0 0 32px rgba(198,248,0,0.25);
+    }
+    .s-a svg { width: 18px; height: 18px; stroke: #c6f800; stroke-width: 2; fill: none; flex-shrink: 0; }
+    .s-a span {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12.5px; font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.92);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE B — Editorial Underline
+       Sin caja, solo subrayado. Italic Playfair. Magazine-y.
+       ════════════════════════════════════════════════════════════ */
+    .s-b {
+      display: inline-flex; align-items: center; gap: 16px;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid rgba(255,255,255,0.45);
+      padding: 0 4px 14px 4px;
+      min-width: 380px;
+      cursor: pointer;
+      color: #fff;
+      transition: border-color 0.2s ease;
+    }
+    .s-b:hover { border-bottom-color: #c6f800; }
+    .s-b svg { width: 22px; height: 22px; stroke: #fff; stroke-width: 2; fill: none; flex-shrink: 0; opacity: 0.7; }
+    .s-b:hover svg { stroke: #c6f800; opacity: 1; }
+    .s-b span {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 24px; font-weight: 400;
+      color: rgba(255,255,255,0.78);
+      letter-spacing: -0.01em;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE C — Lime Pill (bold)
+       Solid lime, dark text. Confident, brand-forward.
+       ════════════════════════════════════════════════════════════ */
+    .s-c {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #c6f800;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 32px; height: 60px;
+      cursor: pointer;
+      box-shadow: 0 12px 36px rgba(198,248,0,0.35);
+      transition: all 0.2s ease;
+      font-family: 'Geist', sans-serif;
+    }
+    .s-c:hover {
+      background: #b5e000;
+      transform: translateY(-2px);
+      box-shadow: 0 18px 48px rgba(198,248,0,0.5);
+    }
+    .s-c svg { width: 18px; height: 18px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+    .s-c span {
+      font-size: 16px; font-weight: 700;
+      color: #0a0a0a;
+      letter-spacing: -0.005em;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE D — Bordered Pill (lime accent border)
+       White pill con borde lime + halo sutil. Llamativo sin gritar.
+       ════════════════════════════════════════════════════════════ */
+    .s-d {
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      background: #fff;
+      border: 2px solid #c6f800;
+      border-radius: 999px;
+      padding: 0 30px; height: 62px;
+      width: 100%; max-width: 480px;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 6px rgba(198,248,0,0.12),
+        0 12px 32px rgba(0,0,0,0.35);
+      transition: all 0.2s ease;
+    }
+    .s-d:hover {
+      box-shadow:
+        0 0 0 8px rgba(198,248,0,0.18),
+        0 16px 40px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+    }
+    .s-d svg { width: 20px; height: 20px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+    .s-d span {
+      font-size: 16px; font-weight: 500;
+      color: #4a4a4a;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE E — Inline con título (horizontal)
+       Title izq + search der en una sola fila. Editorial / header-like.
+       ════════════════════════════════════════════════════════════ */
+    .row-e {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 48px;
+      width: 100%; max-width: 1200px;
+    }
+    .row-e .hero-title {
+      font-size: 56px;
+      margin: 0;
+      text-align: left;
+      flex-shrink: 1;
+    }
+    .s-e {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #fff;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 26px; height: 56px;
+      cursor: pointer;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+      flex-shrink: 0;
+    }
+    .s-e svg { width: 18px; height: 18px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+    .s-e span {
+      font-size: 15px; font-weight: 500;
+      color: #4a4a4a;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE F — Hero IS the search (con chips de categorías)
+       Search grande + chips abajo. Action-first. Estilo Airbnb.
+       ════════════════════════════════════════════════════════════ */
+    .s-f {
+      display: flex; align-items: center; gap: 14px;
+      background: #fff;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 28px; height: 64px;
+      width: 100%; max-width: 540px;
+      cursor: pointer;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+    }
+    .s-f svg { width: 20px; height: 20px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+    .s-f span {
+      flex: 1; text-align: left;
+      font-size: 16px; font-weight: 500;
+      color: #4a4a4a;
+    }
+    .chips-f {
+      display: flex; gap: 8px; margin-top: 22px;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .chips-f a {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: #fff;
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-size: 13.5px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chips-f a:hover {
+      background: rgba(198,248,0,0.18);
+      border-color: rgba(198,248,0,0.5);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE G — Search con kbd hint (estilo Stripe / Algolia)
+       Pill con indicador ⌘K a la derecha. Polished, sin ser button.
+       ════════════════════════════════════════════════════════════ */
+    .s-g {
+      display: flex; align-items: center; gap: 14px;
+      background: #fff;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 8px 0 28px; height: 60px;
+      width: 100%; max-width: 520px;
+      cursor: pointer;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.32);
+      transition: all 0.2s ease;
+    }
+    .s-g:hover { transform: translateY(-2px); box-shadow: 0 16px 44px rgba(198,248,0,0.32); }
+    .s-g svg { width: 20px; height: 20px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+    .s-g .label {
+      flex: 1; text-align: left;
+      font-size: 16px; font-weight: 500;
+      color: #4a4a4a;
+    }
+    .s-g .kbd {
+      display: inline-flex; align-items: center;
+      background: #f0efe9; color: #4a4a4a;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE H — Floating Card (premium / boutique)
+       Card oscura con borde sutil, search adentro. Premium feel.
+       ════════════════════════════════════════════════════════════ */
+    .s-h-wrap {
+      display: inline-flex; align-items: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+    }
+    .s-h {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.95);
+      border: 0;
+      border-radius: 12px;
+      padding: 0 24px; height: 52px;
+      width: 460px;
+      cursor: pointer;
+    }
+    .s-h svg { width: 18px; height: 18px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; flex-shrink: 0; }
+    .s-h span {
+      flex: 1; text-align: left;
+      font-size: 15px; font-weight: 500;
+      color: #4a4a4a;
+    }
+    .s-h-wrap .badge {
+      display: inline-flex; align-items: center;
+      padding: 0 14px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.10em;
+      color: #c6f800;
+      text-transform: uppercase;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE I — Search "estampado" (lime accent block)
+       Pill con accent block lime al lado izquierdo (como tag/sello)
+       ════════════════════════════════════════════════════════════ */
+    .s-i {
+      display: inline-flex; align-items: stretch;
+      background: #fff;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.32);
+      overflow: hidden;
+    }
+    .s-i .accent {
+      background: #c6f800;
+      display: inline-flex; align-items: center;
+      padding: 0 18px;
+      font-family: 'Geist', sans-serif;
+      font-size: 13px; font-weight: 700;
+      color: #0a0a0a;
+      letter-spacing: 0.02em;
+    }
+    .s-i .input {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 0 28px; height: 60px;
+    }
+    .s-i .input svg { width: 18px; height: 18px; stroke: #4a4a4a; stroke-width: 2; fill: none; flex-shrink: 0; }
+    .s-i .input span {
+      font-size: 15px; font-weight: 500;
+      color: #4a4a4a;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE J — Minimal Sin caja (lime icon bullet)
+       Solo el ícono lime + texto blanco grande. Ultra-mínimo.
+       ════════════════════════════════════════════════════════════ */
+    .s-j {
+      display: inline-flex; align-items: center; gap: 16px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      color: #fff;
+      padding: 14px 0;
+      transition: all 0.2s ease;
+    }
+    .s-j:hover { transform: translateY(-2px); }
+    .s-j .icon-wrap {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px;
+      background: #c6f800;
+      border-radius: 50%;
+    }
+    .s-j .icon-wrap svg { width: 18px; height: 18px; stroke: #0a0a0a; stroke-width: 2.5; fill: none; }
+    .s-j span {
+      font-size: 18px; font-weight: 500;
+      color: rgba(255,255,255,0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.4);
+      padding-bottom: 4px;
+    }
+
+    @media (max-width: 720px) {
+      .hero-title { font-size: 44px; }
+      .hero-demo { padding: 60px 20px 80px; min-height: 320px; }
+      .row-e { flex-direction: column; gap: 28px; }
+      .row-e .hero-title { text-align: center; }
+      .s-b { min-width: 0; width: 100%; }
+      .s-b span { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <h1>Hero search — explorations</h1>
+  <p>10 variantes para el search del hero. Compará y pickeá la que más resuene.</p>
+</header>
+
+<!-- ═══════════════ VARIANTE A — Glass Dark ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante A</h2>
+  <h3>Glass Dark</h3>
+  <p>Translucent dark con borde lime sutil + mono uppercase. Cinematic, premium, integrado con el dark hero. Vibe terminal / film.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-a">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <span>Buscá tu próximo plan</span>
+  </button>
+</div>
+
+<!-- ═══════════════ VARIANTE B — Editorial Underline ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante B</h2>
+  <h3>Editorial Underline</h3>
+  <p>Sin caja. Solo subrayado fino + Playfair italic. Magazine-y, confident. La elegancia del minimalismo extremo.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-b">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <span>Buscá tu próximo plan</span>
+  </button>
+</div>
+
+<!-- ═══════════════ VARIANTE C — Lime Pill ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante C</h2>
+  <h3>Lime Pill (bold)</h3>
+  <p>Solid lime, texto oscuro. Confident y muy on-brand. Funciona como CTA primario inequívoco — el ojo va directo ahí.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-c">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <span>Buscá tu próximo plan</span>
+  </button>
+</div>
+
+<!-- ═══════════════ VARIANTE D — Bordered Pill ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante D</h2>
+  <h3>Bordered Pill (lime halo)</h3>
+  <p>White pill con borde lime + halo sutil. Llamativo sin gritar — el halo crea un "spotlight" que ancla el ojo al search.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-d">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <span>Buscá tu próximo plan</span>
+  </button>
+</div>
+
+<!-- ═══════════════ VARIANTE E — Inline con título ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante E</h2>
+  <h3>Inline (horizontal)</h3>
+  <p>Title a la izquierda, search a la derecha en una sola fila. Más editorial / header-like, aprovecha mejor el ancho horizontal.</p>
+</div>
+<div class="hero-demo">
+  <div class="row-e">
+    <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+    <button class="s-e">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+      <span>Buscá tu próximo plan</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE F — Hero IS the search ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante F</h2>
+  <h3>Hero IS the search (con chips)</h3>
+  <p>Search grande + chips de categorías abajo. Estilo Airbnb / Booking. Action-first — comunica "este sitio existe para buscar".</p>
+</div>
+<div class="hero-demo tall">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-f">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <span>Buscá tu próximo plan</span>
+  </button>
+  <div class="chips-f">
+    <a>Conciertos</a>
+    <a>Deporte</a>
+    <a>Experiencias</a>
+    <a>Clases</a>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE G — Kbd hint ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante G</h2>
+  <h3>KBD shortcut hint (estilo Stripe / Algolia)</h3>
+  <p>Pill con indicador <code>⌘K</code> a la derecha. Llena el espacio con un detalle utilitario que no miente — comunica "esto se abre".</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-g">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    <span class="label">Buscá tu próximo plan</span>
+    <span class="kbd">⌘K</span>
+  </button>
+</div>
+
+<!-- ═══════════════ VARIANTE H — Floating Card ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante H</h2>
+  <h3>Floating Card (premium / boutique)</h3>
+  <p>Card oscura translúcida que envuelve un input blanco + badge lime. Premium / boutique vibe. Casi como un command palette.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <div class="s-h-wrap">
+    <button class="s-h">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+      <span>Buscá tu próximo plan</span>
+    </button>
+    <span class="badge">VIBES</span>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE I — Estampado ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante I</h2>
+  <h3>Estampado (lime accent block)</h3>
+  <p>Pill blanca con bloque lime al lado izquierdo (como tag o sello). Combina blanco + lime en una sola pieza. Distinto, memorable.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-i">
+    <span class="accent">VIBES</span>
+    <span class="input">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+      <span>Buscá tu próximo plan</span>
+    </span>
+  </button>
+</div>
+
+<!-- ═══════════════ VARIANTE J — Minimal Bullet ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante J</h2>
+  <h3>Minimal Bullet (lime icon ball)</h3>
+  <p>Sin pill, sin caja. Un círculo lime con la lupa + texto blanco subrayado al lado. Ultra-minimalista, sigue siendo clickeable.</p>
+</div>
+<div class="hero-demo">
+  <h1 class="hero-title">Vibra <em>diferente.</em></h1>
+  <button class="s-j">
+    <span class="icon-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+    </span>
+    <span>Buscá tu próximo plan</span>
+  </button>
+</div>
+
+<footer style="background: #0a0a0a; color: rgba(255,255,255,0.5); padding: 40px; text-align: center; font-size: 13px;">
+  Decime cuál te gusta (A-J) y la implemento en el hero real.
+</footer>
+
+</body>
+</html>

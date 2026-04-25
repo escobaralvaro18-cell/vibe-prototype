@@ -154,33 +154,72 @@ em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color
 .header {
   position: sticky; top: 0; z-index: 100;
   background: rgba(255,255,255,0.92);
+  /* backdrop-filter removed from base — solo aplicarse cuando se necesita
+     (en páginas con header blanco). El backdrop-filter en el base creaba
+     un stacking context que causaba sub-pixel rendering issues incluso
+     cuando se sobreescribía a none en .header-hero. */
+  border-bottom: none;
+  transition: background 0.35s ease;
+}
+/* Backdrop blur sólo cuando el header es blanco/translúcido, no cuando
+   floating glass sobre dark hero. */
+.page[data-page="experiencias"] .header,
+body.scrolled .header {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: none;
-  transition: background 0.35s ease, backdrop-filter 0.35s ease;
 }
-/* Header over dark hero — SAME bg as hero (#0a0a0a), not transparent.
-   Patrón de Spotify / Apple Music / Dice: header y hero comparten el
-   mismo negro, así no hay frontera visual que pintar (el sub-pixel
-   rendering que antes veíamos como "línea blanca" no tiene colores
-   contrastantes que separar). Tampoco hay overlap feo cuando scrolleas,
-   porque el header es opaco y cubre el contenido limpio. Al scrollear
-   (body.scrolled), transición suave a blanco translucent para que el
-   contenido de abajo se lea sobre el chrome. */
-.header-hero {
-  background: #0a0a0a;
+/* Header sobre dark hero — FLOATING GLASS (Variante 7).
+   Position fixed (sin sticky sub-pixel issues), transparente,
+   sin borders/shadows/transforms/transitions/will-change que puedan
+   crear stacking context con rendering artifacts. */
+.header.header-hero {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: transparent !important;
   border: 0 !important;
-  outline: 0;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  outline: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
-  transition: background 0.35s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease;
+  margin: 0 !important;
+  transform: none;
+  will-change: auto;
+  transition: none;
+}
+/* CRITICAL: el .header-search (input dentro del header) es display:flex
+   en desktop con un border de 1.5px y opacity:0. El border invisible aún
+   ocupa espacio y Chrome a veces lo renderiza como un sub-pixel artifact
+   creando una "línea blanca" en el bottom del header. Cuando el header
+   está en modo floating glass (no scrolled), eliminamos COMPLETAMENTE
+   ese elemento del flow para erradicar el artifact. */
+body:not(.scrolled) .header.header-hero .header-search {
+  display: none !important;
+}
+/* Cuando .scrolled, transición suave a blanco translúcido. */
+body.scrolled .header.header-hero {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: saturate(180%) blur(24px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(24px) !important;
+  transition: background 0.35s ease;
 }
 body:not(.scrolled) .header-hero .nav-link { color: rgba(255,255,255,0.75); }
 body:not(.scrolled) .header-hero .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
 body:not(.scrolled) .header-hero .nav-link.active { color: #fff; }
+/* Glass treatment para "Ingresar" cuando flotamos sobre el dark hero
+   (combina con el rest del header floating glass). */
 body:not(.scrolled) .header-hero .btn-signin {
-  background: #fff; color: var(--ink); border-color: #fff;
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #fff !important;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+body:not(.scrolled) .header-hero .btn-signin:hover {
+  background: rgba(255, 255, 255, 0.20) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
 body:not(.scrolled) .header-hero .menu-toggle,
 body:not(.scrolled) .header-hero .header-search-icon {
@@ -1650,7 +1689,10 @@ body.mode-escapes::-webkit-scrollbar-corner { background: #f0f2f1; }
 /* CREATORS LANDING PAGE                                */
 /* ==================================================== */
 .creators-hero {
-  padding: 72px 0 56px;
+  /* Header fixed (no toma flow): hero arranca en y=0; padding-top
+     compensa los 64px del header + espacio respiratorio. */
+  margin-top: 0;
+  padding: 96px 0 56px;
   background: var(--ink); color: #fff;
   position: relative; overflow: hidden;
 }
@@ -1666,7 +1708,7 @@ body.mode-escapes::-webkit-scrollbar-corner { background: #f0f2f1; }
 }
 @media (min-width: 900px) {
   .creators-hero-inner { grid-template-columns: 1.2fr 1fr; gap: 56px; }
-  .creators-hero { padding: 96px 0 80px; }
+  .creators-hero { padding: 120px 0 80px; }
 }
 .creators-kicker {
   display: inline-flex; align-items: center; gap: 8px;
@@ -1930,11 +1972,22 @@ body.scrolled .header-search {
 
 .mobile-menu {
   display: flex; flex-direction: column;
-  padding: 0 20px; background: #fff;
-  border-bottom: 1px solid var(--line);
+  padding: 0 20px;
+  /* CRITICAL: el menú móvil colapsa con max-height: 0 pero antes tenía
+     background: #fff + border-bottom: 1px solid var(--line) que SEGUÍA
+     RENDERIZÁNDOSE como una línea blanca de 1px en el fondo del header
+     (visible en home con header floating glass sobre dark hero).
+     Solución: estilo "blank" cuando colapsado; el background/border solo
+     aplican cuando el menú se abre (.menu-open). */
+  background: transparent;
+  border-bottom: none;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.3s ease;
+  transition: max-height 0.35s ease, padding 0.3s ease, background 0.2s ease, border-color 0.2s ease;
+}
+body.menu-open .mobile-menu {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
 }
 .mobile-menu-section {
   display: flex; flex-direction: column;
@@ -1999,18 +2052,22 @@ body.menu-open .mobile-menu {
 
 .hero-dark {
   background: #0a0a0a;
-  padding: 32px 0 40px;
-  margin-top: -64px;
-  padding-top: 92px;
+  /* Header ahora es position: fixed → no toma flow space. El hero arranca
+     en y=0 naturalmente. Padding-top compensa el alto del header (64px)
+     más espacio respiratorio para el contenido. */
+  padding: 80px 0 36px;
+  margin-top: 0;
   position: relative;
   overflow: hidden;
   color: #fff;
 }
 @media (min-width: 900px) {
   .hero-dark {
-    padding: 28px 0 32px;
-    padding-top: 92px;
-    min-height: min(380px, 48vh);
+    padding: 96px 0 40px;
+    /* Min-height moderado — el hero necesita "presencia" para no sentirse
+       cortado contra la cartelera grande de abajo, pero no tan alto
+       que deje aire muerto. ~280-320px es el sweet spot con el contenido. */
+    min-height: 320px;
     display: flex;
     align-items: center;
   }
@@ -2018,16 +2075,16 @@ body.menu-open .mobile-menu {
 .hero-dark .hero-inner { position: relative; z-index: 2; width: 100%; }
 .hero-bg {
   position: absolute; inset: 0; z-index: 0;
-  /* Capa 1-2: glows lime difuminados (mismo efecto que success-hero):
-       · Un radial al tope-centro con 18% opacity (fuerte)
-       · Un radial abajo-izquierda con 8% opacity (sutil, balance)
-     Capa 3: SOLID #0a0a0a como base (antes era un linear-gradient a #111
-     al 60% que hacía que el top del hero no fuera exactamente igual al
-     header, creando una línea visible al sub-pixel rendering del sticky
-     compositor. Con solid match byte-perfect no hay boundary que pintar). */
+  /* Glows lime — extendidos hacia arriba para fluir DENTRO del área del
+   header (eliminar "línea" visible entre header y hero):
+     · Glow principal grande con CENTRO MOVIDO a 35% (de 45%) — la zona
+       brillante invade el header area, no termina en un borde.
+     · Glow secundario derecho-superior + terciario abajo-izquierda.
+     · Base SOLID #0a0a0a. */
   background:
-    radial-gradient(circle at 50% 0%,  rgba(198,248,0,0.18), transparent 50%),
-    radial-gradient(circle at 20% 100%, rgba(198,248,0,0.08), transparent 50%),
+    radial-gradient(ellipse 80% 95% at 50% 35%, rgba(198,248,0,0.35), transparent 75%),
+    radial-gradient(circle at 85% 15%,  rgba(198,248,0,0.16), transparent 50%),
+    radial-gradient(circle at 15% 95%,  rgba(198,248,0,0.10), transparent 55%),
     #0a0a0a;
   pointer-events: none;
 }
@@ -2122,16 +2179,15 @@ body.menu-open .mobile-menu {
   .hero-word-2 { opacity: 1; transform: none; animation: none; }
 }
 
-.hero-inner { display: flex; flex-direction: column; gap: 20px; align-items: center; text-align: center; }
+/* Gap entre H1 y search ajustado — el H1 grande + search se sienten
+   como una unidad visual sin aire muerto entre ellos. */
+.hero-inner { display: flex; flex-direction: column; gap: 18px; align-items: center; text-align: center; }
 @media (min-width: 900px) {
-  .hero-inner { gap: 16px; }
+  .hero-inner { gap: 20px; }
 }
 .hero-title-row {
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex; flex-direction: column;
   align-items: center;
-}
-@media (min-width: 900px) {
-  .hero-title-row { gap: 6px; }
 }
 .hero-title {
   font-family: var(--font-display); font-weight: 900;
@@ -2153,28 +2209,81 @@ body.menu-open .mobile-menu {
   line-height: 1.4;
 }
 
+/* hero-stack — wrapper inline-flex column con align-items: stretch.
+   El stack se auto-sizea al título (widest child); el search se estira
+   para igualarlo. Ambos comparten el mismo ancho óptico. */
+.hero-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  max-width: 100%;
+}
+.hero-stack .hero-title-row { display: block; text-align: center; }
+.hero-stack .hero-title { white-space: nowrap; }
+/* Mobile: el título auto-sizea al texto natural; search lo iguala vía
+   align-items: stretch. NO forzamos width: 100% porque eso desacopla
+   el ancho del search del título. */
+@media (max-width: 720px) {
+  .hero-stack { width: auto; }
+  .hero-stack .hero-title { white-space: nowrap; }
+}
+/* Smartphones chicos (<480): si "Vibra diferente." no entra, dejamos que
+   wrapee y reducimos el font-size para evitar overflow horizontal. */
+@media (max-width: 480px) {
+  .hero-stack .hero-title { font-size: 38px; white-space: normal; }
+}
+
+/* HERO SEARCH — Glass Dark variant (A) + stretch dentro de hero-stack.
+   Translucent dark con borde lime sutil + mono uppercase label.
+   Cinematográfico, integrado con el dark hero, vibe terminal/film. */
 .hero-search {
-  display: flex; gap: 14px; align-items: center;
-  background: #fff; border: none;
-  border-radius: 16px; padding: 0 20px;
-  max-width: 560px; width: 100%;
-  height: 62px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-  transition: all 0.15s;
-  cursor: text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(198, 248, 0, 0.4);
+  border-radius: 999px;
+  padding: 0 28px;
+  height: 58px;
+  cursor: pointer;
+  color: #fff;
+  font-family: var(--font-display);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-.hero-search:focus-within { box-shadow: 0 10px 50px rgba(198,248,0,0.4); }
-.hero-search > svg { width: 20px; height: 20px; stroke: var(--ink); stroke-width: 2.5; flex-shrink: 0; }
-.hero-search input {
-  background: transparent; border: none; outline: none;
-  flex: 1; min-width: 0;
-  font-size: 16px;
+.hero-search:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(198, 248, 0, 0.8);
+  box-shadow: 0 0 32px rgba(198, 248, 0, 0.25);
+  transform: translateY(-1px);
+}
+.hero-search:focus-visible {
+  outline: 2px solid var(--accent, #c6f800);
+  outline-offset: 4px;
+}
+.hero-search > svg {
+  width: 18px; height: 18px;
+  stroke: var(--accent, #c6f800);
+  stroke-width: 2;
+  fill: none;
+  flex-shrink: 0;
+}
+.hero-search-label {
+  font-family: var(--font-mono, 'Geist Mono', monospace);
+  font-size: 12.5px;
   font-weight: 500;
-  padding: 0;
-  color: var(--ink);
-  height: 100%;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
 }
-.hero-search input::placeholder { color: var(--ink-mid); font-weight: 500; }
+@media (max-width: 480px) {
+  .hero-search { padding: 0 22px; height: 54px; gap: 12px; }
+  .hero-search-label { font-size: 11.5px; letter-spacing: 0.10em; }
+}
 
 /* ==== BIG CARTELERA CAROUSEL ==== */
 .cartelera {

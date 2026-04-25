@@ -240,17 +240,25 @@
   <div class="hero-bg"></div>
 
   <div class="container hero-inner">
-    <div class="hero-title-row">
-      <h1 class="hero-title">
-        <span class="hero-word hero-word-1">Vibra</span>
-        <em class="hero-word hero-word-2">diferente.</em>
-      </h1>
-    </div>
+    <!-- hero-stack: wrapper inline-flex column con align-items: stretch.
+         El stack se auto-sizea al título (widest child); el search se
+         estira para igualarlo. Resultado: ambos comparten el mismo ancho
+         óptico — un bloque visual unificado. -->
+    <div class="hero-stack">
+      <div class="hero-title-row">
+        <h1 class="hero-title">
+          <span class="hero-word hero-word-1">Vibra</span>
+          <em class="hero-word hero-word-2">diferente.</em>
+        </h1>
+      </div>
 
-    <form class="hero-search"  @click.prevent="$store.ui.searchOverlayOpen = true">
-      <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
-      <input type="text" placeholder="Buscá tu próximo plan" readonly />
-    </form>
+      <button type="button" class="hero-search"
+              @click.prevent="$store.ui.searchOverlayOpen = true"
+              aria-label="Abrir búsqueda">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+        <span class="hero-search-label">Buscá tu próximo plan</span>
+      </button>
+    </div>
   </div>
 </section>
 

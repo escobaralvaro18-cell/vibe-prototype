@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Header + Hero — explorations</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #1a1a1a; color: #0a0a0a;
+    }
+    a, button { font-family: inherit; }
+
+    /* ─── DOC HEADER ──────────────────────────────────────────────── */
+    .doc-header {
+      background: #0a0a0a; color: #fff;
+      padding: 36px 40px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .doc-header h1 {
+      font-size: 30px; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 6px;
+    }
+    .doc-header p { color: rgba(255,255,255,0.65); font-size: 15px; }
+
+    /* ─── VARIANT LABEL ──────────────────────────────────────────── */
+    .label-bar {
+      background: #0a0a0a; color: #fff;
+      padding: 22px 40px 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .label-bar h2 {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.14em; color: #c6f800;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .label-bar h3 {
+      font-size: 19px; font-weight: 700;
+      letter-spacing: -0.01em; color: #fff; margin-bottom: 4px;
+    }
+    .label-bar p {
+      color: rgba(255,255,255,0.6);
+      font-size: 13.5px; max-width: 720px;
+    }
+
+    /* ─── BLOCK CONTAINER (each variant lives here) ───────────────── */
+    .block { background: #0a0a0a; }
+
+    /* ════════════════════════════════════════════════════════════
+       SHARED TYPOGRAPHY (hero title / glass search base)
+       ════════════════════════════════════════════════════════════ */
+    .ht {
+      font-family: 'Geist', sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.04em; line-height: 0.95;
+      color: #fff;
+    }
+    .ht em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 400;
+      color: #c6f800; letter-spacing: -0.02em;
+    }
+    /* Glass dark search (mismo de variante A) */
+    .glass-search {
+      display: inline-flex; align-items: center; gap: 14px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(198,248,0,0.4);
+      border-radius: 999px;
+      padding: 0 28px; height: 56px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .glass-search:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(198,248,0,0.8);
+      box-shadow: 0 0 32px rgba(198,248,0,0.25);
+    }
+    .glass-search svg { width: 18px; height: 18px; stroke: #c6f800; stroke-width: 2; fill: none; flex-shrink: 0; }
+    .glass-search span {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12.5px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.92);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 1 — Floating Glass Header (no boundary)
+       ════════════════════════════════════════════════════════════ */
+    .v1 {
+      position: relative;
+      min-height: 460px;
+      overflow: hidden;
+    }
+    .v1::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 45%, rgba(198,248,0,0.32), transparent 70%),
+        radial-gradient(circle at 85% 15%, rgba(198,248,0,0.14), transparent 45%),
+        radial-gradient(circle at 15% 95%, rgba(198,248,0,0.10), transparent 55%);
+    }
+    .v1 .header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 40px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+    }
+    .v1 .logo {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: #fff; font-weight: 800; font-size: 20px;
+    }
+    .v1 .logo svg { width: 26px; height: 26px; fill: #fff; }
+    .v1 .nav {
+      display: inline-flex; align-items: center; gap: 18px;
+      color: #fff;
+    }
+    .v1 .nav a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v1 .nav .btn {
+      padding: 9px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .v1 .hero {
+      position: relative; z-index: 5;
+      padding: 130px 40px 80px;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      gap: 32px;
+    }
+    .v1 .ht { font-size: 60px; }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 2 — Lime Accent Line Header (intentional dark)
+       ════════════════════════════════════════════════════════════ */
+    .v2 .header {
+      background: #0a0a0a;
+      padding: 18px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid #c6f800;
+      position: relative;
+    }
+    .v2 .logo {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: #fff; font-weight: 800; font-size: 20px;
+    }
+    .v2 .logo svg { width: 26px; height: 26px; fill: #fff; }
+    .v2 .nav {
+      display: inline-flex; align-items: center; gap: 18px;
+    }
+    .v2 .nav a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v2 .nav .btn {
+      padding: 9px 18px; border-radius: 999px;
+      background: #fff; color: #0a0a0a;
+      font-weight: 600;
+    }
+    .v2 .hero {
+      position: relative;
+      padding: 80px 40px 100px;
+      min-height: 360px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      gap: 32px;
+    }
+    .v2 .hero::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 45%, rgba(198,248,0,0.32), transparent 70%),
+        radial-gradient(circle at 85% 15%, rgba(198,248,0,0.14), transparent 45%),
+        radial-gradient(circle at 15% 95%, rgba(198,248,0,0.10), transparent 55%);
+    }
+    .v2 .hero > * { position: relative; z-index: 1; }
+    .v2 .ht { font-size: 64px; }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 3 — Centered Header (symmetric composition)
+       ════════════════════════════════════════════════════════════ */
+    .v3 .header {
+      background: #0a0a0a;
+      padding: 24px 40px 18px;
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 40px;
+    }
+    .v3 .header .left, .v3 .header .right {
+      display: inline-flex; align-items: center; gap: 18px;
+      color: rgba(255,255,255,0.85); font-size: 14px;
+    }
+    .v3 .header .right { justify-content: flex-end; }
+    .v3 .header .center {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: #fff; font-weight: 800; font-size: 22px;
+      letter-spacing: -0.01em;
+    }
+    .v3 .header .center svg { width: 28px; height: 28px; fill: #fff; }
+    .v3 .header a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v3 .header .btn {
+      padding: 9px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .v3 .hero {
+      position: relative;
+      padding: 80px 40px 100px;
+      min-height: 360px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      gap: 32px;
+    }
+    .v3 .hero::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 45%, rgba(198,248,0,0.32), transparent 70%),
+        radial-gradient(circle at 85% 15%, rgba(198,248,0,0.14), transparent 45%),
+        radial-gradient(circle at 15% 95%, rgba(198,248,0,0.10), transparent 55%);
+    }
+    .v3 .hero > * { position: relative; z-index: 1; }
+    .v3 .ht { font-size: 60px; }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 4 — Editorial Split Hero (asymmetric)
+       ════════════════════════════════════════════════════════════ */
+    .v4 .header {
+      background: #0a0a0a;
+      padding: 18px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .v4 .logo {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: #fff; font-weight: 800; font-size: 20px;
+    }
+    .v4 .logo svg { width: 26px; height: 26px; fill: #fff; }
+    .v4 .nav { display: inline-flex; align-items: center; gap: 18px; }
+    .v4 .nav a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v4 .nav .btn { padding: 9px 18px; border-radius: 999px; background: #fff; color: #0a0a0a; font-weight: 600; }
+    .v4 .hero {
+      position: relative;
+      padding: 80px 40px 100px;
+      min-height: 380px;
+      overflow: hidden;
+    }
+    .v4 .hero::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 90% at 25% 50%, rgba(198,248,0,0.28), transparent 70%),
+        radial-gradient(circle at 80% 30%, rgba(198,248,0,0.10), transparent 50%);
+    }
+    .v4 .hero > * { position: relative; z-index: 1; }
+    .v4 .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 60px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .v4 .col-left { text-align: left; }
+    .v4 .kicker {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; letter-spacing: 0.16em;
+      color: #c6f800; text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .v4 .ht { font-size: 88px; line-height: 0.92; text-align: left; }
+    .v4 .col-right {
+      display: flex; flex-direction: column; gap: 14px;
+      align-items: flex-end;
+    }
+    .v4 .col-right .meta {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.6); text-transform: uppercase;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 5 — Featured Event Background Hero (drama)
+       ════════════════════════════════════════════════════════════ */
+    .v5 .header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+      padding: 22px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .v5 .logo {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: #fff; font-weight: 800; font-size: 20px;
+    }
+    .v5 .logo svg { width: 26px; height: 26px; fill: #fff; }
+    .v5 .nav { display: inline-flex; align-items: center; gap: 18px; }
+    .v5 .nav a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v5 .nav .btn {
+      padding: 9px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .v5-block {
+      position: relative;
+      min-height: 540px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.85) 100%),
+        linear-gradient(0deg, rgba(10,10,10,0.5), rgba(10,10,10,0.5)),
+        url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+    }
+    .v5 .hero {
+      position: relative; z-index: 5;
+      padding: 140px 40px 80px;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      gap: 24px;
+    }
+    .v5 .featured-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px;
+      background: rgba(198,248,0,0.15);
+      border: 1px solid rgba(198,248,0,0.4);
+      border-radius: 999px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 10.5px; letter-spacing: 0.14em;
+      color: #c6f800; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .v5 .ht { font-size: 64px; }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 6 — Header con Search inline + Hero compact
+       ════════════════════════════════════════════════════════════ */
+    .v6 .header {
+      background: #0a0a0a;
+      padding: 14px 40px;
+      display: flex; align-items: center; gap: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .v6 .logo {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: #fff; font-weight: 800; font-size: 20px;
+      flex-shrink: 0;
+    }
+    .v6 .logo svg { width: 26px; height: 26px; fill: #fff; }
+    .v6 .header .glass-search { flex: 1; max-width: 480px; height: 44px; padding: 0 20px; }
+    .v6 .header .glass-search span { font-size: 11px; }
+    .v6 .nav { display: inline-flex; align-items: center; gap: 14px; margin-left: auto; flex-shrink: 0; }
+    .v6 .nav a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v6 .nav .btn { padding: 8px 16px; border-radius: 999px; background: #fff; color: #0a0a0a; font-weight: 600; font-size: 14px; }
+    .v6 .hero {
+      position: relative;
+      padding: 70px 40px 90px;
+      min-height: 320px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      gap: 24px;
+    }
+    .v6 .hero::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 50%, rgba(198,248,0,0.32), transparent 70%);
+    }
+    .v6 .hero > * { position: relative; z-index: 1; }
+    .v6 .ht { font-size: 72px; }
+    .v6 .hero .sub {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: rgba(255,255,255,0.7);
+      max-width: 520px;
+      line-height: 1.4;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANTE 7 — Floating Glass + search width = title width
+       Refinement de la V1 con search del ancho exacto del título.
+       ════════════════════════════════════════════════════════════ */
+    .v7 {
+      position: relative;
+      min-height: 480px;
+      overflow: hidden;
+    }
+    .v7::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 45%, rgba(198,248,0,0.32), transparent 70%),
+        radial-gradient(circle at 85% 15%, rgba(198,248,0,0.14), transparent 45%),
+        radial-gradient(circle at 15% 95%, rgba(198,248,0,0.10), transparent 55%);
+    }
+    .v7 .header {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 40px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+    }
+    .v7 .logo {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: #fff; font-weight: 800; font-size: 20px;
+    }
+    .v7 .logo svg { width: 26px; height: 26px; fill: #fff; }
+    .v7 .nav { display: inline-flex; align-items: center; gap: 18px; }
+    .v7 .nav a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; cursor: pointer; }
+    .v7 .nav .btn {
+      padding: 9px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .v7 .hero {
+      position: relative; z-index: 5;
+      padding: 130px 40px 80px;
+      display: flex; flex-direction: column;
+      align-items: center;
+    }
+    /* Stack inline-flex column con align-items: stretch — el wrapper se
+       auto-sizea al widest child (el título), y el search se estira para
+       igualarlo. Así ambos elementos comparten exactamente el mismo ancho. */
+    .v7 .hero-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 32px;
+    }
+    .v7 .ht {
+      font-size: 60px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .v7 .glass-search {
+      display: flex;
+      align-items: center; justify-content: center;
+      gap: 14px;
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(198,248,0,0.4);
+      border-radius: 999px;
+      padding: 0 28px; height: 56px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .v7 .glass-search:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(198,248,0,0.8);
+      box-shadow: 0 0 32px rgba(198,248,0,0.25);
+    }
+    .v7 .glass-search svg { width: 18px; height: 18px; stroke: #c6f800; stroke-width: 2; fill: none; flex-shrink: 0; }
+    .v7 .glass-search span {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12.5px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.92);
+    }
+
+    @media (max-width: 720px) {
+      .ht, .v1 .ht, .v2 .ht, .v3 .ht, .v4 .ht, .v5 .ht, .v6 .ht, .v7 .ht { font-size: 40px; }
+      .v4 .row { grid-template-columns: 1fr; gap: 24px; }
+      .v4 .col-right { align-items: flex-start; }
+      .v6 .header .glass-search { display: none; }
+      .v3 .header { grid-template-columns: 1fr; gap: 16px; text-align: center; }
+      .v3 .header .left, .v3 .header .right { display: none; }
+      .v7 .ht { white-space: normal; }
+      .v7 .hero-stack { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <h1>Header + Hero — explorations</h1>
+  <p>6 variantes de la relación header + hero. Compará y pickeá cuál vibra más.</p>
+</header>
+
+<!-- ═══════════════ VARIANTE 1 — Floating Glass Header ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 1</h2>
+  <h3>Floating Glass Header (no boundary)</h3>
+  <p>Header transparente que flota sobre el hero glow. Sin línea divisoria entre header y hero — se sienten como un solo bloque continuo. Botones glass en el header.</p>
+</div>
+<div class="block">
+  <div class="v1">
+    <div class="header">
+      <a class="logo">
+        <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+        VIBES
+      </a>
+      <nav class="nav">
+        <a>Para creadores</a>
+        <a class="btn">Ingresar</a>
+      </nav>
+    </div>
+    <div class="hero">
+      <h1 class="ht">Vibra <em>diferente.</em></h1>
+      <button class="glass-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+        <span>Buscá tu próximo plan</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE 2 — Lime Accent Line Header ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 2</h2>
+  <h3>Lime Accent Line Header</h3>
+  <p>Header negro sólido pero con una línea lime de 2px abajo como acento. Convierte la "frontera" en un statement intencional. CTA "Ingresar" blanco para máxima visibilidad.</p>
+</div>
+<div class="block">
+  <div class="v2">
+    <div class="header">
+      <a class="logo">
+        <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+        VIBES
+      </a>
+      <nav class="nav">
+        <a>Para creadores</a>
+        <a class="btn">Ingresar</a>
+      </nav>
+    </div>
+    <div class="hero">
+      <h1 class="ht">Vibra <em>diferente.</em></h1>
+      <button class="glass-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+        <span>Buscá tu próximo plan</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE 3 — Centered Header ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 3</h2>
+  <h3>Centered Header (poster style)</h3>
+  <p>Logo VIBES centrado en el header con nav distribuido a los lados. Composición simétrica del top section completo. Evoca el feel de un poster editorial.</p>
+</div>
+<div class="block">
+  <div class="v3">
+    <div class="header">
+      <div class="left">
+        <a>Eventos</a>
+        <a>Experiencias</a>
+        <a>Deporte</a>
+      </div>
+      <div class="center">
+        <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+        VIBES
+      </div>
+      <div class="right">
+        <a>Para creadores</a>
+        <a class="btn">Ingresar</a>
+      </div>
+    </div>
+    <div class="hero">
+      <h1 class="ht">Vibra <em>diferente.</em></h1>
+      <button class="glass-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+        <span>Buscá tu próximo plan</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE 4 — Editorial Split Hero ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 4</h2>
+  <h3>Editorial Split Hero (asymmetric, big title)</h3>
+  <p>Title gigante a la izquierda, search compacto a la derecha como acción. Kicker mono arriba. Sensación editorial / portada de revista. Más confiada y menos genérica que un hero centrado.</p>
+</div>
+<div class="block">
+  <div class="v4">
+    <div class="header">
+      <a class="logo">
+        <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+        VIBES
+      </a>
+      <nav class="nav">
+        <a>Para creadores</a>
+        <a class="btn">Ingresar</a>
+      </nav>
+    </div>
+    <div class="hero">
+      <div class="row">
+        <div class="col-left">
+          <div class="kicker">CENTROAMÉRICA · CONCIERTOS · DEPORTE · EXPERIENCIAS</div>
+          <h1 class="ht">Vibra <em>diferente.</em></h1>
+        </div>
+        <div class="col-right">
+          <div class="meta">EXPLORÁ</div>
+          <button class="glass-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+            <span>Buscá tu plan</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE 5 — Featured Event Background ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 5</h2>
+  <h3>Featured Event Background Hero (cinematic)</h3>
+  <p>Background del hero es una foto de un evento real con gradient oscuro encima. Header glass flotando arriba. Vibe cinematográfico, drama. Promociona el evento featured implícitamente.</p>
+</div>
+<div class="block">
+  <div class="v5-block">
+    <div class="v5">
+      <div class="header">
+        <a class="logo">
+          <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+          VIBES
+        </a>
+        <nav class="nav">
+          <a>Para creadores</a>
+          <a class="btn">Ingresar</a>
+        </nav>
+      </div>
+      <div class="hero">
+        <span class="featured-badge">● EN VIVO · BAD BUNNY EN CR</span>
+        <h1 class="ht">Vibra <em>diferente.</em></h1>
+        <button class="glass-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+          <span>Buscá tu próximo plan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE 6 — Search en Header + Hero compact ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 6</h2>
+  <h3>Search siempre visible en header + Hero compact con tagline</h3>
+  <p>El search vive PERMANENTEMENTE en el header (nunca scrollea fuera de vista). Hero queda libre para ser puro brand statement: title + tagline italic. Muy práctico para usuarios que vienen a buscar.</p>
+</div>
+<div class="block">
+  <div class="v6">
+    <div class="header">
+      <a class="logo">
+        <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+        VIBES
+      </a>
+      <button class="glass-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+        <span>Buscá tu próximo plan</span>
+      </button>
+      <nav class="nav">
+        <a>Para creadores</a>
+        <a class="btn">Ingresar</a>
+      </nav>
+    </div>
+    <div class="hero">
+      <h1 class="ht">Vibra <em>diferente.</em></h1>
+      <p class="sub">Conciertos, partidos, experiencias y clases. <br>Toda la vida cultural de Centroamérica en un solo lugar.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VARIANTE 7 — Floating Glass + search width = title width ═══════════════ -->
+<div class="label-bar">
+  <h2>Variante 7</h2>
+  <h3>Floating Glass — search del ancho del título ⭐</h3>
+  <p>Refinement de la V1: el search bar se estira al ancho exacto del título "Vibra diferente." (ni más ancho, ni más angosto). Crea un bloque visual unificado donde título + search comparten el mismo "container" óptico.</p>
+</div>
+<div class="block">
+  <div class="v7">
+    <div class="header">
+      <a class="logo">
+        <svg viewBox="0 0 32 32"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg>
+        VIBES
+      </a>
+      <nav class="nav">
+        <a>Para creadores</a>
+        <a class="btn">Ingresar</a>
+      </nav>
+    </div>
+    <div class="hero">
+      <div class="hero-stack">
+        <h1 class="ht">Vibra <em>diferente.</em></h1>
+        <button class="glass-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+          <span>Buscá tu próximo plan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer style="background: #0a0a0a; color: rgba(255,255,255,0.5); padding: 40px; text-align: center; font-size: 13px;">
+  Decime cuál te gusta (1-7) y la implemento en el header + hero real. Pueden ser combinaciones.
+</footer>
+
+</body>
+</html>
