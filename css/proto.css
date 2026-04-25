@@ -8079,13 +8079,14 @@ body.search-open { overflow: hidden; }
 }
 
 /* Wrap para el estado con query — encabezado de conteo de resultados */
-.search-results-wrap { display: flex; flex-direction: column; gap: 14px; }
+.search-results-wrap { display: flex; flex-direction: column; gap: 22px; }
 .search-results-count {
   font-family: var(--font-mono);
   font-size: 10px; letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.55);
   padding: 0 2px;
+  margin-bottom: 4px;
 }
 
 /* Empty state mejorado */

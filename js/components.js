@@ -155,25 +155,55 @@ document.addEventListener('alpine:init', () => {
     get index() {
       if (this._indexCache) return this._indexCache;
       const data = window.EVENT_DATA || {};
-      // HTML → texto plano (el title viene con <br>/<em>).
       const strip = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      // Normaliza acentos (ñ/á/é/í/ó/ú) para que "san jose" matchee "San José".
       const norm = (s) => String(s || '').toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      // Helpers para enriquecer experiencias (kind=experience): fechas vienen
+      // del `pattern` semanal y la ubicación de `location.destination` —
+      // no tienen `date/venue/city` planos como los conciertos.
+      const DAY_NAMES   = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+      const MONTH_NAMES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+      const nextDateStr = (pattern) => {
+        if (!pattern || !Array.isArray(pattern.days) || pattern.days.length === 0) return '';
+        const today = new Date(); today.setHours(0,0,0,0);
+        for (let i = 0; i < 14; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
+          if (pattern.days.includes(d.getDay())) {
+            const head = DAY_NAMES[d.getDay()] + ' ' + d.getDate() + ' ' + MONTH_NAMES[d.getMonth()];
+            return pattern.time ? (head + ' · ' + pattern.time) : head;
+          }
+        }
+        return '';
+      };
+
       const rows = [];
       for (const id in data) {
         const ev = data[id];
         if (!ev) continue;
-        const title = strip(ev.title);
+        const title  = strip(ev.title);
         const kicker = strip(ev.kicker || '');
-        const venue = strip(ev.venue || '');
-        const city = strip(ev.city || '');
-        const date = strip(ev.date || '');
+        let venue    = strip(ev.venue || '');
+        let city     = strip(ev.city || '');
+        let date     = strip(ev.date || '');
+
+        // Experiencias: completar lo que falte desde pattern + location.destination
+        if (ev.kind === 'experience') {
+          if (!date && ev.pattern) date = nextDateStr(ev.pattern);
+          if (!venue && ev.location && ev.location.destination) {
+            venue = ev.location.destination.split(',')[0].trim();
+          }
+          if (!city && ev.location && ev.location.destination) {
+            const parts = ev.location.destination.split(',').map(s => s.trim()).filter(Boolean);
+            if (parts.length > 1) city = parts[parts.length - 1];
+          }
+        }
+
         const price = strip(ev.price || '');
         const bg = ev.bg || '';
         rows.push({
           id, title, kicker, venue, city, date, price, bg,
-          // haystack sin acentos para filtrar rápido + accent-insensitive
           _hay: norm([title, kicker, venue, city].join(' ')),
         });
       }
@@ -739,6 +769,19 @@ document.addEventListener('alpine:init', () => {
     // --- HELPERS UI -------------------------------------------------------
     catLabel(id) { return this.CATEGORIES.find(c => c.id === id)?.label || id; },
     countryLabel(id) { return this.COUNTRIES.find(c => c.id === id)?.label || id; },
+
+    // Línea de ubicación para mostrar en cada card. Unifica conciertos
+    // (venue plano), experiencias (location.destination) y deportes —
+    // siempre intenta "{País} · {Lugar}" con fallback elegante.
+    venueLineFor(r) {
+      if (!r) return '';
+      const country = r._country ? this.countryLabel(r._country) : '';
+      let place = (r.raw && r.raw.venue) || '';
+      if (!place && r.raw && r.raw.location && r.raw.location.destination) {
+        place = r.raw.location.destination.split(',')[0].trim();
+      }
+      return [country, place].filter(Boolean).join(' · ');
+    },
 
     // Texto contextual del result count: "5 conciertos en Costa Rica",
     // "3 partidos en Centroamérica", "12 eventos en Honduras", etc.
