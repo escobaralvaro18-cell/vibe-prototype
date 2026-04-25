@@ -9260,6 +9260,26 @@ body.scrolled .page[data-page="inicio"] .header.header-hero {
 
 .search-page-card { /* hereda todo de .event-card */ }
 
+/* CRÍTICO para grid 2-col en mobile: por default los grid items tienen
+   min-width: auto, lo que permite que un título largo como "Reserva
+   Biológica Bosque Nuboso Monteverde" empuje la columna más allá del
+   1fr y rompa el layout (la 2da card se sale del viewport).
+   `min-width: 0` + overflow hidden + clamp del texto resuelve esto. */
+.search-grid > .event-card { min-width: 0; }
+.search-grid .event-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.search-grid .event-venue,
+.search-grid .event-date {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .search-load-more {
   display: flex; justify-content: center;
   margin: 32px 0 0;
