@@ -269,7 +269,11 @@
     </div>
 
     <!-- ================= FAVORITES TAB ================= -->
-    <div class="account-tab-panel" :class="{ active: tab === 'favs' }" role="tabpanel">
+    <!-- id="section-favoritos" es el anchor destino del redirect post-auth
+         cuando el guest guarda su 1er favorito. El script de abajo detecta
+         el hash en load y auto-selecciona el tab. -->
+    <div class="account-tab-panel" id="section-favoritos"
+         :class="{ active: tab === 'favs' }" role="tabpanel">
 
       <div class="account-subtabs">
         <button type="button"
@@ -298,7 +302,7 @@
                 <span class="event-genre" x-text="(fav.event?.kicker || '').split(' ').slice(0,3).join(' ')"></span>
                 <!-- Botón corazón: acá siempre está saved (estamos en favoritos). -->
                 <button type="button" class="event-save saved"
-                        @click.prevent.stop="$store.favorites.toggle(fav.id)"
+                        @click.prevent.stop="$store.favorites.onHeartClick(fav.id)"
                         aria-label="Quitar de favoritos">
                   <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
                 </button>
@@ -336,7 +340,7 @@
                   <div class="bg-bg-soft"></div>
                 </div>
                 <button type="button" class="event-save saved"
-                        @click.prevent.stop="$store.favorites.toggle(fav.id)"
+                        @click.prevent.stop="$store.favorites.onHeartClick(fav.id)"
                         aria-label="Quitar de favoritos">
                   <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
                 </button>
@@ -414,6 +418,127 @@
   .event-card--past { opacity: 0.6; pointer-events: none; }
   .event-card--past .event-thumb-img > div.bg-bg-soft { background: var(--bg-soft); }
 </style>
+
+<!-- FAVORITES PROMPT MODAL + TOAST — ver index.html para más detalles.
+     En account.html el user está siempre logueado, entonces el prompt
+     casi nunca aparece — solo existe por consistencia si el user entra
+     sin session. El toast sí se usa al quitar/agregar desde la pestaña
+     "Mis favoritos". -->
+<div class="fav-prompt-modal" x-data
+     x-show="$store.favorites.promptOpen" x-cloak x-transition.opacity
+     @click.self="$store.favorites.closePrompt()"
+     @keydown.escape.window="$store.favorites.promptOpen && $store.favorites.closePrompt()"
+     role="dialog" aria-modal="true" aria-labelledby="fav-prompt-title-ac">
+  <div class="fav-prompt-card" @click.stop>
+    <button type="button" class="fav-prompt-close" @click="$store.favorites.closePrompt()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+
+    <!-- STEP 0: PROMPT -->
+    <div x-show="$store.favorites.authStep === 'prompt'" x-cloak>
+      <div class="fav-prompt-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+      </div>
+      <h2 class="fav-prompt-title" id="fav-prompt-title-ac">¡Guardado!</h2>
+      <p class="fav-prompt-body">Creá tu cuenta para acceder a tus favoritos desde cualquier dispositivo y no perderlos.</p>
+      <div class="fav-prompt-actions">
+        <button type="button" class="fav-prompt-primary" @click="$store.favorites.goToAuthStep()">Crear cuenta o iniciar sesión</button>
+      </div>
+      <button type="button" class="fav-prompt-dismiss" @click="$store.favorites.closePrompt()">Seguir explorando</button>
+    </div>
+
+    <!-- STEP 1: EMAIL -->
+    <div x-show="$store.favorites.authStep === 'email'" x-cloak>
+      <h2 class="fav-prompt-title">Ingresá a Vibes</h2>
+      <p class="fav-prompt-body">Usá tu email o tu cuenta de Google. Sin contraseñas.</p>
+      <button type="button" class="fav-prompt-google"
+              @click="$store.favorites.loginWithGoogleInline()"
+              :disabled="$store.favorites.authBusy">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        <span x-text="$store.favorites.authBusy ? 'Conectando…' : 'Continuar con Google'"></span>
+      </button>
+      <div class="fav-prompt-divider">o con email</div>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthEmail()">
+        <div class="fav-prompt-field">
+          <label class="fav-prompt-label" for="fav-auth-email-ac">Email</label>
+          <input class="fav-prompt-input" id="fav-auth-email-ac" type="email"
+                 x-model="$store.favorites.authEmail"
+                 placeholder="tu@email.com" required autocomplete="email" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">Continuar</button>
+        <p class="fav-prompt-legal">Te enviaremos un código de 6 dígitos para verificar tu email. Al continuar aceptás los <a href="#">Términos</a> y la <a href="#">Política de Privacidad</a>.</p>
+      </form>
+    </div>
+
+    <!-- STEP 2: OTP -->
+    <div x-show="$store.favorites.authStep === 'otp'" x-cloak>
+      <h2 class="fav-prompt-title">Verificá tu email</h2>
+      <p class="fav-prompt-body">
+        Enviamos un código de 6 dígitos a <strong x-text="$store.favorites.authEmail"></strong>.
+        <a class="fav-prompt-change" href="#" @click.prevent="$store.favorites.backToAuthEmail()">Cambiar</a>
+      </p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthOtp()">
+        <div class="fav-prompt-otp-group" role="group" aria-label="Código de 6 dígitos">
+          <template x-for="idx in [0,1,2,3,4,5]" :key="idx">
+            <input class="fav-prompt-otp-input" type="text"
+                   inputmode="numeric" maxlength="1"
+                   :data-fav-otp-idx="idx"
+                   :aria-label="'Dígito ' + (idx + 1)"
+                   autocomplete="one-time-code"
+                   :value="$store.favorites.authOtp[idx]"
+                   @input="$store.favorites.onAuthOtpInput(idx, $event)"
+                   @keydown="$store.favorites.onAuthOtpKeydown(idx, $event)"
+                   @paste="$store.favorites.onAuthOtpPaste($event)" />
+          </template>
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">
+          <span x-text="$store.favorites.authBusy ? 'Verificando…' : 'Verificar'"></span>
+        </button>
+      </form>
+      <p class="fav-prompt-otp-resend">
+        ¿No te llegó?
+        <template x-if="$store.favorites.authResendCountdown === 0">
+          <a href="#" @click.prevent="$store.favorites.resendAuthOtp()">Reenviar código</a>
+        </template>
+        <template x-if="$store.favorites.authResendCountdown > 0">
+          <span>Podés reenviar en <span x-text="$store.favorites.authResendCountdown"></span>s</span>
+        </template>
+      </p>
+      <p class="fav-prompt-hint">Demo: cualquier secuencia de 6 dígitos funciona</p>
+    </div>
+
+    <!-- STEP 3: NAME (signup only) -->
+    <div x-show="$store.favorites.authStep === 'name'" x-cloak>
+      <h2 class="fav-prompt-title">Último paso</h2>
+      <p class="fav-prompt-body">Contanos tu nombre para personalizar tu experiencia.</p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthName()">
+        <div class="fav-prompt-form-grid">
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authFirstName"
+                 placeholder="Nombre" required autocomplete="given-name" />
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authLastName"
+                 placeholder="Apellido" required autocomplete="family-name" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary">Entrar</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="vibe-toast" x-data
+     x-show="$store.toast.visible" x-cloak x-transition.opacity
+     role="status" aria-live="polite">
+  <svg class="vibe-toast-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+  <span class="vibe-toast-message" x-text="$store.toast.message"></span>
+  <template x-if="$store.toast.linkHref">
+    <a class="vibe-toast-link" :href="$store.toast.linkHref" x-text="$store.toast.linkText"></a>
+  </template>
+</div>
 
 </body>
 </html>

@@ -217,10 +217,71 @@
 
   <!-- Detalle -->
   <section class="container" x-show="event" x-cloak>
-    <div class="detail-hero">
-      <div class="detail-poster">
-        <div class="detail-poster-bg" :class="event?.bg"></div>
-      </div>
+    <div class="detail-hero" :class="{ 'detail-hero-experience': isExperience }">
+      <!-- Hero media: gallery carousel (experiences) | poster estático (performance).
+           Experiences priorizan imágenes reales — el usuario decide reservar
+           por cómo se ve el lugar. Performance events siguen con el poster
+           editorial (gradient art-*) que ya tenés. -->
+      <template x-if="!isExperience">
+        <div class="detail-poster">
+          <div class="detail-poster-bg" :class="event?.bg"></div>
+        </div>
+      </template>
+      <template x-if="isExperience">
+        <div class="experience-gallery"
+             role="region" aria-label="Galería de la experiencia"
+             @keydown.left.window="galleryPrev()"
+             @keydown.right.window="galleryNext()">
+          <!-- Main slide. Click en la imagen → abre lightbox fullscreen.
+               Visual cue del cursor zoom-in comunica la interacción. -->
+          <div class="experience-gallery-main"
+               @click="openLightbox()"
+               role="button" tabindex="0"
+               @keydown.enter="openLightbox()"
+               @keydown.space.prevent="openLightbox()"
+               aria-label="Abrir visualizador de imagen">
+            <template x-for="(img, idx) in (event?.gallery || [])" :key="idx">
+              <img :src="img.src" :alt="img.alt"
+                   :class="{ 'is-active': galleryIndex === idx }"
+                   class="experience-gallery-img"
+                   loading="lazy">
+            </template>
+            <!-- Fallback gradient si no hay imágenes o fallan todas -->
+            <div class="experience-gallery-fallback" :class="event?.bg"
+                 x-show="!(event?.gallery && event.gallery.length)"></div>
+            <!-- Prev/next buttons. `.stop` previene que el click bubble
+                 al container y abra el lightbox por accidente. -->
+            <button class="experience-gallery-nav prev"
+                    @click.stop="galleryPrev()"
+                    x-show="(event?.gallery || []).length > 1"
+                    aria-label="Foto anterior">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="experience-gallery-nav next"
+                    @click.stop="galleryNext()"
+                    x-show="(event?.gallery || []).length > 1"
+                    aria-label="Foto siguiente">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <!-- Counter indicator (bottom-right) -->
+            <div class="experience-gallery-counter"
+                 x-show="(event?.gallery || []).length > 1"
+                 x-text="(galleryIndex + 1) + ' / ' + (event?.gallery || []).length"></div>
+          </div>
+          <!-- Thumbnails strip -->
+          <div class="experience-gallery-thumbs" x-show="(event?.gallery || []).length > 1">
+            <template x-for="(img, idx) in (event?.gallery || [])" :key="'t'+idx">
+              <button type="button" class="experience-gallery-thumb"
+                      :class="{ 'is-active': galleryIndex === idx }"
+                      @click="galleryGoTo(idx)"
+                      :aria-label="'Ver foto ' + (idx + 1)"
+                      :aria-current="galleryIndex === idx ? 'true' : 'false'">
+                <img :src="img.src" :alt="''" loading="lazy">
+              </button>
+            </template>
+          </div>
+        </div>
+      </template>
 
       <div class="detail-info">
         <!-- Kicker + badges en la misma fila. Esto evita el hueco visual raro
@@ -246,9 +307,72 @@
           <div class="fact"><div class="fact-label">Ciudad</div> <div class="fact-value" x-text="event?.city"></div></div>
         </div>
 
+        <!-- Quick facts strip: SOLO experiences. 4 pills con lo crítico para
+             decidir (duración / nivel / grupo / idioma / meeting point).
+             Va justo debajo del título — antes de la descripción — para
+             que el user escanee en 2 seg y decida si scrollea. -->
+        <div class="experience-facts-strip" x-show="isExperience && event?.quickFacts" x-cloak>
+          <template x-if="event?.quickFacts?.duration">
+            <div class="exp-fact">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+              <span x-text="event.quickFacts.duration"></span>
+            </div>
+          </template>
+          <template x-if="event?.quickFacts?.level">
+            <div class="exp-fact">
+              <!-- Ícono "nivel/dificultad": 3 barras ascendentes (estilo signal
+                   bars). Comunica progresión — antes era una casa, que no tenía
+                   relación con el concepto "Principiante/Intermedio/Avanzado". -->
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="14" width="4" height="7" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="17" y="4" width="4" height="17" rx="1" opacity="0.35"/></svg>
+              <span x-text="event.quickFacts.level"></span>
+            </div>
+          </template>
+          <template x-if="event?.quickFacts?.groupMax">
+            <div class="exp-fact">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H2v-2a4 4 0 014-4h2a4 4 0 014 4v2m-2-5a4 4 0 11-8 0 4 4 0 018 0zm6-3a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <span x-text="'Máx ' + event.quickFacts.groupMax"></span>
+            </div>
+          </template>
+          <template x-if="event?.quickFacts?.meetingPoint">
+            <div class="exp-fact">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.244-4.243a8 8 0 1111.315 0z"/><circle cx="12" cy="11" r="3"/></svg>
+              <span x-text="event.quickFacts.meetingPoint"></span>
+            </div>
+          </template>
+        </div>
+
+        <!-- Host card EXPERIENCE — justo después de los chips (quick facts),
+             antes de la descripción. En experiences el operador es contexto
+             crítico de confianza (verificación, tours guiados) y va arriba.
+             Para performance events la organizer card se mantiene al final
+             (se renderiza en otra ubicación). -->
+        <template x-if="isExperience">
+          <div class="organizer-card host-card">
+            <div class="organizer-avatar" x-text="event?.host?.avatar || event?.orgAvatar"></div>
+            <div class="organizer-info">
+              <div class="organizer-label">Operado por</div>
+              <div class="organizer-name">
+                <span x-text="event?.host?.name || event?.orgName"></span>
+                <template x-if="event?.host?.verified">
+                  <span class="host-verified-pill" title="Operador verificado por Vibes">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>Verificado</span>
+                  </span>
+                </template>
+              </div>
+              <template x-if="event?.host?.short">
+                <div class="host-tagline" x-text="event.host.short"></div>
+              </template>
+            </div>
+          </div>
+        </template>
+
         <div class="event-desc" x-html="event?.desc"></div>
 
-        <div class="lineup" x-show="(event?.lineup || []).length">
+        <!-- Line-up: performance events (conciertos). En experiences los
+             instructores/guías viven en el host card al final (no son
+             "artistas", son operadores). Se oculta cuando isExperience. -->
+        <div class="lineup" x-show="!isExperience && (event?.lineup || []).length">
           <h3>Line-up</h3>
           <div class="lineup-tags">
             <template x-for="(artist, idx) in (event?.lineup || [])" :key="idx">
@@ -257,10 +381,106 @@
           </div>
         </div>
 
-        <!-- Organizer card: display-only. Feature "seguir" fuera de scope,
-             así que la card no tiene acción ni hover — proto.css la estila
-             sin transition ni pointer cursor (sugiere inerte).             -->
-        <div class="organizer-card">
+        <!-- Qué incluye + Qué traer: SOLO experiences. 2 columnas en desktop,
+             stacked en mobile. Items con checkmark SVG (incluye) o bullet
+             (traer) — sin emojis, más editorial + consistente con el resto. -->
+        <div class="experience-lists" x-show="isExperience && ((event?.includes || []).length || (event?.bring || []).length)" x-cloak>
+          <div class="experience-list-col" x-show="(event?.includes || []).length">
+            <h3 class="experience-list-title">Qué incluye</h3>
+            <ul class="experience-list experience-list-includes">
+              <template x-for="(item, idx) in (event?.includes || [])" :key="idx">
+                <li class="experience-list-item">
+                  <svg class="experience-list-check" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><path d="M6 10l3 3 5-6" stroke="var(--accent-ink, #0a0a0a)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span class="experience-list-label" x-text="item"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+          <div class="experience-list-col" x-show="(event?.bring || []).length">
+            <h3 class="experience-list-title">Qué traer</h3>
+            <ul class="experience-list experience-list-bring">
+              <template x-for="(item, idx) in (event?.bring || [])" :key="idx">
+                <li class="experience-list-item">
+                  <span class="experience-list-dot" aria-hidden="true"></span>
+                  <span class="experience-list-label" x-text="item"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Ubicación — mapa embed de Google Maps con meeting point +
+             destination. Para tours/adventures es info crítica (el user
+             planifica llegar); para clases también útil porque muestra la
+             venue específica. Se renderiza después del itinerary para
+             cerrar la narrativa "qué hacés · dónde". -->
+        <div class="experience-location" x-show="isExperience && event?.location" x-cloak>
+          <h3 class="experience-location-title">Dónde es</h3>
+          <div class="experience-location-map">
+            <iframe
+              :src="'https://maps.google.com/maps?q=' + encodeURIComponent(event?.location?.mapQuery || event?.location?.destination || event?.location?.meetingPoint || '') + '&output=embed'"
+              width="100%"
+              height="280"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Ubicación de la experiencia en el mapa"
+              allowfullscreen></iframe>
+          </div>
+          <dl class="experience-location-info">
+            <template x-if="event?.location?.meetingPoint">
+              <div class="experience-location-row">
+                <dt>Punto de encuentro</dt>
+                <dd x-text="event.location.meetingPoint"></dd>
+              </div>
+            </template>
+            <template x-if="event?.location?.destination">
+              <div class="experience-location-row">
+                <dt>Destino</dt>
+                <dd x-text="event.location.destination"></dd>
+              </div>
+            </template>
+          </dl>
+          <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event?.location?.mapQuery || event?.location?.destination || event?.location?.meetingPoint || '')"
+             target="_blank" rel="noopener noreferrer"
+             class="experience-location-link">
+            Abrir en Google Maps
+            <svg fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+
+        <!-- Itinerario — se movió fuera de recurring-section para que
+             viva en la columna de contenido junto con includes/bring/host,
+             y el booking widget (calendario+CTA) quede en sidebar propio. -->
+        <div class="experience-itinerary" x-show="isExperience && (event?.itinerary || []).length" x-cloak>
+          <h3 class="experience-itinerary-title">Qué hacemos</h3>
+          <ol class="experience-itinerary-list">
+            <template x-for="(step, idx) in (event?.itinerary || [])" :key="idx">
+              <li class="experience-itinerary-step">
+                <div class="experience-itinerary-dot">
+                  <span class="experience-itinerary-num" x-text="idx + 1"></span>
+                </div>
+                <div class="experience-itinerary-body">
+                  <div class="experience-itinerary-row">
+                    <span class="experience-itinerary-time" x-text="step.time"></span>
+                    <span class="experience-itinerary-step-title" x-text="step.title"></span>
+                  </div>
+                  <template x-if="step.note">
+                    <p class="experience-itinerary-note" x-text="step.note"></p>
+                  </template>
+                </div>
+              </li>
+            </template>
+          </ol>
+        </div>
+
+        <!-- Host/Organizer card: display-only (sin "seguir"). Cuando es
+             experience, se renderiza la versión "host" con badge verificado +
+             short tagline. Cuando es performance, queda la organizer card
+             clásica. Estructura similar para no multiplicar componentes. -->
+        <!-- Organizer card — SOLO performance events (conciertos, shows).
+             Para experiences el host card vive más arriba, debajo del
+             quick facts strip (template x-if="isExperience" arriba). -->
+        <div class="organizer-card" x-show="!isExperience" x-cloak>
           <div class="organizer-avatar" x-text="event?.orgAvatar"></div>
           <div class="organizer-info">
             <div class="organizer-label">Organiza</div>
@@ -353,8 +573,18 @@
         <!-- de slots + CTA inline que avanza directo a checkout?step=     -->
         <!-- details (ya hay qty=1 seleccionada: la clase).                -->
         <!-- ============================================================ -->
-        <div class="recurring-section" x-show="isRecurring" x-cloak>
-          <div class="recurring-subtitle">Calendario de clases</div>
+        <!-- El booking widget se movió FUERA de .detail-info a ser sibling
+             directo de .detail-hero — así el grid-area: booking lo puede
+             posicionar en la columna derecha sticky en desktop. Ver más abajo
+             después del cierre de .detail-info. -->
+
+        <!-- Recurring section: para eventos recurring NO-experience (clases sin
+             framing de experiencia), se mantiene el picker inline legacy.
+             Para experiences, se oculta porque el calendar vive en el modal. -->
+        <div class="recurring-section" x-show="isRecurring && !isExperience" x-cloak>
+          <!-- Subtítulo adapta al tipo: "Elegí tu fecha" para experiences
+               (tours/adventures), "Calendario de clases" para recurring class. -->
+          <div class="recurring-subtitle" x-text="isExperience ? 'Elegí tu fecha' : 'Calendario de clases'"></div>
           <div class="cal-wrapper">
             <div class="cal-nav">
               <button class="cal-nav-btn" @click="changeMonth(-1)" :disabled="!canGoPrev" aria-label="Mes anterior">
@@ -434,16 +664,31 @@
             </div>
           </template>
 
-          <!-- CTA inline: Continuar con esta clase (bloqueado hasta elegir).
-               x-ref="continueCta" lo usa selectClass() para auto-scroll. -->
+          <!-- Itinerario movido fuera — ahora vive en detail-info para que
+               el user lo vea junto con incluye/traer/host. El booking
+               widget queda limpio con solo calendar + cancelación + CTA. -->
+
+          <!-- Política de cancelación: badge prominente arriba del CTA.
+               Decisión de compra crítica para experiences — el user se
+               compromete con un día específico, la flexibilidad importa. -->
+          <div class="experience-cancellation" x-show="isExperience && event?.cancellation" x-cloak>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span x-text="event.cancellation"></span>
+          </div>
+
+          <!-- CTA inline. Copy adapta al tipo:
+               · isExperience → "Reservar mi lugar" (relacional)
+               · recurring class → "Continuar con esta clase" (legacy) -->
           <button type="button" class="continue-cta"
                   x-ref="continueCta"
                   :disabled="!hasSelectedClass"
                   @click="continueToClass()">
-            <template x-if="!hasSelectedClass"><span>Elegí una clase</span></template>
+            <template x-if="!hasSelectedClass">
+              <span x-text="isExperience ? 'Elegí una fecha' : 'Elegí una clase'"></span>
+            </template>
             <template x-if="hasSelectedClass">
               <span>
-                Continuar con esta clase
+                <span x-text="isExperience ? 'Reservar mi lugar' : 'Continuar con esta clase'"></span>
                 <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;margin-left:6px;"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
               </span>
             </template>
@@ -523,12 +768,45 @@
           </button>
         </div>
       </div>
+
+      <!-- Booking widget (experiences only) — sibling directo de .detail-info
+           para que caiga en grid-area: booking (columna sticky a la derecha
+           en desktop ≥960px, card normal en mobile). Muestra precio + picker
+           + CTA + cancelación. El picker abre el schedule modal al click. -->
+      <template x-if="isExperience && isRecurring">
+        <aside class="booking-widget">
+          <div class="booking-widget-price-row">
+            <span class="booking-widget-price-label">Desde</span>
+            <div class="booking-widget-price-main">
+              <span class="booking-widget-price" x-text="event?.price"></span>
+              <span class="booking-widget-per">/ persona</span>
+            </div>
+          </div>
+
+          <!-- CTA único — abre el schedule modal. Antes había un picker-btn
+               arriba + un CTA abajo que hacían lo mismo. Ahora uno solo,
+               siempre activo, siempre abre el modal. El modal maneja la
+               selección y al confirmar navega al checkout directamente.  -->
+          <button type="button" class="booking-widget-cta btn-accent"
+                  @click="openScheduleModal()">
+            <span>Elegí una fecha</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+
+          <div class="booking-widget-cancel">
+            <svg fill="none" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span x-text="event?.cancellation || 'Cancelación gratis hasta 24 horas antes'"></span>
+          </div>
+        </aside>
+      </template>
     </div>
 
-    <!-- Info secundaria -->
-    <section class="event-secondary">
+    <!-- Info secundaria. Para experiences OCULTAMOS el "Info importante"
+         porque duplica los quick facts + includes/bring que ya están
+         arriba en el main. Solo queda el mapa (cómo llegar) cuando aplica. -->
+    <section class="event-secondary" x-show="!isExperience || (!isRecurring && !isMultiDate && (event?.venue || event?.city))" x-cloak>
       <div class="event-secondary-grid">
-        <div class="info-block">
+        <div class="info-block" x-show="!isExperience" x-cloak>
           <h3>Información importante</h3>
           <ul class="info-list">
             <template x-for="(pair, idx) in (event?.info || [])" :key="idx">
@@ -553,7 +831,183 @@
       </div>
     </section>
 
+    <!-- ============================================================ -->
+    <!-- REVIEWS — solo experiences (por ahora). Performance events    -->
+    <!-- también podrían tener eventualmente, pero no es crítico.      -->
+    <!-- Muestra rating promedio + count + 3 reseñas destacadas.       -->
+    <!-- Estado "Nuevo · sin reseñas" cuando reviews.count === 0.      -->
+    <!-- ============================================================ -->
+    <section class="reviews-section" x-show="isExperience" x-cloak>
+      <div class="reviews-header">
+        <h2 class="reviews-title">Reseñas</h2>
+        <template x-if="(event?.reviews?.count || 0) > 0">
+          <div class="reviews-summary">
+            <div class="reviews-rating">
+              <svg class="reviews-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <span class="reviews-rating-num" x-text="(event?.reviews?.rating || 0).toFixed(1)"></span>
+            </div>
+            <span class="reviews-rating-sep">·</span>
+            <span class="reviews-count" x-text="(event?.reviews?.count || 0) + ' ' + ((event?.reviews?.count === 1) ? 'reseña' : 'reseñas')"></span>
+          </div>
+        </template>
+        <template x-if="(event?.reviews?.count || 0) === 0">
+          <div class="reviews-empty-pill">
+            <svg class="reviews-star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span>Nuevo · sé el primero en reseñar</span>
+          </div>
+        </template>
+      </div>
+
+      <template x-if="(event?.reviews?.highlights || []).length > 0">
+        <div class="reviews-list">
+          <template x-for="(r, idx) in (event?.reviews?.highlights || [])" :key="idx">
+            <article class="review-card">
+              <header class="review-header">
+                <div class="review-avatar" x-text="r.initial || r.name?.[0] || '?'"></div>
+                <div class="review-meta">
+                  <div class="review-name" x-text="r.name"></div>
+                  <div class="review-date" x-text="r.date"></div>
+                </div>
+                <div class="review-rating" :aria-label="r.rating + ' de 5 estrellas'">
+                  <template x-for="s in [1,2,3,4,5]" :key="s">
+                    <svg class="review-star" :class="{ 'is-filled': s <= r.rating }" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  </template>
+                </div>
+              </header>
+              <p class="review-text" x-text="r.text"></p>
+            </article>
+          </template>
+        </div>
+      </template>
+    </section>
+
   </section>
+
+  <!-- =========================================== -->
+  <!-- SCHEDULE MODAL — calendar + slot picker overlay.-->
+  <!-- Solo se usa para experiences (isExperience).    -->
+  <!-- El booking widget sticky lo abre al click.      -->
+  <!-- =========================================== -->
+  <div class="schedule-modal" x-show="scheduleModalOpen && isExperience" x-cloak
+       @click.self="closeScheduleModal()"
+       @keydown.escape.window="scheduleModalOpen && closeScheduleModal()"
+       role="dialog" aria-modal="true" aria-label="Elegí tu fecha y hora"
+       x-transition.opacity>
+    <div class="schedule-modal-content" @click.stop>
+      <header class="schedule-modal-header">
+        <h2 class="schedule-modal-title">Elegí tu fecha y hora</h2>
+        <button type="button" class="schedule-modal-close" @click="closeScheduleModal()" aria-label="Cerrar selector">
+          <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
+      </header>
+
+      <div class="schedule-modal-body">
+        <!-- Mes nav -->
+        <div class="cal-wrapper">
+          <div class="cal-nav">
+            <button class="cal-nav-btn" @click="changeMonth(-1)" :disabled="!canGoPrev" aria-label="Mes anterior">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="cal-month-label" x-text="monthLabel"></div>
+            <button class="cal-nav-btn" @click="changeMonth(1)" :disabled="!canGoNext" aria-label="Mes siguiente">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-dow">Lun</div>
+            <div class="cal-dow">Mar</div>
+            <div class="cal-dow">Mié</div>
+            <div class="cal-dow">Jue</div>
+            <div class="cal-dow">Vie</div>
+            <div class="cal-dow">Sáb</div>
+            <div class="cal-dow">Dom</div>
+            <template x-for="(cell, i) in gridCells" :key="i">
+              <template x-if="cell.type === 'empty'">
+                <div class="cal-day empty"></div>
+              </template>
+            </template>
+            <template x-for="(cell, i) in gridCells" :key="'d' + i">
+              <template x-if="cell.type === 'day'">
+                <button class="cal-day"
+                        :class="{ 'has-classes': cell.hasClasses, 'no-classes': !cell.hasClasses, 'selected': cell.selected }"
+                        :disabled="!cell.hasClasses"
+                        @click="selectDay(cell.day)"
+                        x-text="cell.day"></button>
+              </template>
+            </template>
+          </div>
+        </div>
+
+        <template x-if="monthIsEmpty">
+          <div class="cal-empty-state">No hay fechas disponibles este mes.</div>
+        </template>
+        <template x-if="!monthIsEmpty && !selectedDay">
+          <div class="cal-empty-state">Tocá un día con punto verde para ver los horarios</div>
+        </template>
+        <template x-if="!monthIsEmpty && selectedDay && selectedDayClasses.length > 0">
+          <div>
+            <div class="cal-classes-header" x-text="selectedDayLabel"></div>
+            <div class="cal-classes-list">
+              <template x-for="(cls, idx) in selectedDayClasses" :key="idx">
+                <button type="button" class="class-slot"
+                        :data-status="cls.status"
+                        :disabled="cls.status === 'soldout'"
+                        :class="{ 'selected': selectedClassIdx === idx }"
+                        @click="selectClass(selectedDay, idx)">
+                  <div class="class-slot-time" x-text="cls.time"></div>
+                  <div class="class-slot-info">
+                    <div class="class-slot-name" x-text="cls.name"></div>
+                    <div class="class-slot-teacher" x-text="'Con ' + cls.teacher"></div>
+                  </div>
+                  <span class="class-slot-badge" x-show="cls.status === 'last'">Últimas</span>
+                  <span class="class-slot-badge" x-show="cls.status === 'soldout'" style="background:var(--ink-mid);color:#fff;">Agotado</span>
+                  <div class="class-slot-price" x-text="cls.price"></div>
+                </button>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <footer class="schedule-modal-footer">
+        <button type="button" class="schedule-modal-confirm btn-accent"
+                :disabled="!hasSelectedClass"
+                @click="confirmScheduleSelection()">
+          <span x-text="hasSelectedClass ? 'Confirmar selección' : 'Elegí una fecha y hora'"></span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- LIGHTBOX — modal para ver imagen en grande.   -->
+  <!-- Se abre al hacer click en la gallery principal.-->
+  <!-- Keyboard: ← → flechas, ESC para cerrar.       -->
+  <!-- =========================================== -->
+  <div class="image-lightbox" x-show="lightboxOpen" x-cloak
+       @click.self="closeLightbox()"
+       @keydown.escape.window="closeLightbox()"
+       @keydown.left.window="lightboxOpen && galleryPrev()"
+       @keydown.right.window="lightboxOpen && galleryNext()"
+       role="dialog" aria-modal="true" aria-label="Visualizador de imagen ampliada"
+       x-transition.opacity>
+    <button type="button" class="image-lightbox-close" @click="closeLightbox()" aria-label="Cerrar visualizador">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+    <button type="button" class="image-lightbox-nav prev" @click="galleryPrev()" x-show="(event?.gallery || []).length > 1" aria-label="Foto anterior">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button type="button" class="image-lightbox-nav next" @click="galleryNext()" x-show="(event?.gallery || []).length > 1" aria-label="Foto siguiente">
+      <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <figure class="image-lightbox-figure">
+      <template x-if="event?.gallery?.[galleryIndex]">
+        <img class="image-lightbox-img" :src="event.gallery[galleryIndex].src" :alt="event.gallery[galleryIndex].alt">
+      </template>
+      <figcaption class="image-lightbox-caption" x-show="(event?.gallery || []).length > 1"
+                  x-text="(galleryIndex + 1) + ' / ' + (event?.gallery || []).length"></figcaption>
+    </figure>
+  </div>
 
   <!-- =========================================== -->
   <!-- EVENTOS SIMILARES (carrusel final)            -->
@@ -593,7 +1047,7 @@
               <!-- Botón de favorito: mismo patrón que index.html -->
               <button type="button" class="event-save"
                       :class="{ saved: $store.favorites.has(sim.id) }"
-                      @click.prevent.stop="$store.favorites.toggle(sim.id)"
+                      @click.prevent.stop="$store.favorites.onHeartClick(sim.id)"
                       aria-label="Guardar evento">
                 <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
               </button>
@@ -634,24 +1088,20 @@
     <template x-if="isRecurring">
       <div class="mobile-buy-bar-inner">
         <div class="mobile-buy-bar-price">
-          <template x-if="selectedClass">
-            <div>
-              <span class="mobile-buy-bar-label" x-text="selectedClass.time + ' · ' + selectedClass.name"></span>
-              <span class="mobile-buy-bar-value" x-text="selectedClass.price"></span>
-            </div>
-          </template>
-          <template x-if="!selectedClass">
-            <div>
-              <span class="mobile-buy-bar-label">Desde</span>
-              <span class="mobile-buy-bar-value" x-text="event?.price"></span>
-            </div>
-          </template>
+          <div>
+            <span class="mobile-buy-bar-label">Desde</span>
+            <span class="mobile-buy-bar-value" x-text="event?.price"></span>
+          </div>
         </div>
+        <!-- CTA mobile: experiences SIEMPRE abren el modal (el modal maneja
+             la selección y al confirmar auto-avanza al checkout). Recurring
+             legacy sin framing de experiencia mantiene el comportamiento
+             viejo: disabled hasta elegir slot desde calendar inline. -->
         <button class="btn-accent mobile-buy-bar-cta"
-                :disabled="!hasSelectedClass"
-                @click="continueToClass()">
-          <span x-text="hasSelectedClass ? 'Continuar' : 'Elegí una clase'"></span>
-          <svg x-show="hasSelectedClass" fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+                :disabled="!hasSelectedClass && !isExperience"
+                @click="isExperience ? openScheduleModal() : continueToClass()">
+          <span x-text="isExperience ? 'Elegí una fecha' : (hasSelectedClass ? 'Continuar' : 'Elegí una clase')"></span>
+          <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
     </template>
@@ -965,6 +1415,123 @@
     onScroll();
   })();
 </script>
+
+<!-- FAVORITES + AUTH MODAL — multi-step. Ver index.html para detalles. -->
+<div class="fav-prompt-modal" x-data
+     x-show="$store.favorites.promptOpen" x-cloak x-transition.opacity
+     @click.self="$store.favorites.closePrompt()"
+     @keydown.escape.window="$store.favorites.promptOpen && $store.favorites.closePrompt()"
+     role="dialog" aria-modal="true" aria-labelledby="fav-prompt-title-ev">
+  <div class="fav-prompt-card" @click.stop>
+    <button type="button" class="fav-prompt-close" @click="$store.favorites.closePrompt()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+
+    <!-- STEP 0: PROMPT -->
+    <div x-show="$store.favorites.authStep === 'prompt'" x-cloak>
+      <div class="fav-prompt-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+      </div>
+      <h2 class="fav-prompt-title" id="fav-prompt-title-ev">¡Guardado!</h2>
+      <p class="fav-prompt-body">Creá tu cuenta para acceder a tus favoritos desde cualquier dispositivo y no perderlos.</p>
+      <div class="fav-prompt-actions">
+        <button type="button" class="fav-prompt-primary" @click="$store.favorites.goToAuthStep()">Crear cuenta o iniciar sesión</button>
+      </div>
+      <button type="button" class="fav-prompt-dismiss" @click="$store.favorites.closePrompt()">Seguir explorando</button>
+    </div>
+
+    <!-- STEP 1: EMAIL -->
+    <div x-show="$store.favorites.authStep === 'email'" x-cloak>
+      <h2 class="fav-prompt-title">Ingresá a Vibes</h2>
+      <p class="fav-prompt-body">Usá tu email o tu cuenta de Google. Sin contraseñas.</p>
+      <button type="button" class="fav-prompt-google"
+              @click="$store.favorites.loginWithGoogleInline()"
+              :disabled="$store.favorites.authBusy">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        <span x-text="$store.favorites.authBusy ? 'Conectando…' : 'Continuar con Google'"></span>
+      </button>
+      <div class="fav-prompt-divider">o con email</div>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthEmail()">
+        <div class="fav-prompt-field">
+          <label class="fav-prompt-label" for="fav-auth-email-ev">Email</label>
+          <input class="fav-prompt-input" id="fav-auth-email-ev" type="email"
+                 x-model="$store.favorites.authEmail"
+                 placeholder="tu@email.com" required autocomplete="email" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">Continuar</button>
+        <p class="fav-prompt-legal">Te enviaremos un código de 6 dígitos para verificar tu email. Al continuar aceptás los <a href="#">Términos</a> y la <a href="#">Política de Privacidad</a>.</p>
+      </form>
+    </div>
+
+    <!-- STEP 2: OTP -->
+    <div x-show="$store.favorites.authStep === 'otp'" x-cloak>
+      <h2 class="fav-prompt-title">Verificá tu email</h2>
+      <p class="fav-prompt-body">
+        Enviamos un código de 6 dígitos a <strong x-text="$store.favorites.authEmail"></strong>.
+        <a class="fav-prompt-change" href="#" @click.prevent="$store.favorites.backToAuthEmail()">Cambiar</a>
+      </p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthOtp()">
+        <div class="fav-prompt-otp-group" role="group" aria-label="Código de 6 dígitos">
+          <template x-for="idx in [0,1,2,3,4,5]" :key="idx">
+            <input class="fav-prompt-otp-input" type="text"
+                   inputmode="numeric" maxlength="1"
+                   :data-fav-otp-idx="idx"
+                   :aria-label="'Dígito ' + (idx + 1)"
+                   autocomplete="one-time-code"
+                   :value="$store.favorites.authOtp[idx]"
+                   @input="$store.favorites.onAuthOtpInput(idx, $event)"
+                   @keydown="$store.favorites.onAuthOtpKeydown(idx, $event)"
+                   @paste="$store.favorites.onAuthOtpPaste($event)" />
+          </template>
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">
+          <span x-text="$store.favorites.authBusy ? 'Verificando…' : 'Verificar'"></span>
+        </button>
+      </form>
+      <p class="fav-prompt-otp-resend">
+        ¿No te llegó?
+        <template x-if="$store.favorites.authResendCountdown === 0">
+          <a href="#" @click.prevent="$store.favorites.resendAuthOtp()">Reenviar código</a>
+        </template>
+        <template x-if="$store.favorites.authResendCountdown > 0">
+          <span>Podés reenviar en <span x-text="$store.favorites.authResendCountdown"></span>s</span>
+        </template>
+      </p>
+      <p class="fav-prompt-hint">Demo: cualquier secuencia de 6 dígitos funciona</p>
+    </div>
+
+    <!-- STEP 3: NAME (signup only) -->
+    <div x-show="$store.favorites.authStep === 'name'" x-cloak>
+      <h2 class="fav-prompt-title">Último paso</h2>
+      <p class="fav-prompt-body">Contanos tu nombre para personalizar tu experiencia.</p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthName()">
+        <div class="fav-prompt-form-grid">
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authFirstName"
+                 placeholder="Nombre" required autocomplete="given-name" />
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authLastName"
+                 placeholder="Apellido" required autocomplete="family-name" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary">Entrar</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="vibe-toast" x-data
+     x-show="$store.toast.visible" x-cloak x-transition.opacity
+     role="status" aria-live="polite">
+  <svg class="vibe-toast-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+  <span class="vibe-toast-message" x-text="$store.toast.message"></span>
+  <template x-if="$store.toast.linkHref">
+    <a class="vibe-toast-link" :href="$store.toast.linkHref" x-text="$store.toast.linkText"></a>
+  </template>
+</div>
 
 </body>
 </html>

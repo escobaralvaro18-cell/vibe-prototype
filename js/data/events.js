@@ -346,71 +346,180 @@ window.EVENT_DATA = {
       ['Reembolsos', 'Hasta 48h antes']
     ]
   },
-  yoga: {
-    eventType: 'recurring',
-    kicker: 'FLOW STUDIO · CLASES SEMANALES',
-    title: 'Yoga Sunset<br><em>en la playa.</em>',
-    desc: '<p><strong>Yoga Sunset</strong> es una experiencia semanal de vinyasa flow al aire libre, con vista al atardecer del Pacífico. Incluye mat, música en vivo y té chai al finalizar la clase.</p><p>Clases para todos los niveles. Duración 75 minutos.</p>',
-    // Schedule por mes. Cada mes es un objeto con key = día del mes -> array de clases.
-    // month: 0=Enero ... 11=Diciembre
+  // ============================================================
+  // COMASAGUA — Primera "experiencia" (kind=experience, tour).
+  // Reemplaza el yoga anterior como experiencia-modelo. Estructura
+  // nueva: gallery, quickFacts, includes, bring, itinerary,
+  // cancellation, host. Mantiene scheduleByMonth del modelo
+  // recurring porque el calendario + slots picker ya funciona.
+  // ============================================================
+  comasagua: {
+    kind: 'experience',              // performance | experience
+    experienceType: 'tour',          // class | tour | adventure | wellness
+    eventType: 'recurring',          // reusa calendario para daily slots
+    country: 'SV',
+    kicker: 'JIMNY TRIPS · POWERED BY SUZUKI',
+    title: 'Sunrise en el<br><em>Peñón de Comasagua.</em>',
+    category: 'Tours · Aventura',
+    desc: '<p>Tour 4x4 en un <strong>Suzuki Jimny</strong> al mirador del Peñón de Comasagua. Vistas espectaculares de Surf City y La Libertad desde 1.400 msnm, naturaleza, aire fresco al amanecer, y fotos épicas en una experiencia de 5 horas.</p><p>Salida antes del amanecer para ver el sunrise desde el punto más alto. Incluye desayuno al volver del mirador.</p>',
+
+    // Galería del hero carousel (3-5 fotos reales en lugar de gradient).
+    gallery: [
+      { src: 'assets/experiences/penon-sunrise.jpg', alt: 'Pareja en la cima del Peñón de Comasagua al amanecer, con vistas a la costa pacífica de El Salvador' },
+      { src: 'assets/experiences/jimny-field.jpg',   alt: 'Dos Suzuki Jimny 4x4 en un campo de cultivo con las montañas de fondo — Jimny Trips powered by Suzuki' },
+      { src: 'assets/experiences/jimny-border.jpg',  alt: 'Celebración en la cima junto a cartel de El Salvador, con dos Jimny 4x4 estacionados' }
+    ],
+
+    // Quick facts strip — lo crítico para decidir antes de scrollear.
+    quickFacts: {
+      duration: '5 horas',
+      level: 'Principiante',
+      groupMax: 8,
+      language: 'Español / English',
+      meetingPoint: 'Santa Tecla'
+    },
+
+    // Qué incluye — lista estructurada. Sin emojis (decisión de
+     // branding: evitar iconos decorativos informales). El render usa
+     // un checkmark SVG uniforme para todos los items. */
+    includes: [
+      'Transporte en Suzuki Jimny 4x4',
+      'Experiencia de sunrise en el mirador',
+      'Desayuno típico',
+      'Fotos del tour'
+    ],
+
+    // Qué traer — lista de items del participante.
+    bring: [
+      'Ropa cómoda',
+      'Tenis o calzado cerrado',
+      'Gorra o sombrero',
+      'Suéter ligero (hace fresco al amanecer)',
+      'Protector solar',
+      'Celular o cámara para fotos'
+    ],
+
+    // Itinerario — timeline visual para tours.
+    itinerary: [
+      { time: '4:00 AM', title: 'Salida',              note: 'Punto de encuentro en Santa Tecla' },
+      { time: '6:00 AM', title: 'Llegada al Peñón',   note: 'Ascenso al mirador para el amanecer' },
+      { time: '7:00 AM', title: 'Desayuno',            note: 'Desayuno típico con vista al amanecer' },
+      { time: '9:00 AM', title: 'Regreso',             note: 'Vuelta al punto de encuentro' }
+    ],
+
+    // Ubicación — se renderea como mapa embed de Google Maps + textos.
+    // `mapQuery` es lo que Google Maps busca (landmark o address); usar un
+    // nombre reconocible funciona mejor que coordenadas crudas. El user
+    // puede también abrirlo en una app dedicada con el link del final.
+    location: {
+      meetingPoint: 'Urb. La Montaña No 4, Santa Tecla, El Salvador',
+      destination: 'Peñón de Comasagua, La Libertad, El Salvador',
+      mapQuery: 'Peñón de Comasagua, El Salvador'
+    },
+
+    // Política de cancelación — decisión crítica de compra.
+    cancellation: 'Cancelación gratis hasta 24 horas antes del tour',
+
+    // Host — operador del tour, reemplaza al "organizer" con más detalle.
+    host: {
+      name: 'Jandi GO Tours',
+      verified: true,
+      badge: 'Operador verificado',
+      avatar: 'J',
+      short: 'Más de 200 tours guiados · Especialistas en 4x4'
+    },
+
+    // Reviews — rating promedio, total de reseñas, y 3 destacadas.
+    // Si reviews.count === 0 mostramos el estado "Nuevo · sé el primero".
+    reviews: {
+      rating: 4.9,
+      count: 42,
+      distribution: { 5: 38, 4: 3, 3: 1, 2: 0, 1: 0 },
+      highlights: [
+        {
+          name: 'Andrea M.',
+          initial: 'A',
+          date: 'Marzo 2026',
+          rating: 5,
+          text: 'Experiencia increíble de principio a fin. El sunrise desde el Peñón es algo que todo salvadoreño tiene que vivir. Jandi y su equipo manejan los Jimny con mucha experiencia — subís tranquilo aunque nunca hayas hecho 4x4. El desayuno arriba es la cereza del pastel.'
+        },
+        {
+          name: 'Roberto S.',
+          initial: 'R',
+          date: 'Febrero 2026',
+          rating: 5,
+          text: 'Fuimos con mi novia y fue el mejor plan que hicimos en El Salvador. Organización impecable: puntuales, seguridad primero, y muchas paradas para fotos. La vista desde el mirador no la vas a encontrar en ningún tour comercial.'
+        },
+        {
+          name: 'Carolina V.',
+          initial: 'C',
+          date: 'Enero 2026',
+          rating: 4,
+          text: 'Espectacular el recorrido y muy bien operado. Solo sugiero traer guantes si vas en diciembre-enero, hace más frío del que uno espera a las 4 AM. El desayuno y la compañía del grupo compensan todo. Volvemos seguro.'
+        }
+      ]
+    },
+
+    // Schedule — viernes, sábados y domingos disponibles cada mes.
+    // Reutiliza la grid pattern del yoga pero con UN slot por día (4 AM).
+    // Schedule por mes. Tours opera viernes/sábados/domingos (demo).
+    // UN slot por día a las 4:00 AM (sunrise tour).
     scheduleByMonth: {
       '2026-3': { // Abril 2026
-        '2':  [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '4':  [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '6':  [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'last' } ],
-        '9':  [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '11': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '13': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '16': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '18': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'soldout' } ],
-        '20': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '23': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '25': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '27': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow + Live Music', teacher: 'Especial', price: '$22', status: 'last' } ],
-        '30': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ]
+        '3':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '4':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'last' } ],
+        '5':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'soldout' } ],
+        '10': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '11': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '12': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '17': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '18': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'last' } ],
+        '19': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '24': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '25': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '26': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ]
       },
       '2026-4': { // Mayo 2026
-        '2':  [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '5':  [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '7':  [ { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '9':  [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '12': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '14': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '16': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'last' } ],
-        '19': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '21': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '23': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '26': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '28': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '30': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ]
+        '1':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '2':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '3':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '8':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '9':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '10': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '15': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '16': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'last' } ],
+        '17': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '22': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '23': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '24': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '29': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '30': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '31': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ]
       },
       '2026-5': { // Junio 2026
-        '2':  [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '4':  [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '6':  [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '9':  [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ],
-        '11': [ { time: '5:30 PM', name: 'Power Yoga', teacher: 'Daniel', price: '$12', status: 'available' } ],
-        '13': [ { time: '7:00 AM', name: 'Morning Flow', teacher: 'Marcela', price: '$15', status: 'available' }, { time: '5:30 PM', name: 'Sunset Flow', teacher: 'Daniel', price: '$15', status: 'available' } ],
-        '16': [ { time: '5:30 PM', name: 'Vinyasa Flow', teacher: 'Marcela', price: '$12', status: 'available' } ]
+        '5':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '6':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '7':  [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '12': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ],
+        '13': [ { time: '4:00 AM', name: 'Sunrise Tour', teacher: 'Jandi Tours', price: '$45', status: 'available' } ]
       }
     },
-    // Rango navegable
     calMinMonth: '2026-3',
     calMaxMonth: '2026-5',
-    lineup: [
-      { name: 'Marcela Ramírez', main: true },
-      { name: 'Daniel Quesada' }
-    ],
-    orgAvatar: 'FS',
-    orgName: 'Flow Studio CR',
-    price: '$12.00',
-    bg: 'art-yoga',
+
+    // Legacy fields (compatibilidad con componentes que ya leen event.orgAvatar,
+    // event.orgName, event.price, event.bg, event.info). Para experiencias los
+    // duplicamos desde host/quickFacts para no romper el render existente.
+    orgAvatar: 'J',
+    orgName: 'Jandi GO Tours',
+    price: '$45.00',
+    bg: 'art-comasagua',
     info: [
-      ['Qué traer', 'Ropa cómoda y botella de agua'],
-      ['Duración', '75 minutos'],
-      ['Nivel', 'Todos los niveles'],
-      ['Pagos', 'Tarjeta, SINPE, efectivo'],
-      ['Reembolsos', 'Hasta 6h antes']
+      ['Duración',           '5 horas'],
+      ['Nivel',              'Principiante'],
+      ['Capacidad',          'Máx 8 personas'],
+      ['Operador',           'Jandi GO Tours'],
+      ['Punto de encuentro', 'Urb. La Montaña, Santa Tecla']
     ]
   },
   badbunny: {
@@ -491,6 +600,117 @@ window.EVENT_DATA = {
       ['Reembolsos', 'Hasta 48h antes']
     ]
   },
+  // ========================================================================
+  // DEPORTE — Partidos de fútbol locales (CR/SV/HN). Estructura clásica de
+  // eventos `single + ga`, con tribunas como "secciones" del seatedConfig
+  // (palco, sombra, sol, general). Imágenes Unsplash de estadios reales.
+  // ========================================================================
+  'clasico-cr': {
+    eventType: 'single',
+    ticketMode: 'ga',
+    seatedConfig: {
+      sections: [
+        { id: 'palco',    name: 'Palco Cabina',   price: 75, color: '#c6f800', status: 'fewleft',   description: 'Palco con bebidas y snacks incluidos' },
+        { id: 'sombra-c', name: 'Sombra Centro',  price: 45, color: '#00aa5c', status: 'fewleft',   description: 'Vista preferencial al centro de la cancha' },
+        { id: 'sombra',   name: 'Sombra',         price: 28, color: '#2d9cdb', status: 'available', description: 'Tribuna sombra cubierta' },
+        { id: 'sol',      name: 'Sol',            price: 18, color: '#2d9cdb', status: 'available', description: 'Tribuna sol numerada' },
+        { id: 'norte',    name: 'Sector Norte',   price: 22, color: '#2d9cdb', status: 'available', description: 'Barra Saprissa · ambiente caliente' }
+      ]
+    },
+    kicker: 'LIGA PROMERICA · CLÁSICO MORADO',
+    title: 'Saprissa vs<br><em>Alajuelense.</em>',
+    date: 'Dom 24 May',
+    time: '6:00 PM',
+    venue: 'Estadio Ricardo Saprissa Aymá',
+    city: 'San José',
+    desc: '<p><strong>El Clásico del fútbol costarricense.</strong> Saprissa recibe a Alajuelense en una nueva edición del partido más esperado de la temporada. Más de 75 años de rivalidad en la cancha del Monstruo Morado.</p><p>Apto para todas las edades · Zona familiar disponible · Recomendamos llegar 1 hora antes.</p>',
+    lineup: [
+      { name: 'Deportivo Saprissa', main: true },
+      { name: 'Liga Deportiva Alajuelense' }
+    ],
+    orgAvatar: 'DS',
+    orgName: 'Deportivo Saprissa',
+    price: '$18.00',
+    bg: 'bg-clasico-cr',
+    info: [
+      ['Edad mínima', 'Todas las edades'],
+      ['Puertas', '4:00 PM — inicio 6:00 PM'],
+      ['Parqueo', 'Disponible · ₡3,500'],
+      ['Pagos', 'Tarjeta, SINPE, efectivo'],
+      ['Reembolsos', 'No hay reembolsos en eventos deportivos']
+    ]
+  },
+
+  'alianza-fas': {
+    eventType: 'single',
+    ticketMode: 'ga',
+    seatedConfig: {
+      sections: [
+        { id: 'palco',    name: 'Palco VIP',     price: 60, color: '#c6f800', status: 'fewleft',   description: 'Palco con catering · vista preferencial' },
+        { id: 'platinum', name: 'Platea Centro', price: 35, color: '#00aa5c', status: 'available', description: 'Platea cubierta centro' },
+        { id: 'platea',   name: 'Platea',        price: 22, color: '#2d9cdb', status: 'available', description: 'Platea cubierta lateral' },
+        { id: 'general',  name: 'General',       price: 12, color: '#2d9cdb', status: 'available', description: 'Tribuna general · sol' }
+      ]
+    },
+    kicker: 'PRIMERA DIVISIÓN · CLÁSICO DEL FÚTBOL',
+    title: 'Alianza FC vs<br><em>FAS.</em>',
+    date: 'Sáb 6 Jun',
+    time: '5:00 PM',
+    venue: 'Estadio Cuscatlán',
+    city: 'San Salvador',
+    desc: '<p><strong>El Clásico de El Salvador.</strong> Alianza FC y CD FAS protagonizan una nueva entrega de uno de los duelos más emblemáticos del fútbol salvadoreño. Más de 80 años de historia sobre la grama del Cuscatlán.</p><p>Show de medio tiempo con pirotecnia · Recomendamos llegar 1 hora antes.</p>',
+    lineup: [
+      { name: 'Alianza FC', main: true },
+      { name: 'Club Deportivo FAS' }
+    ],
+    orgAvatar: 'AL',
+    orgName: 'Alianza FC',
+    price: '$12.00',
+    bg: 'bg-alianza-fas',
+    info: [
+      ['Edad mínima', 'Todas las edades'],
+      ['Puertas', '3:00 PM — inicio 5:00 PM'],
+      ['Parqueo', 'Predio Estadio Cuscatlán'],
+      ['Pagos', 'Tarjeta, Transfer365, efectivo'],
+      ['Reembolsos', 'No hay reembolsos en eventos deportivos']
+    ]
+  },
+
+  'olimpia-motagua': {
+    eventType: 'single',
+    ticketMode: 'ga',
+    seatedConfig: {
+      sections: [
+        { id: 'palco',        name: 'Palco',         price: 55, color: '#c6f800', status: 'fewleft',   description: 'Palco cubierto · vista al centro' },
+        { id: 'sombra',       name: 'Sombra',        price: 25, color: '#00aa5c', status: 'available', description: 'Sombra cubierta' },
+        { id: 'preferencial', name: 'Preferencial',  price: 15, color: '#2d9cdb', status: 'available', description: 'Preferencial · sol numerado' },
+        { id: 'general',      name: 'General',       price:  8, color: '#2d9cdb', status: 'available', description: 'Tribuna general' }
+      ]
+    },
+    kicker: 'LIGA NACIONAL · CLÁSICO CAPITALINO',
+    title: 'Olimpia vs<br><em>Motagua.</em>',
+    date: 'Dom 31 May',
+    time: '4:00 PM',
+    venue: 'Estadio Nacional Chelato Uclés',
+    city: 'Tegucigalpa',
+    desc: '<p><strong>El Clásico Capitalino.</strong> Olimpia y Motagua se enfrentan en el Estadio Nacional. La rivalidad más intensa del fútbol hondureño, ahora en una nueva temporada de la Liga Nacional.</p><p>Apto para todas las edades · Zona familiar disponible.</p>',
+    lineup: [
+      { name: 'Club Deportivo Olimpia', main: true },
+      { name: 'Fútbol Club Motagua' }
+    ],
+    orgAvatar: 'OL',
+    orgName: 'CD Olimpia',
+    price: '$8.00',
+    bg: 'bg-olimpia-motagua',
+    info: [
+      ['Edad mínima', 'Todas las edades'],
+      ['Puertas', '2:00 PM — inicio 4:00 PM'],
+      ['Parqueo', 'Disponible · cercanías del estadio'],
+      ['Pagos', 'Tarjeta, Tengo, efectivo'],
+      ['Reembolsos', 'No hay reembolsos en eventos deportivos']
+    ]
+  },
+
   // Piso 21 (HN) — agregado para cubrir el link del home que en el prototipo
   // quedaba huérfano. Datos razonables de show en Tegucigalpa.
   piso21: {
@@ -524,6 +744,302 @@ window.EVENT_DATA = {
       ['Parqueo', 'Disponible'],
       ['Pagos', 'Tarjeta, transferencia'],
       ['Reembolsos', 'Hasta 48h antes']
+    ]
+  },
+
+  // ========================================================================
+  // EXPERIENCIAS DUMMY — catálogo para mostrar variedad por país (CR/SV/HN).
+  // ========================================================================
+  // Comparten la misma estructura que `comasagua` (el template modelo).
+  // Cada una tiene gallery con foto real de Unsplash (1 imagen), datos
+  // mínimos viables (quickFacts, includes, bring, host, cancellation,
+  // scheduleByMonth básico). Sin itinerary ni location en las dummy para
+  // mantener el archivo manejable — si se necesitan después, se agregan.
+  // ========================================================================
+  'surf-tamarindo': {
+    kind: 'experience', experienceType: 'class', eventType: 'recurring',
+    country: 'CR',
+    kicker: 'PURA VIDA SURF · TAMARINDO',
+    title: 'Surf lesson en<br><em>Playa Tamarindo.</em>',
+    category: 'Clases · Deporte',
+    desc: '<p>Clase de surf grupal con instructores certificados ISA. Todos los equipos incluidos (tabla, lycra, parafina). Ideal para principiantes que quieren pararse en su primera ola en una de las playas más icónicas del Pacífico costarricense.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1502933691298-84fc14542831?auto=format&fit=crop&w=1600&q=75', alt: 'Persona surfeando una ola al atardecer en Playa Tamarindo' }
+    ],
+    quickFacts: { duration: '2 horas', level: 'Principiante', groupMax: 6, meetingPoint: 'Tamarindo' },
+    includes: ['Tabla de surf y lycra', 'Instructor certificado ISA', 'Video de tus mejores olas', 'Agua y frutas'],
+    bring: ['Traje de baño', 'Protector solar reef-safe', 'Toalla', 'Ganas de levantarte'],
+    cancellation: 'Cancelación gratis hasta 12 horas antes',
+    host: { name: 'Pura Vida Surf School', verified: true, avatar: 'P', short: 'Más de 10 años enseñando · Equipo ISA' },
+    location: {
+      meetingPoint: 'Pura Vida Surf School, Playa Tamarindo, Guanacaste',
+      destination: 'Playa Tamarindo, Costa Rica',
+      mapQuery: 'Playa Tamarindo, Guanacaste, Costa Rica'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '4':  [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ],
+        '5':  [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'last' } ],
+        '11': [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ],
+        '12': [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ],
+        '18': [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ],
+        '19': [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ],
+        '25': [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ],
+        '26': [ { time: '7:00 AM', name: 'Morning Session', teacher: 'Pura Vida', price: '$55', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'P', orgName: 'Pura Vida Surf School',
+    price: '$55.00', bg: 'art-surf-tamarindo',
+    info: [
+      ['Duración', '2 horas'], ['Nivel', 'Principiante'], ['Capacidad', 'Máx 6 personas'],
+      ['Operador', 'Pura Vida Surf School'], ['Punto de encuentro', 'Playa Tamarindo']
+    ]
+  },
+
+  'canopy-monteverde': {
+    kind: 'experience', experienceType: 'adventure', eventType: 'recurring',
+    country: 'CR',
+    kicker: 'SELVATURA · MONTEVERDE',
+    title: 'Canopy tour en<br><em>Bosque Nuboso.</em>',
+    category: 'Aventura',
+    desc: '<p>Recorré el bosque nuboso de Monteverde por el aire: 14 cables de canopy, el más largo de 1 km. Vistas al océano Pacífico y al volcán Arenal desde los cables. Aptos todos los niveles con instrucciones de seguridad previas.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?auto=format&fit=crop&w=1600&q=75', alt: 'Bosque nuboso denso verde en Monteverde, Costa Rica' }
+    ],
+    quickFacts: { duration: '3 horas', level: 'Todos los niveles', groupMax: 12, meetingPoint: 'Monteverde' },
+    includes: ['Arnés y casco', 'Guías bilingües', 'Transporte desde hotel', 'Galería de fotos digital'],
+    bring: ['Zapatos cerrados', 'Ropa cómoda', 'Chaqueta ligera', 'Protector solar'],
+    cancellation: 'Cancelación gratis hasta 24 horas antes',
+    host: { name: 'Selvatura Park', verified: true, avatar: 'S', short: 'Parque privado · 250 hectáreas de bosque' },
+    location: {
+      meetingPoint: 'Selvatura Park, Monteverde, Puntarenas',
+      destination: 'Reserva Biológica Bosque Nuboso Monteverde',
+      mapQuery: 'Selvatura Park, Monteverde, Costa Rica'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '3':  [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ],
+        '5':  [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ],
+        '10': [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ],
+        '12': [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'last' } ],
+        '17': [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ],
+        '19': [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ],
+        '24': [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ],
+        '26': [ { time: '9:00 AM', name: 'Tour matutino',  teacher: 'Selvatura', price: '$65', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'S', orgName: 'Selvatura Park',
+    price: '$65.00', bg: 'art-canopy-monteverde',
+    info: [
+      ['Duración', '3 horas'], ['Nivel', 'Todos'], ['Capacidad', 'Máx 12 personas'],
+      ['Operador', 'Selvatura Park'], ['Punto de encuentro', 'Monteverde']
+    ]
+  },
+
+  'cafe-ataco': {
+    kind: 'experience', experienceType: 'tour', eventType: 'recurring',
+    country: 'SV',
+    kicker: 'RUTA DE LAS FLORES · ATACO',
+    title: 'Ruta del café en<br><em>Concepción de Ataco.</em>',
+    category: 'Tours · Cultura',
+    desc: '<p>Tour guiado por una finca familiar de café de altura en la Ruta de las Flores. Ves todo el proceso desde la cereza hasta la taza: cosecha, beneficio, tostado y cata. Terminás con un desayuno típico salvadoreño en el cafetal.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1600&q=75', alt: 'Granos de café verdes y rojos en una rama' }
+    ],
+    quickFacts: { duration: '5 horas', level: 'Todos los niveles', groupMax: 10, meetingPoint: 'Ataco' },
+    includes: ['Tour guiado por finca', 'Cata de 3 cafés de especialidad', 'Desayuno típico', 'Bolsa de café para llevar'],
+    bring: ['Calzado cómodo', 'Ropa que pueda mancharse', 'Gorra o sombrero', 'Protector solar'],
+    cancellation: 'Cancelación gratis hasta 24 horas antes',
+    host: { name: 'Finca Santa Leticia', verified: true, avatar: 'F', short: 'Cafetal familiar · 3 generaciones' },
+    location: {
+      meetingPoint: 'Finca Santa Leticia, Concepción de Ataco, Ahuachapán',
+      destination: 'Ruta de las Flores, El Salvador',
+      mapQuery: 'Concepción de Ataco, Ahuachapán, El Salvador'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '4':  [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ],
+        '6':  [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ],
+        '11': [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ],
+        '13': [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'last' } ],
+        '18': [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ],
+        '20': [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ],
+        '25': [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ],
+        '27': [ { time: '8:00 AM', name: 'Tour completo', teacher: 'Santa Leticia', price: '$40', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'F', orgName: 'Finca Santa Leticia',
+    price: '$40.00', bg: 'art-cafe-ataco',
+    info: [
+      ['Duración', '5 horas'], ['Nivel', 'Todos'], ['Capacidad', 'Máx 10 personas'],
+      ['Operador', 'Finca Santa Leticia'], ['Punto de encuentro', 'Concepción de Ataco']
+    ]
+  },
+
+  'roatan-snorkel': {
+    kind: 'experience', experienceType: 'adventure', eventType: 'recurring',
+    country: 'HN',
+    kicker: 'BAY ISLANDS · ROATÁN',
+    title: 'Snorkel en<br><em>arrecifes de Roatán.</em>',
+    category: 'Aventura · Mar',
+    desc: '<p>Expedición en bote a 3 puntos de snorkel del Mesoamerican Barrier Reef, el segundo arrecife más grande del mundo. Guías marinos certificados, equipo profesional, y aguas cristalinas llenas de vida marina: tortugas, rayas, bancos de peces tropicales.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1600&q=75', alt: 'Persona haciendo snorkel sobre arrecife de coral con peces tropicales' }
+    ],
+    quickFacts: { duration: '4 horas', level: 'Principiante', groupMax: 8, meetingPoint: 'West Bay' },
+    includes: ['Máscara, snorkel y aletas', 'Bote con capitán y guía', 'Agua y fruta a bordo', 'Chaleco salvavidas'],
+    bring: ['Traje de baño', 'Protector solar reef-safe', 'Toalla', 'Cámara acuática (opcional)'],
+    cancellation: 'Cancelación gratis hasta 24 horas antes',
+    host: { name: 'Roatán Marine Tours', verified: true, avatar: 'R', short: 'Guías PADI · Más de 15 años en el arrecife' },
+    location: {
+      meetingPoint: 'West Bay Beach, Roatán, Islas de la Bahía',
+      destination: 'Mesoamerican Barrier Reef, Roatán',
+      mapQuery: 'West Bay, Roatán, Honduras'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '3':  [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ],
+        '5':  [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ],
+        '10': [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'last' } ],
+        '12': [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ],
+        '17': [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ],
+        '19': [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ],
+        '24': [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ],
+        '26': [ { time: '9:00 AM', name: 'Morning Dive', teacher: 'Marine Tours', price: '$75', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'R', orgName: 'Roatán Marine Tours',
+    price: '$75.00', bg: 'art-roatan-snorkel',
+    info: [
+      ['Duración', '4 horas'], ['Nivel', 'Principiante'], ['Capacidad', 'Máx 8 personas'],
+      ['Operador', 'Roatán Marine Tours'], ['Punto de encuentro', 'West Bay, Roatán']
+    ]
+  },
+
+  'salsa-sansalvador': {
+    kind: 'experience', experienceType: 'class', eventType: 'recurring',
+    country: 'SV',
+    kicker: 'LATIN BEAT · SALSA & BACHATA',
+    title: 'Clase abierta de<br><em>Salsa.</em>',
+    category: 'Clases · Baile',
+    desc: '<p>Clase abierta de salsa para todos los niveles en una academia del centro de San Salvador. 90 minutos con instructores certificados: calentamiento, técnica básica, giros y combinaciones para mover la cadera. No necesitás pareja — rotamos para que todos bailen.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&w=1600&q=75', alt: 'Pareja bailando salsa en clase grupal' }
+    ],
+    quickFacts: { duration: '1h 30min', level: 'Todos los niveles', groupMax: 16, meetingPoint: 'San Salvador' },
+    includes: ['Instructor certificado', 'Calentamiento dirigido', 'Combinaciones para llevar', 'Agua y snacks'],
+    bring: ['Ropa cómoda', 'Zapatos de suela lisa', 'Toalla pequeña', 'Ganas de bailar'],
+    cancellation: 'Cancelación gratis hasta 6 horas antes',
+    host: { name: 'Latin Beat Academy', verified: true, avatar: 'L', short: 'Academia de baile · 8 años en SV' },
+    location: {
+      meetingPoint: 'Latin Beat Academy, Colonia Escalón, San Salvador',
+      destination: 'San Salvador, El Salvador',
+      mapQuery: 'Colonia Escalón, San Salvador, El Salvador'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '5':  [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ],
+        '7':  [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ],
+        '12': [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ],
+        '14': [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'last' } ],
+        '19': [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ],
+        '21': [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ],
+        '26': [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ],
+        '28': [ { time: '7:00 PM', name: 'Clase abierta', teacher: 'Latin Beat', price: '$15', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'L', orgName: 'Latin Beat Academy',
+    price: '$15.00', bg: 'art-salsa-sansalvador',
+    info: [
+      ['Duración', '1h 30min'], ['Nivel', 'Todos'], ['Capacidad', 'Máx 16 personas'],
+      ['Operador', 'Latin Beat Academy'], ['Punto de encuentro', 'Colonia Escalón']
+    ]
+  },
+
+  'cocina-tegus': {
+    kind: 'experience', experienceType: 'class', eventType: 'recurring',
+    country: 'HN',
+    kicker: 'COCINA HONDUREÑA · TEGUCIGALPA',
+    title: 'Clase de<br><em>Baleadas y Plato Típico.</em>',
+    category: 'Clases · Cocina',
+    desc: '<p>Aprendé a hacer baleadas, plato típico y catrachas en una clase práctica de cocina hondureña. Tres horas amasando tortillas a mano, frijoles desde cero y queso fresco rallado al estilo de la abuela. Te llevás las recetas para repetir en tu casa.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1600&q=75', alt: 'Mesa con tortillas hechas a mano y frijoles' }
+    ],
+    quickFacts: { duration: '3 horas', level: 'Principiante', groupMax: 8, meetingPoint: 'Tegucigalpa' },
+    includes: ['Todos los ingredientes', 'Recetario impreso', 'Almuerzo de tu propia comida', 'Bebidas frescas'],
+    bring: ['Delantal (opcional)', 'Ropa cómoda', 'Pelo amarrado', 'Apetito'],
+    cancellation: 'Cancelación gratis hasta 24 horas antes',
+    host: { name: 'Sazón Catracho', verified: true, avatar: 'S', short: 'Cocina hondureña · familiar y abierta' },
+    location: {
+      meetingPoint: 'Sazón Catracho, Colonia Palmira, Tegucigalpa',
+      destination: 'Tegucigalpa, Honduras',
+      mapQuery: 'Colonia Palmira, Tegucigalpa, Honduras'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '4':  [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ],
+        '7':  [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ],
+        '11': [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'last' } ],
+        '14': [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ],
+        '18': [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ],
+        '21': [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ],
+        '25': [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ],
+        '28': [ { time: '11:00 AM', name: 'Clase práctica', teacher: 'Sazón Catracho', price: '$35', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'S', orgName: 'Sazón Catracho',
+    price: '$35.00', bg: 'art-cocina-tegus',
+    info: [
+      ['Duración', '3 horas'], ['Nivel', 'Principiante'], ['Capacidad', 'Máx 8 personas'],
+      ['Operador', 'Sazón Catracho'], ['Punto de encuentro', 'Colonia Palmira']
+    ]
+  },
+
+  'copan-ruins': {
+    kind: 'experience', experienceType: 'tour', eventType: 'recurring',
+    country: 'HN',
+    kicker: 'PATRIMONIO UNESCO · COPÁN',
+    title: 'Tour guiado a las<br><em>Ruinas de Copán.</em>',
+    category: 'Tours · Historia',
+    desc: '<p>Recorrido guiado de 4 horas por el sitio arqueológico maya de Copán, declarado Patrimonio de la Humanidad por UNESCO. Estelas, la Escalera Jeroglífica, el Campo de Pelota y los túneles de Rosalila. Guía bilingüe con formación arqueológica.</p>',
+    gallery: [
+      { src: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1600&q=75', alt: 'Pirámide maya en la selva — sitio arqueológico estilo Copán' }
+    ],
+    quickFacts: { duration: '4 horas', level: 'Todos los niveles', groupMax: 14, meetingPoint: 'Copán Ruinas' },
+    includes: ['Entrada al sitio arqueológico', 'Guía bilingüe certificado', 'Acceso a los túneles', 'Agua embotellada'],
+    bring: ['Zapatos cómodos para caminar', 'Gorra o sombrero', 'Protector solar', 'Repelente de insectos'],
+    cancellation: 'Cancelación gratis hasta 48 horas antes',
+    host: { name: 'Copán Heritage Tours', verified: true, avatar: 'C', short: 'Guías arqueólogos · Certificados por IHAH' },
+    location: {
+      meetingPoint: 'Centro de Copán Ruinas, Copán',
+      destination: 'Sitio Arqueológico de Copán (UNESCO)',
+      mapQuery: 'Ruinas de Copán, Honduras'
+    },
+    scheduleByMonth: {
+      '2026-3': {
+        '3':  [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ],
+        '5':  [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ],
+        '10': [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ],
+        '12': [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ],
+        '17': [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'last' } ],
+        '19': [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ],
+        '24': [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ],
+        '26': [ { time: '8:30 AM', name: 'Tour AM', teacher: 'Heritage Tours', price: '$50', status: 'available' } ]
+      }
+    },
+    calMinMonth: '2026-3', calMaxMonth: '2026-3',
+    orgAvatar: 'C', orgName: 'Copán Heritage Tours',
+    price: '$50.00', bg: 'art-copan-ruins',
+    info: [
+      ['Duración', '4 horas'], ['Nivel', 'Todos'], ['Capacidad', 'Máx 14 personas'],
+      ['Operador', 'Copán Heritage Tours'], ['Punto de encuentro', 'Centro de Copán Ruinas']
     ]
   }
 };

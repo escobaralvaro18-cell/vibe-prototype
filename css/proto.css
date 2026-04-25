@@ -2408,9 +2408,44 @@ body.menu-open .mobile-menu {
 .event-thumb-img > .bg-manuelturizo,
 .event-thumb-img > .bg-piso21,
 .event-thumb-img > .bg-karolg,
-.event-thumb-img > .bg-maluma {
+.event-thumb-img > .bg-maluma,
+.event-thumb-img > .bg-clasico-cr,
+.event-thumb-img > .bg-alianza-fas,
+.event-thumb-img > .bg-olimpia-motagua {
   position: absolute; inset: 0; width: 100%; height: 100%;
 }
+
+/* ===== DEPORTE — Partidos de fútbol (CR/SV/HN) =================== */
+/* Fotos reales de Unsplash de estadios + atmósferas de cancha. */
+.bg-clasico-cr {
+  position: absolute; inset: 0;
+  background-color: #4b237b;
+  background-image:
+    linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%),
+    url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=75');
+  background-size: cover; background-position: center;
+}
+.bg-clasico-cr::before, .bg-clasico-cr::after { content: none; }
+
+.bg-alianza-fas {
+  position: absolute; inset: 0;
+  background-color: #002a5e;
+  background-image:
+    linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%),
+    url('https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=1600&q=75');
+  background-size: cover; background-position: center;
+}
+.bg-alianza-fas::before, .bg-alianza-fas::after { content: none; }
+
+.bg-olimpia-motagua {
+  position: absolute; inset: 0;
+  background-color: #143d75;
+  background-image:
+    linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%),
+    url('https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=1600&q=75');
+  background-size: cover; background-position: center;
+}
+.bg-olimpia-motagua::before, .bg-olimpia-motagua::after { content: none; }
 
 
 .cartelera-content {
@@ -2617,6 +2652,11 @@ body.menu-open .mobile-menu {
   display: flex; gap: 8px;
   overflow-x: auto; scrollbar-width: none;
   scroll-snap-type: x proximity;
+  /* Padding-right para que el último pill tenga "respiro" al final y no
+     se corte raro contra el edge del container. También funciona como
+     affordance visual: indica que hay más scroll disponible. */
+  padding-right: 16px;
+  scroll-padding-right: 16px;
 }
 .pills-row::-webkit-scrollbar { display: none; }
 .pill {
@@ -3158,15 +3198,83 @@ body.menu-open .mobile-menu {
   background-position: center;
 }
 .art-comedia::before, .art-comedia::after { content: none; }
-/* ===== FLYER: YOGA (soft gold with sun + serif) ===== */
-.art-yoga {
+/* ===== THUMB: COMASAGUA (foto sunrise real + gradient overlay) =====
+   Thumbnail usado en home cards. El path del url() es RELATIVO al
+   archivo CSS (css/proto.css), por eso necesita `../` para subir un
+   nivel hasta vibe/ antes de entrar a assets/. Si la foto no carga,
+   el background-color + linear-gradient amarillo→negro evoca sunrise. */
+.art-comasagua {
   position: absolute; inset: 0;
-  background-color: #f59e0b;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 360' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='yg' x1='0' y1='0' x2='0' y2='1'><stop offset='0%25' stop-color='%23fde68a'/><stop offset='50%25' stop-color='%23fcd34d'/><stop offset='100%25' stop-color='%23f59e0b'/></linearGradient></defs><rect width='300' height='360' fill='url(%23yg)'/><circle cx='150' cy='130' r='65' fill='rgba(255,255,255,0.85)'/><circle cx='150' cy='130' r='50' fill='white'/><g transform='translate(150, 240)'><circle cx='0' cy='0' r='8' fill='%235a3a14'/><rect x='-2' y='5' width='4' height='25' fill='%235a3a14'/><path d='M -20 20 Q -10 15 0 20 Q 10 15 20 20' stroke='%235a3a14' stroke-width='3' fill='none' stroke-linecap='round'/><path d='M -15 35 L 15 35' stroke='%235a3a14' stroke-width='3' stroke-linecap='round'/></g><text x='150' y='305' text-anchor='middle' font-family='Georgia, serif' font-style='italic' font-weight='700' font-size='30' fill='%235a3a14'>Beach Yoga</text><text x='150' y='340' text-anchor='middle' font-family='monospace' font-weight='500' font-size='10' fill='%235a3a14' letter-spacing='3'>PLAYA HERMOSA · 6:45 AM</text></svg>");
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('../assets/experiences/penon-sunrise.jpg'),
+    linear-gradient(180deg, #fcd34d 0%, #f59e0b 35%, #b45309 70%, #1f2937 100%);
+  background-size: cover, cover, cover;
+  background-position: center, center, center;
+  background-color: #1f2937;
+}
+.art-comasagua::before, .art-comasagua::after { content: none; }
+
+/* ===== THUMBS: experiencias dummy (foto Unsplash + gradient overlay) =====
+   Patrón compartido: linear-gradient para oscurecer la parte baja donde
+   cae el título de la card, + url() con la foto real, + fallback color.
+   Todos usan `background-size: cover` con `center` para recorte limpio. */
+.art-surf-tamarindo,
+.art-canopy-monteverde,
+.art-cafe-ataco,
+.art-roatan-snorkel,
+.art-copan-ruins,
+.art-salsa-sansalvador,
+.art-cocina-tegus {
+  position: absolute; inset: 0;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  background-color: #0a0a0a;
 }
-.art-yoga::before, .art-yoga::after { content: none; }
+.art-surf-tamarindo::before, .art-surf-tamarindo::after,
+.art-canopy-monteverde::before, .art-canopy-monteverde::after,
+.art-cafe-ataco::before, .art-cafe-ataco::after,
+.art-roatan-snorkel::before, .art-roatan-snorkel::after,
+.art-copan-ruins::before, .art-copan-ruins::after,
+.art-salsa-sansalvador::before, .art-salsa-sansalvador::after,
+.art-cocina-tegus::before, .art-cocina-tegus::after { content: none; }
+
+.art-surf-tamarindo {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1502933691298-84fc14542831?auto=format&fit=crop&w=1200&q=75');
+}
+.art-canopy-monteverde {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1516912481808-3406841bd33c?auto=format&fit=crop&w=1200&q=75');
+}
+.art-cafe-ataco {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1200&q=75');
+}
+.art-roatan-snorkel {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=75');
+}
+.art-copan-ruins {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1200&q=75');
+}
+.art-salsa-sansalvador {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&w=1200&q=75');
+}
+.art-cocina-tegus {
+  background-image:
+    linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.65) 100%),
+    url('https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1200&q=75');
+}
 /* ===== FLYER: KAROL G (pink pastel) ===== */
 .art-karol {
   position: absolute; inset: 0;
@@ -8571,12 +8679,1342 @@ body.scrolled .page[data-page="inicio"] .header.header-hero {
   border-bottom: 1px solid var(--line) !important;
 }
 
+/* ========================================================================
+   FAVORITES PROMPT MODAL — guests, al agregar su 1er favorito de la sesión
+   ========================================================================
+   Modal no-bloqueante: el favorito YA se guardó (el corazón se llenó). Este
+   modal es solo para convertir al user y ofrecer login/signup. Dismissable
+   con X, click fuera, ESC, o "Seguir explorando". */
+/* x-cloak global — oculta cualquier elemento con [x-cloak] hasta que Alpine
+   lo procese. Sin esto, x-show con valor inicial false flashea durante el
+   pre-hidratación (visible por ~50-200ms al cargar). Las páginas viejas
+   tenían esta regla inline; aquí la centralizamos. */
+[x-cloak] { display: none !important; }
+
+.fav-prompt-modal {
+  position: fixed; inset: 0;
+  z-index: 9500;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.fav-prompt-card {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 420px;
+  width: 100%;
+  padding: 32px 28px 24px;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+.fav-prompt-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg-soft, #f7f7f5);
+  border: 0;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.fav-prompt-close:hover { background: var(--line); }
+.fav-prompt-close svg { width: 16px; height: 16px; stroke: var(--ink); }
+.fav-prompt-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(198, 248, 0, 0.18);
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.fav-prompt-icon svg {
+  width: 28px; height: 28px;
+  color: var(--accent);
+  fill: currentColor;
+}
+.fav-prompt-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.fav-prompt-body {
+  font-size: 14.5px;
+  color: var(--ink-mid);
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+.fav-prompt-actions {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.fav-prompt-primary {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink, var(--ink));
+  transition: background 0.15s ease;
+}
+.fav-prompt-primary:hover { background: var(--accent-hover, #b5e000); }
+.fav-prompt-secondary {
+  padding: 13px 20px;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 600;
+  background: #fff;
+  color: var(--ink);
+  border: 1.5px solid var(--line-strong, var(--line));
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.fav-prompt-secondary:hover {
+  background: var(--bg-soft, #f7f7f5);
+  border-color: var(--ink);
+}
+.fav-prompt-dismiss {
+  background: none;
+  border: 0;
+  color: var(--ink-mid);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 10px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.12s ease;
+}
+.fav-prompt-dismiss:hover { color: var(--ink); }
+
+/* ---- AUTH STEPS DENTRO DEL MISMO MODAL ----------------------------------
+   Cuando el usuario elige "crear cuenta o iniciar sesión", el card swappea
+   contenido (no redirect a auth.html). Re-usamos el shell del card y solo
+   estilizamos los nuevos elementos: Google btn, divider, inputs, OTP. */
+.fav-prompt-google {
+  width: 100%;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  gap: 10px;
+  padding: 13px 18px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line-strong, var(--line));
+  background: #fff;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.fav-prompt-google:hover {
+  background: var(--bg-soft, #f7f7f5);
+  border-color: var(--ink);
+}
+.fav-prompt-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+.fav-prompt-google[disabled] { opacity: 0.6; cursor: wait; }
+
+.fav-prompt-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim, var(--ink-mid));
+  text-transform: uppercase;
+  margin: 16px 0;
+}
+.fav-prompt-divider::before,
+.fav-prompt-divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--line);
+}
+
+.fav-prompt-form { text-align: left; }
+.fav-prompt-field { margin-bottom: 14px; text-align: left; }
+.fav-prompt-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.10em;
+  color: var(--ink-mid);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.fav-prompt-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line-strong, var(--line));
+  background: #fff;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.fav-prompt-input::placeholder { color: var(--ink-dim, #8c8c88); }
+.fav-prompt-input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.08);
+}
+
+.fav-prompt-error {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #dc2626;
+  margin: -4px 0 10px;
+  text-align: left;
+}
+
+.fav-prompt-form-grid {
+  display: grid; gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 14px;
+}
+@media (max-width: 480px) {
+  .fav-prompt-form-grid { grid-template-columns: 1fr; }
+}
+
+.fav-prompt-legal {
+  font-size: 11.5px;
+  color: var(--ink-mid);
+  line-height: 1.5;
+  margin: 12px 0 0;
+}
+.fav-prompt-legal a { color: var(--ink); text-decoration: underline; }
+
+.fav-prompt-back {
+  background: none;
+  border: 0;
+  color: var(--ink-mid);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 10px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-top: 4px;
+}
+.fav-prompt-back:hover { color: var(--ink); }
+
+/* OTP — 6 inputs centrados */
+.fav-prompt-otp-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.fav-prompt-otp-input {
+  width: 44px; height: 52px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line-strong, var(--line));
+  background: #fff;
+  font-family: var(--font-mono);
+  font-size: 22px; font-weight: 600;
+  text-align: center;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.fav-prompt-otp-input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.08);
+}
+@media (max-width: 380px) {
+  .fav-prompt-otp-input { width: 38px; height: 46px; font-size: 19px; }
+  .fav-prompt-otp-group { gap: 6px; }
+}
+
+.fav-prompt-otp-resend {
+  font-size: 13px;
+  color: var(--ink-mid);
+  margin: 12px 0 0;
+}
+.fav-prompt-otp-resend a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.fav-prompt-hint {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-dim, var(--ink-mid));
+  margin: 8px 0 0;
+}
+.fav-prompt-change {
+  color: var(--ink-mid);
+  text-decoration: underline;
+  font-weight: 500;
+}
+.fav-prompt-change:hover { color: var(--ink); }
+
+/* ========================================================================
+   TOAST — feedback sutil abajo-derecha (usado en favoritos de logged-in)
+   ========================================================================
+   Tipo "snackbar": pill oscuro con ícono + mensaje + link opcional.
+   Auto-dismiss a los 3s. En mobile se pega abajo con margen para no
+   chocar con la mobile-buy-bar sticky de event.html. */
+.vibe-toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  z-index: 9400;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  max-width: calc(100vw - 48px);
+}
+@media (max-width: 520px) {
+  .vibe-toast {
+    bottom: 96px;
+    right: 12px; left: 12px;
+    justify-content: center;
+  }
+}
+.vibe-toast-icon {
+  width: 16px; height: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+  fill: currentColor;
+}
+.vibe-toast-message { flex: 1 1 auto; }
+.vibe-toast-link {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+  padding-left: 12px;
+  margin-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+.vibe-toast-link:hover { text-decoration: underline; }
+
 /* --- Section spacing on the inicio page --- */
 .page[data-page="inicio"] .section { padding: 40px 0 12px; }
 .page[data-page="inicio"] .section + .section { padding-top: 12px; }
 .page[data-page="inicio"] .section-title em {
   font-family: var(--font-display, 'Playfair Display', serif);
   font-style: italic; font-weight: 500;
+}
+
+/* ========================================================================
+   EXPERIENCE DETAIL PAGE — Layout + componentes ad-hoc para `kind=experience`
+   ========================================================================
+   Los eventos tipo performance (conciertos, shows) siguen usando el layout
+   de 2 columnas con poster + info (proto.css línea 3490). Las experiences
+   (tours, clases, adventures) usan este layout: gallery full-width arriba,
+   info como columna centrada abajo. Razón: en experiences las fotos son
+   el producto — deciden la reserva. En performance eventos es el artista
+   + la fecha. Layouts distintos reflejan intents distintos.               */
+
+/* Layout experience — gallery full-width arriba, luego 2 columnas en desktop
+   (contenido izquierda + booking widget sticky derecha), o stacked en mobile.
+   Patrón inspirado en Airbnb Experiences: calendario NO visible inline,
+   sino dentro de un modal que se abre desde el widget. El widget es compacto:
+   price + botón "Elegí tu fecha" + CTA + cancelación. */
+.detail-hero.detail-hero-experience {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "gallery"
+    "info"
+    "booking";
+  gap: 28px;
+  padding-bottom: 40px;
+}
+.detail-hero.detail-hero-experience > .experience-gallery { grid-area: gallery; }
+.detail-hero.detail-hero-experience > .detail-info        { grid-area: info; min-width: 0; }
+/* El booking widget se renderiza via <template x-if>, entonces aparece
+   como child directo. Le asignamos grid-area: booking via su clase. */
+.detail-hero.detail-hero-experience .booking-widget { grid-area: booking; }
+
+/* Mobile (<900px): ocultamos el booking widget inline porque la
+   `.mobile-buy-bar` sticky al fondo ya cumple la misma función (price +
+   "Elegí tu fecha" que abre el modal). Tener ambos visibles al mismo
+   tiempo es duplicación sin valor. En desktop se invierte: widget sticky
+   sidebar visible, mobile-buy-bar oculta (rule en event.html inline).
+   `!important` porque el base rule `.booking-widget { display: flex }`
+   vive más abajo en el archivo — mismo specificity (0,0,1,0), gana por
+   orden. El `!important` fuerza la ocultación. */
+@media (max-width: 899.98px) {
+  .booking-widget { display: none !important; }
+}
+
+@media (min-width: 900px) {
+  /* Desktop: booking widget span ambas filas (derecha, desde arriba).
+     Gallery queda en col izquierda row 1, info queda en col izquierda row 2.
+     El widget es sticky — visible desde que cargás la página Y durante todo
+     el scroll del contenido. Coincide con el patrón Airbnb Experiences.
+     Breakpoint a 900px matchea con mobile-buy-bar para no tener gaps donde
+     ambos (inline widget + sticky bar) aparezcan al mismo tiempo. */
+  .detail-hero.detail-hero-experience {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-areas:
+      "gallery  booking"
+      "info     booking";
+    gap: 32px 32px;
+  }
+  .detail-hero.detail-hero-experience .booking-widget {
+    position: sticky;
+    top: 88px;
+    align-self: start;
+  }
+}
+@media (min-width: 1100px) {
+  /* En pantallas más amplias, columnas más holgadas */
+  .detail-hero.detail-hero-experience {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 40px 48px;
+  }
+}
+
+/* ========================================================================
+   BOOKING WIDGET — card compacto con price + picker + CTA + cancelación
+   ======================================================================== */
+.booking-widget {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.booking-widget-price-row {
+  display: flex; flex-direction: column;
+  gap: 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.booking-widget-price-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+.booking-widget-price-main {
+  display: flex; align-items: baseline; gap: 6px;
+}
+.booking-widget-price {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.booking-widget-per {
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+
+/* Picker button — big chip that opens schedule modal */
+.booking-widget-picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1.5px solid var(--line-strong, var(--line));
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.booking-widget-picker-btn:hover {
+  border-color: var(--ink);
+  background: var(--bg-soft, #f7f7f5);
+}
+.booking-widget-picker-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.booking-widget-picker-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+}
+.booking-widget-picker-placeholder {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.booking-widget-picker-chev {
+  width: 16px; height: 16px;
+  stroke: var(--ink-mid);
+  flex-shrink: 0;
+}
+
+/* Estado seleccionado: fecha + hora + cambiar */
+.booking-widget-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-soft, #f7f7f5);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+}
+.booking-widget-selected-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.booking-widget-selected-date {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.booking-widget-change {
+  background: none;
+  border: 0;
+  padding: 4px 8px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.booking-widget-change:hover { color: var(--ink-mid); }
+
+/* CTA principal del widget */
+.booking-widget-cta {
+  display: flex;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  border: 0;
+}
+.booking-widget-cta:disabled {
+  background: var(--line);
+  color: var(--ink-mid);
+  cursor: not-allowed;
+}
+.booking-widget-cta:not(:disabled):hover { background: var(--accent-hover, #b5e000); }
+.booking-widget-cta:not(:disabled):active { transform: scale(0.98); }
+.booking-widget-cta svg { width: 16px; height: 16px; stroke: currentColor; }
+
+/* Cancellation note — small and reassuring */
+.booking-widget-cancel {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-mid);
+  line-height: 1.4;
+}
+.booking-widget-cancel svg {
+  width: 16px; height: 16px;
+  stroke: #4d7700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ========================================================================
+   SCHEDULE MODAL — overlay con calendar + slot picker
+   ======================================================================== */
+.schedule-modal {
+  position: fixed; inset: 0;
+  z-index: 9500;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.schedule-modal-content {
+  background: #fff;
+  border-radius: 18px;
+  max-width: 560px;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+.schedule-modal-header {
+  display: flex;
+  align-items: center; justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.schedule-modal-title {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+.schedule-modal-close {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--bg-soft, #f7f7f5);
+  border: 0;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.schedule-modal-close:hover { background: var(--line); }
+.schedule-modal-close svg { width: 18px; height: 18px; stroke: var(--ink); }
+.schedule-modal-body {
+  padding: 20px 24px 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.schedule-modal-footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--line);
+}
+.schedule-modal-confirm {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  border: 0;
+  transition: background 0.15s ease;
+}
+.schedule-modal-confirm:disabled {
+  background: var(--line);
+  color: var(--ink-mid);
+  cursor: not-allowed;
+}
+
+/* ---- Gallery carousel (hero) ---- */
+.experience-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.experience-gallery-main {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0a0a0a;
+  border: 1px solid var(--line);
+}
+@media (min-width: 900px) {
+  .experience-gallery-main { aspect-ratio: 16 / 9; }
+}
+.experience-gallery-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.experience-gallery-img.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.experience-gallery-fallback {
+  position: absolute; inset: 0;
+}
+
+/* Prev/next — círculos semi-transparentes que no compiten con la foto */
+.experience-gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.experience-gallery-nav:hover { background: #fff; transform: translateY(-50%) scale(1.05); }
+.experience-gallery-nav.prev { left: 16px; }
+.experience-gallery-nav.next { right: 16px; }
+.experience-gallery-nav svg { width: 18px; height: 18px; stroke: var(--ink); }
+@media (max-width: 520px) {
+  .experience-gallery-nav { width: 36px; height: 36px; }
+  .experience-gallery-nav.prev { left: 10px; }
+  .experience-gallery-nav.next { right: 10px; }
+}
+
+/* Counter pill bottom-right */
+.experience-gallery-counter {
+  position: absolute;
+  right: 14px; bottom: 14px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  z-index: 2;
+}
+
+/* Thumbnail strip (debajo del main) */
+.experience-gallery-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+.experience-gallery-thumbs::-webkit-scrollbar { display: none; }
+.experience-gallery-thumb {
+  flex: 0 0 auto;
+  width: 72px; height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background: #0a0a0a;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  opacity: 0.6;
+}
+.experience-gallery-thumb:hover { opacity: 0.85; }
+.experience-gallery-thumb.is-active {
+  border-color: var(--ink);
+  opacity: 1;
+}
+.experience-gallery-thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+}
+
+/* ---- Quick facts strip (pills con iconos) ---- */
+.experience-facts-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 20px;
+}
+.exp-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-soft, #f7f7f5);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.exp-fact svg {
+  width: 15px; height: 15px;
+  stroke: var(--ink-mid);
+  flex-shrink: 0;
+}
+
+/* ---- Includes + Bring (2-col grid) ---- */
+.experience-lists {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin: 32px 0;
+  padding: 24px;
+  background: var(--bg-soft, #f7f7f5);
+  border-radius: 16px;
+}
+@media (min-width: 720px) {
+  .experience-lists { grid-template-columns: 1fr 1fr; gap: 40px; }
+}
+.experience-list-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+.experience-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.experience-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.experience-list-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  width: 22px;
+  text-align: center;
+}
+/* Checkmark SVG: width/height explícitos. Sin esto, el SVG hereda
+   el max-width: 100% del reset global y se expande al tamaño del
+   flex item, produciendo círculos lima gigantes. */
+.experience-list-check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+/* Bullet visual (span vacío + ::before) — renderea un dot lima pequeño
+   alineado con el baseline del texto. Antes el span estaba empty y no
+   mostraba nada, dejando los items desalineados sin marcador. */
+.experience-list-dot {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 20px;
+  height: 22px; /* matches line-height del label */
+}
+.experience-list-dot::before {
+  content: '';
+  display: block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.experience-list-label { flex: 1; }
+
+/* ---- Location / map embed ---- */
+.experience-location {
+  margin: 32px 0 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.experience-location-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+.experience-location-map {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-soft, #f7f7f5);
+  margin-bottom: 16px;
+  /* Garantiza que el iframe respete el wrapper incluso en viewports
+     donde los iframes defaultean a ancho fijo (300px). */
+  aspect-ratio: 16 / 10;
+  max-height: 320px;
+}
+.experience-location-map iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* Meeting point + destination rows */
+.experience-location-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  background: var(--bg-soft, #f7f7f5);
+  border-radius: 12px;
+}
+.experience-location-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.experience-location-row dt {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  margin: 0;
+}
+.experience-location-row dd {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.4;
+}
+/* "Abrir en Maps" external link */
+.experience-location-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.12s ease;
+}
+.experience-location-link:hover { color: var(--ink-mid); }
+.experience-location-link svg {
+  width: 14px; height: 14px;
+  stroke: currentColor;
+}
+
+/* ---- Itinerary timeline ---- */
+.experience-itinerary {
+  margin: 32px 0 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.experience-itinerary-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+  color: var(--ink);
+}
+.experience-itinerary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+}
+.experience-itinerary-step {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  position: relative;
+}
+.experience-itinerary-step:last-child { padding-bottom: 0; }
+/* Línea vertical conectando los dots */
+.experience-itinerary-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--line);
+}
+.experience-itinerary-dot {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+.experience-itinerary-body {
+  flex: 1;
+  padding-top: 3px;
+}
+.experience-itinerary-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.experience-itinerary-time {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.experience-itinerary-step-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.experience-itinerary-note {
+  font-size: 13.5px;
+  color: var(--ink-mid);
+  line-height: 1.4;
+  margin: 4px 0 0;
+}
+
+/* ---- Cancellation policy badge (prominente, arriba del CTA) ---- */
+.experience-cancellation {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(198, 248, 0, 0.12);
+  border: 1px solid rgba(198, 248, 0, 0.4);
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 20px 0 14px;
+  line-height: 1.4;
+}
+.experience-cancellation svg {
+  width: 18px; height: 18px;
+  stroke: #4d7700;
+  flex-shrink: 0;
+}
+
+/* ---- Host card compacto ----
+   Antes era un card grande full-width con padding 16px. Ahora es más
+   pill-like: padding reducido, avatar pequeño, name + verified pill en
+   una sola línea (wrap si es necesario), tagline abajo en texto sutil.
+   Pensado para vivir cerca del título (debajo del quick facts strip),
+   no dominar verticalmente la columna de contenido. */
+.organizer-card.host-card {
+  padding: 12px 14px;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-soft, #f7f7f5);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin: 8px 0 22px;
+}
+.organizer-card.host-card .organizer-avatar {
+  width: 36px; height: 36px;
+  font-size: 13px;
+}
+.organizer-card.host-card .organizer-info {
+  display: flex; flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.organizer-card.host-card .organizer-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+.organizer-card.host-card .organizer-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+/* Pill con TEXTO "Verificado" — fondo lima-tint + borde lima, comunica el
+   sello con texto legible (antes era solo un ícono silencioso). Ahora en
+   la misma línea del nombre en vez de debajo, para layout más compacto. */
+.host-verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(198, 248, 0, 0.15);
+  border: 1px solid rgba(198, 248, 0, 0.45);
+  color: #2d4a00;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.host-verified-pill svg {
+  width: 11px; height: 11px;
+  stroke: currentColor;
+}
+.host-tagline {
+  font-size: 12px;
+  color: var(--ink-mid);
+  line-height: 1.35;
+}
+
+/* ========================================================================
+   REVIEWS SECTION — rating summary + list de reseñas destacadas
+   ========================================================================
+   Renderea solo en experiences por ahora. Layout: header con rating/count,
+   grid de review cards abajo. Cada card tiene avatar con inicial, nombre,
+   fecha, estrellas y texto del review. Empty state cuando count === 0. */
+.reviews-section {
+  padding: 48px 20px 16px;
+  max-width: var(--container);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.reviews-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.reviews-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+.reviews-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--ink);
+}
+.reviews-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.reviews-star {
+  width: 18px; height: 18px;
+  color: var(--accent, #c6f800);
+  fill: currentColor;
+  /* Border sutil para que se vea bien la estrella lima */
+  filter: drop-shadow(0 0 0.5px rgba(0,0,0,0.3));
+}
+.reviews-rating-num {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.reviews-rating-sep {
+  color: var(--ink-dim, var(--ink-mid));
+  opacity: 0.6;
+}
+.reviews-count {
+  color: var(--ink-mid);
+}
+.reviews-empty-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-soft, #f7f7f5);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+.reviews-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 720px) {
+  .reviews-list { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1100px) {
+  .reviews-list { grid-template-columns: 1fr 1fr 1fr; }
+}
+.review-card {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.review-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.review-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.review-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.review-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.review-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mid);
+  letter-spacing: 0.02em;
+}
+.review-rating {
+  display: inline-flex;
+  gap: 1px;
+}
+.review-star {
+  width: 13px; height: 13px;
+  color: var(--line);
+  fill: currentColor;
+  transition: color 0.12s ease;
+}
+.review-star.is-filled {
+  color: var(--accent, #c6f800);
+}
+.review-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* ========================================================================
+   IMAGE LIGHTBOX — modal fullscreen para ver fotos del gallery en grande
+   ======================================================================== */
+.image-lightbox {
+  position: fixed; inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 60px;
+  cursor: zoom-out;
+}
+@media (max-width: 720px) {
+  .image-lightbox { padding: 24px; }
+}
+.image-lightbox-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  z-index: 2;
+}
+.image-lightbox-close:hover { background: rgba(255, 255, 255, 0.2); }
+.image-lightbox-close svg { width: 20px; height: 20px; stroke: currentColor; }
+.image-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  z-index: 2;
+}
+.image-lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-50%) scale(1.05);
+}
+.image-lightbox-nav.prev { left: 20px; }
+.image-lightbox-nav.next { right: 20px; }
+.image-lightbox-nav svg { width: 22px; height: 22px; stroke: currentColor; }
+@media (max-width: 720px) {
+  .image-lightbox-nav { width: 40px; height: 40px; }
+  .image-lightbox-nav svg { width: 18px; height: 18px; }
+  .image-lightbox-nav.prev { left: 8px; }
+  .image-lightbox-nav.next { right: 8px; }
+}
+.image-lightbox-figure {
+  max-width: 100%;
+  max-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  cursor: default;   /* override parent's zoom-out */
+}
+.image-lightbox-img {
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+}
+.image-lightbox-caption {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Gallery main — cursor zoom-in comunica que es clickeable */
+.experience-gallery-main {
+  cursor: zoom-in;
+}
+
+/* Screen reader only helper */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
   

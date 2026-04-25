@@ -192,6 +192,24 @@ document.addEventListener('alpine:init', () => {
   // acá es fuente de verdad única: toggle desde cards, lectura desde cuenta.
   Alpine.store('favorites', {
     ids: Alpine.$persist([]).as('vibe_favorites_ids'),
+    // Modal del overlay de favoritos — multi-step:
+    //   'prompt' → "¡Guardado! Crea cuenta o iniciá sesión"
+    //   'email'  → email + Google
+    //   'otp'    → 6 dígitos
+    //   'name'   → solo si es nuevo usuario
+    promptOpen: false,
+    promptEventId: null,
+    authStep: 'prompt',
+    // Auth state (compartido con el modal inline)
+    authEmail: '',
+    authOtp: ['', '', '', '', '', ''],
+    authFirstName: '',
+    authLastName: '',
+    authIsNewUser: false,
+    authBusy: false,
+    authError: '',
+    authResendCountdown: 0,
+    _authResendTimerId: null,
 
     has(eventId) {
       return !!eventId && this.ids.includes(eventId);
@@ -213,6 +231,235 @@ document.addEventListener('alpine:init', () => {
     },
     clear() { this.ids = []; },
     get count() { return this.ids.length; },
+
+    // Handler unificado para click del ♥:
+    // · Toggleamos SIEMPRE (optimistic UI — fill/unfill inmediato).
+    // · Si AGREGÓ + guest: abrimos modal (siempre — no hay throttle).
+    // · Si AGREGÓ + logueado: toast "Guardado · Ver →".
+    // · Unfavorite: silencioso (gesto reversible, no pedimos confirmación).
+    onHeartClick(eventId) {
+      if (!eventId) return;
+      const wasHas = this.has(eventId);
+      this.toggle(eventId);
+      const added = !wasHas && this.has(eventId);
+      if (!added) return;
+
+      const session = Alpine.store('session');
+      const isAuthed = !!(session && session.isAuthed);
+
+      if (!isAuthed) {
+        this.openPrompt(eventId);
+      } else {
+        const toast = Alpine.store('toast');
+        if (toast) toast.show('Guardado en favoritos', 'Ver →', 'account.html#section-favoritos');
+      }
+    },
+    openPrompt(eventId) {
+      this.promptEventId = eventId || null;
+      // Saltamos el step intermedio "¡Guardado!" — vamos directo al login.
+      // El corazón ya cambió de estado (optimistic UI) entonces el usuario
+      // sabe que se guardó; el modal solo capta su email.
+      this.authStep = 'email';
+      this.authEmail = '';
+      this.authOtp = ['', '', '', '', '', ''];
+      this.authFirstName = '';
+      this.authLastName = '';
+      this.authError = '';
+      this.authBusy = false;
+      this.authIsNewUser = false;
+      this.promptOpen = true;
+    },
+    closePrompt() {
+      this.promptOpen = false;
+      this.promptEventId = null;
+      this.authStep = 'prompt';
+      this.authError = '';
+      this.authBusy = false;
+      this._stopAuthResendTimer();
+    },
+
+    // ---- AUTH FLOW INLINE ------------------------------------------------
+    // Pasamos al step de email (desde el prompt inicial).
+    goToAuthStep() {
+      this.authStep = 'email';
+      this.authError = '';
+      this.authEmail = '';
+    },
+    backToPrompt() {
+      this.authStep = 'prompt';
+      this.authError = '';
+      this._stopAuthResendTimer();
+    },
+    backToAuthEmail() {
+      this.authStep = 'email';
+      this.authOtp = ['', '', '', '', '', ''];
+      this.authError = '';
+      this._stopAuthResendTimer();
+    },
+
+    submitAuthEmail() {
+      const email = (this.authEmail || '').trim().toLowerCase();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        this.authError = 'Ingresá un email válido';
+        return;
+      }
+      this.authEmail = email;
+      this.authError = '';
+      const session = Alpine.store('session');
+      this.authIsNewUser = !(session && session.isKnown(email));
+      this.authStep = 'otp';
+      this.authOtp = ['', '', '', '', '', ''];
+      this._startAuthResendTimer();
+    },
+
+    onAuthOtpInput(idx, e) {
+      const v = String(e.target.value || '').replace(/\D/g, '').slice(0, 1);
+      this.authOtp[idx] = v;
+      this.authError = '';
+      if (v && idx < 5) {
+        const next = document.querySelector('[data-fav-otp-idx="' + (idx + 1) + '"]');
+        if (next) next.focus();
+      }
+      if (idx === 5 && v && this.authOtp.every(d => d)) {
+        this.submitAuthOtp();
+      }
+    },
+    onAuthOtpKeydown(idx, e) {
+      if (e.key === 'Backspace' && !this.authOtp[idx] && idx > 0) {
+        const prev = document.querySelector('[data-fav-otp-idx="' + (idx - 1) + '"]');
+        if (prev) prev.focus();
+      }
+    },
+    onAuthOtpPaste(e) {
+      const raw = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+      const digits = raw.replace(/\D/g, '').slice(0, 6).split('');
+      if (digits.length === 0) return;
+      e.preventDefault();
+      for (let i = 0; i < 6; i++) this.authOtp[i] = digits[i] || '';
+      this.authError = '';
+      const idx = Math.min(digits.length, 5);
+      const el = document.querySelector('[data-fav-otp-idx="' + idx + '"]');
+      if (el) el.focus();
+      if (digits.length === 6) this.submitAuthOtp();
+    },
+
+    submitAuthOtp() {
+      if (this.authBusy) return;
+      const code = this.authOtp.join('');
+      if (!/^\d{6}$/.test(code)) {
+        this.authError = 'Código incompleto. Ingresá los 6 dígitos.';
+        return;
+      }
+      this.authBusy = true;
+      this.authError = '';
+      setTimeout(() => {
+        this.authBusy = false;
+        this._stopAuthResendTimer();
+        if (this.authIsNewUser) {
+          this.authStep = 'name';
+        } else {
+          this._completeAuth();
+        }
+      }, 700);
+    },
+
+    submitAuthName() {
+      const fn = (this.authFirstName || '').trim();
+      const ln = (this.authLastName || '').trim();
+      if (!fn || !ln) {
+        this.authError = 'Ingresá tu nombre y apellido.';
+        return;
+      }
+      Alpine.store('profiles').save(this.authEmail, {
+        firstName: fn,
+        lastName:  ln,
+      });
+      this._completeAuth();
+    },
+
+    loginWithGoogleInline() {
+      if (this.authBusy) return;
+      this.authBusy = true;
+      setTimeout(() => {
+        const mockEmail = 'demo.google@vibe.app';
+        const session = Alpine.store('session');
+        const known = session.isKnown(mockEmail);
+        this.authEmail = mockEmail;
+        session.login(mockEmail);
+        if (!known) {
+          Alpine.store('profiles').save(mockEmail, {
+            firstName: 'Demo',
+            lastName:  'Google',
+          });
+        }
+        this.authBusy = false;
+        this._completeAuth();
+      }, 600);
+    },
+
+    resendAuthOtp() {
+      if (this.authResendCountdown > 0) return;
+      this.authOtp = ['', '', '', '', '', ''];
+      this.authError = '';
+      this._startAuthResendTimer();
+    },
+    _startAuthResendTimer() {
+      this._stopAuthResendTimer();
+      this.authResendCountdown = 30;
+      this._authResendTimerId = setInterval(() => {
+        this.authResendCountdown--;
+        if (this.authResendCountdown <= 0) this._stopAuthResendTimer();
+      }, 1000);
+    },
+    _stopAuthResendTimer() {
+      if (this._authResendTimerId) {
+        clearInterval(this._authResendTimerId);
+        this._authResendTimerId = null;
+      }
+      this.authResendCountdown = 0;
+    },
+
+    _completeAuth() {
+      // Login si no está ya autenticado (Google ya lo llamó arriba).
+      const session = Alpine.store('session');
+      if (!session.isAuthed && this.authEmail) {
+        session.login(this.authEmail);
+      }
+      this.closePrompt();
+      // Siempre llevamos al usuario a sus favoritos en account.html. Reload
+      // garantiza que el header session-aware refleje el nuevo estado y que
+      // accountPage.init() lea el hash y abra el tab correcto.
+      const toast = Alpine.store('toast');
+      if (toast) toast.show('¡Bienvenido! Vamos a tus favoritos', '', '');
+      setTimeout(() => {
+        location.href = 'account.html#section-favoritos';
+      }, 600);
+    },
+  });
+
+  // ---- TOAST -------------------------------------------------------------
+  // Feedback sutil abajo-derecha, auto-dismiss a los 3s. Usado hoy por
+  // favoritos (logged-in) pero extensible a otros feedbacks.
+  Alpine.store('toast', {
+    visible: false,
+    message: '',
+    linkText: '',
+    linkHref: '',
+    _timer: null,
+
+    show(message, linkText, linkHref) {
+      this.message = String(message || '');
+      this.linkText = String(linkText || '');
+      this.linkHref = String(linkHref || '');
+      this.visible = true;
+      if (this._timer) clearTimeout(this._timer);
+      this._timer = setTimeout(() => { this.visible = false; }, 3000);
+    },
+    hide() {
+      this.visible = false;
+      if (this._timer) clearTimeout(this._timer);
+      this._timer = null;
+    },
   });
 
   // ---- UI ----------------------------------------------------------------

@@ -482,7 +482,7 @@
   <div class="container">
     <div class="event-headline-wrap">
       <h2 class="event-headline">
-        <span class="event-headline-lead">Explorando eventos en</span>
+        <span class="event-headline-lead">Explorando en</span>
         <span class="event-country-anchor" x-data="countryPicker">
           <button
             type="button"
@@ -531,6 +531,7 @@
 </section>
 
 <!-- STICKY CATEGORY PILLS -->
+<!-- Iconos: calendario, micrófono, fuego, pelota, palmera, gorro de graduación. -->
 <section class="pills-bar">
   <div class="container">
     <div class="pills-row" id="home-pills">
@@ -538,25 +539,25 @@
         <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg></span>
         Próximos eventos
       </a>
-      <a class="pill" data-target="section-populares">
-        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2l2.4 7.2H22l-6 4.4 2.4 7.2L12 16.4 5.6 20.8 8 13.6 2 9.2h7.6L12 2z"/></svg></span>
-        Populares
-      </a>
-      <a class="pill" data-target="section-openformat">
-        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg></span>
-        Open Format
-      </a>
-      <a class="pill" data-target="section-electronica">
-        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 18V5l12-2v13M9 13l12-2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-        Electrónica
-      </a>
       <a class="pill" data-target="section-conciertos">
-        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 12h3l3-9 4 18 3-9h5"/></svg></span>
+        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM5 11v1a7 7 0 0 0 14 0v-1M12 19v3M9 22h6"/></svg></span>
         Conciertos
       </a>
+      <a class="pill" data-target="section-populares">
+        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2s4 4 4 8a4 4 0 0 1-1.5 3c.3-1.5-.5-3-1.5-3-1 0-1 1.5-1 1.5S9 8.5 9 6c-2 2-4 4-4 8a7 7 0 0 0 14 0c0-5-7-12-7-12z"/></svg></span>
+        Populares
+      </a>
+      <a class="pill" data-target="section-deporte">
+        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l3.5 5L12 12l-3.5-4L12 3zM3.5 9l4 3-2 5L3 13M20.5 9l-4 3 2 5 2.5-4M8.5 17h7l-1 4h-5z"/></svg></span>
+        Deporte
+      </a>
       <a class="pill" data-target="section-experiencias">
-        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M2 20c3-4 6-4 10-4s7 0 10 4"/><circle cx="12" cy="8" r="4"/></svg></span>
+        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 13v9M12 13c-4 0-8-1-9-4 2-2 5-2 7 0 0-3 1-6 2-7 1 1 2 4 2 7 2-2 5-2 7 0-1 3-5 4-9 4z"/></svg></span>
         Experiencias
+      </a>
+      <a class="pill" data-target="section-clases">
+        <span class="pill-icon"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-5 9 5-9 5-9-5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11v4c0 1 2 3 5 3s5-2 5-3v-4M21 9v6"/></svg></span>
+        Clases
       </a>
     </div>
   </div>
@@ -587,7 +588,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-badbunny" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           <div class="event-badges"><span class="badge-age">+18</span></div>
         </div>
         <div class="event-body">
@@ -601,7 +602,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-yatra" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1446057032654-9d8885db76c6?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -615,7 +616,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-camilo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -629,7 +630,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-manuelturizo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -643,7 +644,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-arcangel" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           <div class="event-badges"><span class="badge-age">+18</span></div>
         </div>
         <div class="event-body">
@@ -657,7 +658,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-beret" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           <div class="event-badges"><span class="badge-multidate">5 FECHAS</span></div>
         </div>
         <div class="event-body">
@@ -671,7 +672,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-morat" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP / FOLK</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -685,7 +686,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-piso21" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1507901747481-84a4f64fda6d?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -699,7 +700,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-feid" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           <div class="event-badges"><span class="badge-presale">PREVENTA PRONTO</span></div>
         </div>
         <div class="event-body">
@@ -713,7 +714,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-alejandro" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">REGIONAL MEXICANO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -727,7 +728,7 @@
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-karolg" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
 
         </div>
         <div class="event-body">
@@ -737,361 +738,57 @@
           <div class="event-price"><span>Desde</span><strong>$75.00</strong></div>
         </div>
       </a>
-      <a href="event.html?id=yoga" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=clasico-cr" class="event-card" data-country-filter="CR">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="art-yoga"></div></div>
-          <span class="event-genre">WELLNESS</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          <div class="event-badges"><span class="badge-multidate">SEMANAL</span></div>
+          <div class="event-thumb-img"><div class="bg-clasico-cr"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Yoga Sunset en la playa</h3>
-          <div class="event-date">JUE A DOM · 4:30 PM</div>
-          <div class="event-venue">Playa Guiones · Nosara</div>
-          <div class="event-price"><span>Desde</span><strong>$25.00</strong></div>
+          <h3 class="event-title">Saprissa vs Alajuelense — Clásico Morado</h3>
+          <div class="event-date">DOM 24 MAY · 6:00 PM</div>
+          <div class="event-venue">Estadio Saprissa</div>
+          <div class="event-price"><span>Desde</span><strong>$18.00</strong></div>
         </div>
       </a>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION: POPULARES -->
-<section class="section" id="section-populares">
-  <div class="container">
-    <div class="section-head">
-      <div class="section-head-left">
-        <h2 class="section-title">Populares</h2>
-      </div>
-      <div class="section-actions">
-        <div class="carousel-controls">
-          <button class="carousel-btn" @click="scrollCarousel('c-populares', -1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg></button>
-          <button class="carousel-btn" @click="scrollCarousel('c-populares', 1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg></button>
-        </div>
-        <a href="index.html" class="section-link">Ver todos →</a>
-      </div>
-    </div>
-
-    <div class="carousel" id="c-populares">
-      <a href="event.html?id=karolg" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=comasagua" class="event-card" data-country-filter="SV">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-karolg" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-
+          <div class="event-thumb-img"><div class="art-comasagua"></div></div>
+          <span class="event-genre">TOURS</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar experiencia"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">5 HORAS</span></div>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Karol G — Mañana Será Bonito</h3>
-          <div class="event-date">VIE 3 OCT · 9:00 PM</div>
-          <div class="event-venue">Estadio Nacional</div>
-          <div class="event-price"><span>Desde</span><strong>$75.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=badbunny" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-badbunny" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Bad Bunny — Debí Tirar Más Fotos</h3>
-          <div class="event-date">VIE 7 NOV · 9:00 PM</div>
-          <div class="event-venue">Estadio Nacional</div>
-          <div class="event-price"><span>Desde</span><strong>$95.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=camilo" class="event-card" data-country-filter="SV">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-camilo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Camilo — De Adentro Pa Afuera</h3>
-          <div class="event-date">SÁB 19 JUL · 8:30 PM</div>
-          <div class="event-venue">Estadio Cuscatlán</div>
-          <div class="event-price"><span>Desde</span><strong>$40.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=maluma" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-maluma" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Maluma — Pretty / Dirty</h3>
-          <div class="event-date">SÁB 25 OCT · 9:00 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=piso21" class="event-card" data-country-filter="HN">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-piso21" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1507901747481-84a4f64fda6d?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Piso 21 — Trópico Tour</h3>
-          <div class="event-date">SÁB 11 OCT · 8:30 PM</div>
-          <div class="event-venue">Expocentro SPS</div>
-          <div class="event-price"><span>Desde</span><strong>$32.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=yatra" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-yatra" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1446057032654-9d8885db76c6?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Sebastián Yatra — Entre Tanta</h3>
-          <div class="event-date">SÁB 15 JUN · 8:30 PM</div>
-          <div class="event-venue">Estadio Nacional</div>
+          <h3 class="event-title">Sunrise en el Peñón de Comasagua</h3>
+          <div class="event-date">VIE A DOM · 4:00 AM</div>
+          <div class="event-venue">Santa Tecla · El Salvador</div>
           <div class="event-price"><span>Desde</span><strong>$45.00</strong></div>
         </div>
       </a>
-      <a href="event.html?id=feid" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=olimpia-motagua" class="event-card" data-country-filter="HN">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-feid" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          <div class="event-badges"><span class="badge-presale">PREVENTA PRONTO</span></div>
+          <div class="event-thumb-img"><div class="bg-olimpia-motagua"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Feid — Ferxxo World Tour</h3>
-          <div class="event-date">SÁB 18 OCT · 8:30 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$65.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=morat" class="event-card" data-country-filter="SV">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-morat" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP / FOLK</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Morat — Cuarto Azul</h3>
-          <div class="event-date">VIE 29 AGO · 8:30 PM</div>
-          <div class="event-venue">Gimnasio Nacional</div>
-          <div class="event-price"><span>Desde</span><strong>$35.00</strong></div>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION: OPEN FORMAT -->
-<section class="section" id="section-openformat">
-  <div class="container">
-    <div class="section-head">
-      <div class="section-head-left">
-        <h2 class="section-title">Open Format</h2>
-      </div>
-      <div class="section-actions">
-        <div class="carousel-controls">
-          <button class="carousel-btn" @click="scrollCarousel('c-openformat', -1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg></button>
-          <button class="carousel-btn" @click="scrollCarousel('c-openformat', 1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg></button>
-        </div>
-        <a href="index.html" class="section-link">Ver todos →</a>
-      </div>
-    </div>
-
-    <div class="carousel" id="c-openformat">
-      <a href="event.html?id=arcangel" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-arcangel" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          <div class="event-badges"><span class="badge-age">+18</span></div>
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Arcángel — La 8va Maravilla</h3>
-          <div class="event-date">SÁB 28 JUN · 10:00 PM</div>
-          <div class="event-venue">Estadio Saprissa</div>
-          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=maluma" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-maluma" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Maluma — Pretty / Dirty</h3>
-          <div class="event-date">SÁB 25 OCT · 9:00 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=manuelturizo" class="event-card" data-country-filter="HN">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-manuelturizo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Manuel Turizo — 201 Tour</h3>
-          <div class="event-date">SÁB 13 SEP · 9:00 PM</div>
+          <h3 class="event-title">Olimpia vs Motagua — Clásico Capitalino</h3>
+          <div class="event-date">DOM 31 MAY · 4:00 PM</div>
           <div class="event-venue">Estadio Chelato Uclés</div>
-          <div class="event-price"><span>Desde</span><strong>$38.00</strong></div>
+          <div class="event-price"><span>Desde</span><strong>$8.00</strong></div>
         </div>
       </a>
-      <a href="event.html?id=feid" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=alianza-fas" class="event-card" data-country-filter="SV">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-feid" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
+          <div class="event-thumb-img"><div class="bg-alianza-fas"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Feid — Ferxxo World Tour</h3>
-          <div class="event-date">SÁB 18 OCT · 8:30 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$65.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=camilo" class="event-card" data-country-filter="SV">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-camilo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Camilo — De Adentro Pa Afuera</h3>
-          <div class="event-date">SÁB 19 JUL · 8:30 PM</div>
+          <h3 class="event-title">Alianza FC vs FAS — Clásico</h3>
+          <div class="event-date">SÁB 6 JUN · 5:00 PM</div>
           <div class="event-venue">Estadio Cuscatlán</div>
-          <div class="event-price"><span>Desde</span><strong>$40.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=karolg" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-karolg" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Karol G — Mañana Será Bonito</h3>
-          <div class="event-date">VIE 3 OCT · 9:00 PM</div>
-          <div class="event-venue">Estadio Nacional</div>
-          <div class="event-price"><span>Desde</span><strong>$75.00</strong></div>
-        </div>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- SECTION: ELECTRÓNICA -->
-<section class="section" id="section-electronica">
-  <div class="container">
-    <div class="section-head">
-      <div class="section-head-left">
-        <h2 class="section-title">Electrónica</h2>
-      </div>
-      <div class="section-actions">
-        <div class="carousel-controls">
-          <button class="carousel-btn" @click="scrollCarousel('c-electronica', -1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg></button>
-          <button class="carousel-btn" @click="scrollCarousel('c-electronica', 1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg></button>
-        </div>
-        <a href="index.html" class="section-link">Ver todos →</a>
-      </div>
-    </div>
-
-    <div class="carousel" id="c-electronica">
-      <a href="event.html?id=arcangel" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-arcangel" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          <div class="event-badges"><span class="badge-age">+18</span></div>
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Arcángel — La 8va Maravilla</h3>
-          <div class="event-date">SÁB 28 JUN · 10:00 PM</div>
-          <div class="event-venue">Estadio Saprissa</div>
-          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=feid" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-feid" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Feid — Ferxxo World Tour</h3>
-          <div class="event-date">SÁB 18 OCT · 8:30 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$65.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=badbunny" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-badbunny" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Bad Bunny — Debí Tirar Más Fotos</h3>
-          <div class="event-date">VIE 7 NOV · 9:00 PM</div>
-          <div class="event-venue">Estadio Nacional</div>
-          <div class="event-price"><span>Desde</span><strong>$95.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=manuelturizo" class="event-card" data-country-filter="HN">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-manuelturizo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Manuel Turizo — 201 Tour</h3>
-          <div class="event-date">SÁB 13 SEP · 9:00 PM</div>
-          <div class="event-venue">Estadio Chelato Uclés</div>
-          <div class="event-price"><span>Desde</span><strong>$38.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=maluma" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-maluma" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGGAETÓN</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Maluma — Pretty / Dirty</h3>
-          <div class="event-date">SÁB 25 OCT · 9:00 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=piso21" class="event-card" data-country-filter="HN">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-piso21" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1507901747481-84a4f64fda6d?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Piso 21 — Trópico Tour</h3>
-          <div class="event-date">SÁB 11 OCT · 8:30 PM</div>
-          <div class="event-venue">Expocentro SPS</div>
-          <div class="event-price"><span>Desde</span><strong>$32.00</strong></div>
+          <div class="event-price"><span>Desde</span><strong>$12.00</strong></div>
         </div>
       </a>
     </div>
@@ -1115,39 +812,67 @@
     </div>
 
     <div class="carousel" id="c-conciertos">
-      <a href="event.html?id=alejandro" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=badbunny" class="event-card" data-country-filter="CR">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-alejandro" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">REGIONAL MEXICANO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-thumb-img"><div class="bg-badbunny" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-age">+18</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Bad Bunny — Debí Tirar Más Fotos</h3>
+          <div class="event-date">VIE 7 NOV · 9:00 PM</div>
+          <div class="event-venue">Estadio Nacional</div>
+          <div class="event-price"><span>Desde</span><strong>$95.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=karolg" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-karolg" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
-          <h3 class="event-title">Alejandro Fernández — De Rey a Rey</h3>
-          <div class="event-date">VIE 22 AGO · 9:00 PM</div>
-          <div class="event-venue">Parque Viva</div>
-          <div class="event-price"><span>Desde</span><strong>$85.00</strong></div>
+          <h3 class="event-title">Karol G — Mañana Será Bonito</h3>
+          <div class="event-date">VIE 3 OCT · 9:00 PM</div>
+          <div class="event-venue">Estadio Nacional</div>
+          <div class="event-price"><span>Desde</span><strong>$75.00</strong></div>
         </div>
       </a>
-      <a href="event.html?id=beret" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=feid" class="event-card" data-country-filter="CR">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-beret" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          <div class="event-badges"><span class="badge-multidate">5 FECHAS</span></div>
+          <div class="event-thumb-img"><div class="bg-feid" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-presale">PREVENTA PRONTO</span></div>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Beret — Lo Bello y Lo Roto</h3>
-          <div class="event-date">JUE 12 JUN · 8:00 PM</div>
-          <div class="event-venue">Teatro Melico Salazar</div>
-          <div class="event-price"><span>Desde</span><strong>$32.00</strong></div>
+          <h3 class="event-title">Feid — Ferxxo World Tour</h3>
+          <div class="event-date">SÁB 18 OCT · 8:30 PM</div>
+          <div class="event-venue">Parque Viva</div>
+          <div class="event-price"><span>Desde</span><strong>$65.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=arcangel" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-arcangel" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-age">+18</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Arcángel — La 8va Maravilla</h3>
+          <div class="event-date">SÁB 28 JUN · 10:00 PM</div>
+          <div class="event-venue">Estadio Saprissa</div>
+          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
         </div>
       </a>
       <a href="event.html?id=yatra" class="event-card" data-country-filter="CR">
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-yatra" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1446057032654-9d8885db76c6?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -1157,11 +882,53 @@
           <div class="event-price"><span>Desde</span><strong>$45.00</strong></div>
         </div>
       </a>
+      <a href="event.html?id=beret" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-beret" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">POP LATINO</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">5 FECHAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Beret — Lo Bello y Lo Roto</h3>
+          <div class="event-date">JUE 12 JUN · 8:00 PM</div>
+          <div class="event-venue">Teatro Melico Salazar</div>
+          <div class="event-price"><span>Desde</span><strong>$32.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=alejandro" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-alejandro" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGIONAL MEXICANO</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Alejandro Fernández — De Rey a Rey</h3>
+          <div class="event-date">VIE 22 AGO · 9:00 PM</div>
+          <div class="event-venue">Parque Viva</div>
+          <div class="event-price"><span>Desde</span><strong>$85.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=camilo" class="event-card" data-country-filter="SV">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-camilo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">POP LATINO</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Camilo — De Adentro Pa Afuera</h3>
+          <div class="event-date">SÁB 19 JUL · 8:30 PM</div>
+          <div class="event-venue">Estadio Cuscatlán</div>
+          <div class="event-price"><span>Desde</span><strong>$40.00</strong></div>
+        </div>
+      </a>
       <a href="event.html?id=morat" class="event-card" data-country-filter="SV">
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-morat" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP / FOLK</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -1171,11 +938,172 @@
           <div class="event-price"><span>Desde</span><strong>$35.00</strong></div>
         </div>
       </a>
+      <a href="event.html?id=manuelturizo" class="event-card" data-country-filter="HN">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-manuelturizo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Manuel Turizo — 201 Tour</h3>
+          <div class="event-date">SÁB 13 SEP · 9:00 PM</div>
+          <div class="event-venue">Estadio Chelato Uclés</div>
+          <div class="event-price"><span>Desde</span><strong>$38.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=piso21" class="event-card" data-country-filter="HN">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-piso21" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1507901747481-84a4f64fda6d?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">POP LATINO</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Piso 21 — Trópico Tour</h3>
+          <div class="event-date">SÁB 11 OCT · 8:30 PM</div>
+          <div class="event-venue">Expocentro SPS</div>
+          <div class="event-price"><span>Desde</span><strong>$32.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=maluma" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-maluma" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Maluma — Pretty / Dirty</h3>
+          <div class="event-date">SÁB 25 OCT · 9:00 PM</div>
+          <div class="event-venue">Parque Viva</div>
+          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=tristito" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-reggaeton"></div></div>
+          <span class="event-genre">FIESTA</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-age">+18</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Reggaetón Tristito — Old School</h3>
+          <div class="event-date">SÁB 2 MAY · 9:00 PM</div>
+          <div class="event-venue">Finca La Glorita</div>
+          <div class="event-price"><span>Desde</span><strong>$11.00</strong></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: POPULARES -->
+<section class="section" id="section-populares">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-left">
+        <h2 class="section-title">Populares</h2>
+      </div>
+      <div class="section-actions">
+        <div class="carousel-controls">
+          <button class="carousel-btn" @click="scrollCarousel('c-populares', -1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg></button>
+          <button class="carousel-btn" @click="scrollCarousel('c-populares', 1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <a href="index.html" class="section-link">Ver todos →</a>
+      </div>
+    </div>
+
+    <div class="carousel" id="c-populares">
+      <a href="event.html?id=badbunny" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-badbunny" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-age">+18</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Bad Bunny — Debí Tirar Más Fotos</h3>
+          <div class="event-date">VIE 7 NOV · 9:00 PM</div>
+          <div class="event-venue">Estadio Nacional</div>
+          <div class="event-price"><span>Desde</span><strong>$95.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=karolg" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-karolg" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Karol G — Mañana Será Bonito</h3>
+          <div class="event-date">VIE 3 OCT · 9:00 PM</div>
+          <div class="event-venue">Estadio Nacional</div>
+          <div class="event-price"><span>Desde</span><strong>$75.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=feid" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-feid" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-presale">PREVENTA PRONTO</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Feid — Ferxxo World Tour</h3>
+          <div class="event-date">SÁB 18 OCT · 8:30 PM</div>
+          <div class="event-venue">Parque Viva</div>
+          <div class="event-price"><span>Desde</span><strong>$65.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=clasico-cr" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-clasico-cr"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Saprissa vs Alajuelense — Clásico Morado</h3>
+          <div class="event-date">DOM 24 MAY · 6:00 PM</div>
+          <div class="event-venue">Estadio Saprissa</div>
+          <div class="event-price"><span>Desde</span><strong>$18.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=comasagua" class="event-card" data-country-filter="SV">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-comasagua"></div></div>
+          <span class="event-genre">TOURS</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">5 HORAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Sunrise en el Peñón de Comasagua</h3>
+          <div class="event-date">VIE A DOM · 4:00 AM</div>
+          <div class="event-venue">Santa Tecla · El Salvador</div>
+          <div class="event-price"><span>Desde</span><strong>$45.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=maluma" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-maluma" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Maluma — Pretty / Dirty</h3>
+          <div class="event-date">SÁB 25 OCT · 9:00 PM</div>
+          <div class="event-venue">Parque Viva</div>
+          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
+        </div>
+      </a>
       <a href="event.html?id=camilo" class="event-card" data-country-filter="SV">
         <div class="event-thumb-wrap">
           <div class="event-thumb-img"><div class="bg-camilo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
           <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
           
         </div>
         <div class="event-body">
@@ -1183,6 +1111,111 @@
           <div class="event-date">SÁB 19 JUL · 8:30 PM</div>
           <div class="event-venue">Estadio Cuscatlán</div>
           <div class="event-price"><span>Desde</span><strong>$40.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=manuelturizo" class="event-card" data-country-filter="HN">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-manuelturizo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Manuel Turizo — 201 Tour</h3>
+          <div class="event-date">SÁB 13 SEP · 9:00 PM</div>
+          <div class="event-venue">Estadio Chelato Uclés</div>
+          <div class="event-price"><span>Desde</span><strong>$38.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=alianza-fas" class="event-card" data-country-filter="SV">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-alianza-fas"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Alianza FC vs FAS — Clásico</h3>
+          <div class="event-date">SÁB 6 JUN · 5:00 PM</div>
+          <div class="event-venue">Estadio Cuscatlán</div>
+          <div class="event-price"><span>Desde</span><strong>$12.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=arcangel" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-arcangel" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
+          <span class="event-genre">REGGAETÓN</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-age">+18</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Arcángel — La 8va Maravilla</h3>
+          <div class="event-date">SÁB 28 JUN · 10:00 PM</div>
+          <div class="event-venue">Estadio Saprissa</div>
+          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION: DEPORTE -->
+<section class="section" id="section-deporte">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-left">
+        <h2 class="section-title">Deporte</h2>
+      </div>
+      <div class="section-actions">
+        <div class="carousel-controls">
+          <button class="carousel-btn" @click="scrollCarousel('c-deporte', -1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg></button>
+          <button class="carousel-btn" @click="scrollCarousel('c-deporte', 1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <a href="index.html" class="section-link">Ver todos →</a>
+      </div>
+    </div>
+
+    <div class="carousel" id="c-deporte">
+      <a href="event.html?id=clasico-cr" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-clasico-cr"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Saprissa vs Alajuelense — Clásico Morado</h3>
+          <div class="event-date">DOM 24 MAY · 6:00 PM</div>
+          <div class="event-venue">Estadio Saprissa</div>
+          <div class="event-price"><span>Desde</span><strong>$18.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=alianza-fas" class="event-card" data-country-filter="SV">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-alianza-fas"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Alianza FC vs FAS — Clásico</h3>
+          <div class="event-date">SÁB 6 JUN · 5:00 PM</div>
+          <div class="event-venue">Estadio Cuscatlán</div>
+          <div class="event-price"><span>Desde</span><strong>$12.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=olimpia-motagua" class="event-card" data-country-filter="HN">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="bg-olimpia-motagua"></div></div>
+          <span class="event-genre">FÚTBOL</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Olimpia vs Motagua — Clásico Capitalino</h3>
+          <div class="event-date">DOM 31 MAY · 4:00 PM</div>
+          <div class="event-venue">Estadio Chelato Uclés</div>
+          <div class="event-price"><span>Desde</span><strong>$8.00</strong></div>
         </div>
       </a>
     </div>
@@ -1206,65 +1239,143 @@
     </div>
 
     <div class="carousel" id="c-experiencias">
-      <a href="event.html?id=yoga" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=comasagua" class="event-card" data-country-filter="SV">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="art-yoga"></div></div>
-          <span class="event-genre">WELLNESS</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          <div class="event-badges"><span class="badge-multidate">SEMANAL</span></div>
+          <div class="event-thumb-img"><div class="art-comasagua"></div></div>
+          <span class="event-genre">TOURS</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">5 HORAS</span></div>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Yoga Sunset en la playa</h3>
-          <div class="event-date">JUE A DOM · 4:30 PM</div>
-          <div class="event-venue">Playa Guiones · Nosara</div>
-          <div class="event-price"><span>Desde</span><strong>$25.00</strong></div>
-        </div>
-      </a>
-      <a href="event.html?id=yatra" class="event-card" data-country-filter="CR">
-        <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-yatra" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1446057032654-9d8885db76c6?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
-        </div>
-        <div class="event-body">
-          <h3 class="event-title">Sebastián Yatra — Entre Tanta</h3>
-          <div class="event-date">SÁB 15 JUN · 8:30 PM</div>
-          <div class="event-venue">Estadio Nacional</div>
+          <h3 class="event-title">Sunrise en el Peñón de Comasagua</h3>
+          <div class="event-date">VIE A DOM · 4:00 AM</div>
+          <div class="event-venue">Santa Tecla · El Salvador</div>
           <div class="event-price"><span>Desde</span><strong>$45.00</strong></div>
         </div>
       </a>
-      <a href="event.html?id=camilo" class="event-card" data-country-filter="SV">
+      <a href="event.html?id=canopy-monteverde" class="event-card" data-country-filter="CR">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-camilo" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
+          <div class="event-thumb-img"><div class="art-canopy-monteverde"></div></div>
+          <span class="event-genre">AVENTURA</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">3 HORAS</span></div>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Camilo — De Adentro Pa Afuera</h3>
-          <div class="event-date">SÁB 19 JUL · 8:30 PM</div>
-          <div class="event-venue">Estadio Cuscatlán</div>
+          <h3 class="event-title">Canopy tour en Bosque Nuboso</h3>
+          <div class="event-date">DIARIO · 9:00 AM</div>
+          <div class="event-venue">Monteverde · Costa Rica</div>
+          <div class="event-price"><span>Desde</span><strong>$65.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=cafe-ataco" class="event-card" data-country-filter="SV">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-cafe-ataco"></div></div>
+          <span class="event-genre">TOURS</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">5 HORAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Ruta del café en Concepción de Ataco</h3>
+          <div class="event-date">MIÉ A VIE · 8:00 AM</div>
+          <div class="event-venue">Ataco · El Salvador</div>
           <div class="event-price"><span>Desde</span><strong>$40.00</strong></div>
         </div>
       </a>
-      <a href="event.html?id=beret" class="event-card" data-country-filter="CR">
+      <a href="event.html?id=roatan-snorkel" class="event-card" data-country-filter="HN">
         <div class="event-thumb-wrap">
-          <div class="event-thumb-img"><div class="bg-beret" style="background-image:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%),url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=70');background-size:cover;background-position:center;background-repeat:no-repeat"></div></div>
-          <span class="event-genre">POP LATINO</span>
-          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.toggle(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
-          
+          <div class="event-thumb-img"><div class="art-roatan-snorkel"></div></div>
+          <span class="event-genre">AVENTURA</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">4 HORAS</span></div>
         </div>
         <div class="event-body">
-          <h3 class="event-title">Beret — Lo Bello y Lo Roto</h3>
-          <div class="event-date">JUE 12 JUN · 8:00 PM</div>
-          <div class="event-venue">Teatro Melico Salazar</div>
-          <div class="event-price"><span>Desde</span><strong>$32.00</strong></div>
+          <h3 class="event-title">Snorkel en arrecifes de Roatán</h3>
+          <div class="event-date">DIARIO · 9:00 AM</div>
+          <div class="event-venue">West Bay · Honduras</div>
+          <div class="event-price"><span>Desde</span><strong>$75.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=copan-ruins" class="event-card" data-country-filter="HN">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-copan-ruins"></div></div>
+          <span class="event-genre">TOURS</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">4 HORAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Tour guiado a las Ruinas de Copán</h3>
+          <div class="event-date">MAR A DOM · 8:30 AM</div>
+          <div class="event-venue">Copán Ruinas · Honduras</div>
+          <div class="event-price"><span>Desde</span><strong>$50.00</strong></div>
         </div>
       </a>
     </div>
   </div>
 </section>
+
+<!-- SECTION: CLASES -->
+<section class="section" id="section-clases">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-head-left">
+        <h2 class="section-title">Clases</h2>
+      </div>
+      <div class="section-actions">
+        <div class="carousel-controls">
+          <button class="carousel-btn" @click="scrollCarousel('c-clases', -1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg></button>
+          <button class="carousel-btn" @click="scrollCarousel('c-clases', 1)"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <a href="index.html" class="section-link">Ver todos →</a>
+      </div>
+    </div>
+
+    <div class="carousel" id="c-clases">
+      <a href="event.html?id=surf-tamarindo" class="event-card" data-country-filter="CR">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-surf-tamarindo"></div></div>
+          <span class="event-genre">CLASES</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">2 HORAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Surf lesson en Playa Tamarindo</h3>
+          <div class="event-date">SÁB Y DOM · 7:00 AM</div>
+          <div class="event-venue">Tamarindo · Costa Rica</div>
+          <div class="event-price"><span>Desde</span><strong>$55.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=salsa-sansalvador" class="event-card" data-country-filter="SV">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-salsa-sansalvador"></div></div>
+          <span class="event-genre">CLASES</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">1.5 HORAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Clase abierta de Salsa</h3>
+          <div class="event-date">LUN A JUE · 7:00 PM</div>
+          <div class="event-venue">Colonia Escalón · El Salvador</div>
+          <div class="event-price"><span>Desde</span><strong>$15.00</strong></div>
+        </div>
+      </a>
+      <a href="event.html?id=cocina-tegus" class="event-card" data-country-filter="HN">
+        <div class="event-thumb-wrap">
+          <div class="event-thumb-img"><div class="art-cocina-tegus"></div></div>
+          <span class="event-genre">CLASES</span>
+          <button class="event-save" x-data="{ favId: (($el.closest('a')?.getAttribute('href') || '').match(/[?&]id=([^&]+)/) || [])[1] || '' }" :class="{ saved: $store.favorites.has(favId) }" @click.prevent.stop="$store.favorites.onHeartClick(favId)" aria-label="Guardar evento"><svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg></button>
+          <div class="event-badges"><span class="badge-multidate">3 HORAS</span></div>
+        </div>
+        <div class="event-body">
+          <h3 class="event-title">Clase de Baleadas y Plato Típico</h3>
+          <div class="event-date">SÁB Y DOM · 11:00 AM</div>
+          <div class="event-venue">Tegucigalpa · Honduras</div>
+          <div class="event-price"><span>Desde</span><strong>$35.00</strong></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
 
 <footer class="footer">
   <div class="container">
@@ -1663,6 +1774,127 @@
     requestAnimationFrame(update);
   })();
 </script>
+
+<!-- ============================================================ -->
+<!-- FAVORITES + AUTH MODAL — multi-step en el mismo overlay      -->
+<!-- 'prompt' → 'email' → 'otp' → 'name' (signup only)            -->
+<!-- ============================================================ -->
+<div class="fav-prompt-modal" x-data
+     x-show="$store.favorites.promptOpen" x-cloak x-transition.opacity
+     @click.self="$store.favorites.closePrompt()"
+     @keydown.escape.window="$store.favorites.promptOpen && $store.favorites.closePrompt()"
+     role="dialog" aria-modal="true" aria-labelledby="fav-prompt-title">
+  <div class="fav-prompt-card" @click.stop>
+    <button type="button" class="fav-prompt-close" @click="$store.favorites.closePrompt()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+
+    <!-- STEP 0: PROMPT -->
+    <div x-show="$store.favorites.authStep === 'prompt'" x-cloak>
+      <div class="fav-prompt-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+      </div>
+      <h2 class="fav-prompt-title" id="fav-prompt-title">¡Guardado!</h2>
+      <p class="fav-prompt-body">Creá tu cuenta para acceder a tus favoritos desde cualquier dispositivo y no perderlos.</p>
+      <div class="fav-prompt-actions">
+        <button type="button" class="fav-prompt-primary" @click="$store.favorites.goToAuthStep()">Crear cuenta o iniciar sesión</button>
+      </div>
+      <button type="button" class="fav-prompt-dismiss" @click="$store.favorites.closePrompt()">Seguir explorando</button>
+    </div>
+
+    <!-- STEP 1: EMAIL -->
+    <div x-show="$store.favorites.authStep === 'email'" x-cloak>
+      <h2 class="fav-prompt-title">Ingresá a Vibes</h2>
+      <p class="fav-prompt-body">Usá tu email o tu cuenta de Google. Sin contraseñas.</p>
+      <button type="button" class="fav-prompt-google"
+              @click="$store.favorites.loginWithGoogleInline()"
+              :disabled="$store.favorites.authBusy">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        <span x-text="$store.favorites.authBusy ? 'Conectando…' : 'Continuar con Google'"></span>
+      </button>
+      <div class="fav-prompt-divider">o con email</div>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthEmail()">
+        <div class="fav-prompt-field">
+          <label class="fav-prompt-label" for="fav-auth-email">Email</label>
+          <input class="fav-prompt-input" id="fav-auth-email" type="email"
+                 x-model="$store.favorites.authEmail"
+                 placeholder="tu@email.com" required autocomplete="email" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">Continuar</button>
+        <p class="fav-prompt-legal">Te enviaremos un código de 6 dígitos para verificar tu email. Al continuar aceptás los <a href="#">Términos</a> y la <a href="#">Política de Privacidad</a>.</p>
+      </form>
+    </div>
+
+    <!-- STEP 2: OTP -->
+    <div x-show="$store.favorites.authStep === 'otp'" x-cloak>
+      <h2 class="fav-prompt-title">Verificá tu email</h2>
+      <p class="fav-prompt-body">
+        Enviamos un código de 6 dígitos a <strong x-text="$store.favorites.authEmail"></strong>.
+        <a class="fav-prompt-change" href="#" @click.prevent="$store.favorites.backToAuthEmail()">Cambiar</a>
+      </p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthOtp()">
+        <div class="fav-prompt-otp-group" role="group" aria-label="Código de 6 dígitos">
+          <template x-for="idx in [0,1,2,3,4,5]" :key="idx">
+            <input class="fav-prompt-otp-input" type="text"
+                   inputmode="numeric" maxlength="1"
+                   :data-fav-otp-idx="idx"
+                   :aria-label="'Dígito ' + (idx + 1)"
+                   autocomplete="one-time-code"
+                   :value="$store.favorites.authOtp[idx]"
+                   @input="$store.favorites.onAuthOtpInput(idx, $event)"
+                   @keydown="$store.favorites.onAuthOtpKeydown(idx, $event)"
+                   @paste="$store.favorites.onAuthOtpPaste($event)" />
+          </template>
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">
+          <span x-text="$store.favorites.authBusy ? 'Verificando…' : 'Verificar'"></span>
+        </button>
+      </form>
+      <p class="fav-prompt-otp-resend">
+        ¿No te llegó?
+        <template x-if="$store.favorites.authResendCountdown === 0">
+          <a href="#" @click.prevent="$store.favorites.resendAuthOtp()">Reenviar código</a>
+        </template>
+        <template x-if="$store.favorites.authResendCountdown > 0">
+          <span>Podés reenviar en <span x-text="$store.favorites.authResendCountdown"></span>s</span>
+        </template>
+      </p>
+      <p class="fav-prompt-hint">Demo: cualquier secuencia de 6 dígitos funciona</p>
+    </div>
+
+    <!-- STEP 3: NAME (signup only) -->
+    <div x-show="$store.favorites.authStep === 'name'" x-cloak>
+      <h2 class="fav-prompt-title">Último paso</h2>
+      <p class="fav-prompt-body">Contanos tu nombre para personalizar tu experiencia.</p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthName()">
+        <div class="fav-prompt-form-grid">
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authFirstName"
+                 placeholder="Nombre" required autocomplete="given-name" />
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authLastName"
+                 placeholder="Apellido" required autocomplete="family-name" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary">Entrar</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST — feedback sutil para logged-in users al guardar fav -->
+<div class="vibe-toast" x-data
+     x-show="$store.toast.visible" x-cloak x-transition.opacity
+     role="status" aria-live="polite">
+  <svg class="vibe-toast-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+  <span class="vibe-toast-message" x-text="$store.toast.message"></span>
+  <template x-if="$store.toast.linkHref">
+    <a class="vibe-toast-link" :href="$store.toast.linkHref" x-text="$store.toast.linkText"></a>
+  </template>
+</div>
 
 </body>
 </html>

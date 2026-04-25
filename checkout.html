@@ -399,10 +399,21 @@
            Es la pantalla "funnel" clásica del checkout.               -->
       <template x-if="!otpSent">
         <div>
-          <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
-            <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Volver a entradas
-          </a>
+          <!-- Back link: context-aware. En experiences venís del event page
+               (ahí elegiste fecha+hora en el modal), no del cart. Para
+               performance events sí volvés al cart (elegí tus entradas). -->
+          <template x-if="activeEvent?.kind === 'experience'">
+            <a :href="'event.html?id=' + ($store.cart.eventId || '')" class="detail-back">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Volver al evento
+            </a>
+          </template>
+          <template x-if="activeEvent?.kind !== 'experience'">
+            <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Volver a entradas
+            </a>
+          </template>
           <h1 class="checkout-h1">¿Cómo querés continuar?</h1>
           <div class="identity-main">
             <!-- Timer + ticket lines -->
@@ -526,10 +537,20 @@
 
     <!-- ---------- STEP 2b: DETAILS (buyer form) ---------- -->
     <div x-show="step === 'details'" x-cloak class="checkout-step checkout-step-details">
-      <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
-        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Volver a entradas
-      </a>
+      <!-- Back link context-aware (mismo razonamiento que en identity):
+           experience → event page; performance → cart step. -->
+      <template x-if="activeEvent?.kind === 'experience'">
+        <a :href="'event.html?id=' + ($store.cart.eventId || '')" class="detail-back">
+          <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Volver al evento
+        </a>
+      </template>
+      <template x-if="activeEvent?.kind !== 'experience'">
+        <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
+          <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Volver a entradas
+        </a>
+      </template>
       <h1 class="checkout-h1">Ingresá tus datos</h1>
 
       <!-- Details step: mismo patrón que identity. Sin sidebar — timer +

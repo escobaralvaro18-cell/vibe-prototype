@@ -388,6 +388,22 @@ document.addEventListener('alpine:init', () => {
       this.eventId = params.get('id') || '';
       const data = (window.EVENT_DATA || {})[this.eventId] || null;
       this.event = data;
+
+      // Reset de selección al cargar: el flujo confirmScheduleSelection() va
+      // directo al checkout, entonces el estado "Reservado para X · Cambiar"
+      // del widget nunca debería mostrarse en navegación normal. Si el user
+      // vuelve (click "Volver al evento" o browser back), queremos widget
+      // limpio — no en estado previo. También registra pageshow para
+      // cubrir bfcache (Chrome/Safari preservan in-memory JS state al back).
+      this.selectedDay = null;
+      this.selectedClassIdx = null;
+      window.addEventListener('pageshow', (e) => {
+        if (e.persisted) {
+          this.selectedDay = null;
+          this.selectedClassIdx = null;
+          this.scheduleModalOpen = false;
+        }
+      });
       if (data) {
         const plain = String(data.title || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
         document.title = 'Vibes — ' + plain;
@@ -504,6 +520,68 @@ document.addEventListener('alpine:init', () => {
     // y al confirmar se empuja al checkout como un único ticket (qty=1).
     get isRecurring() {
       return this.event && this.event.eventType === 'recurring';
+    },
+
+    // ---- Experience mode -----------------------------------------------
+    // `kind === 'experience'` activa el layout ad-hoc del detail page:
+    // gallery carousel en vez de poster, quick facts strip, includes/bring,
+    // itinerary timeline, host card, política de cancelación prominente.
+    // El schedule picker (calendar) se mantiene porque los tours + clases
+    // comparten el modelo recurrente. Ver yoga→comasagua reemplazo.
+    get isExperience() {
+      return this.event && this.event.kind === 'experience';
+    },
+    // Gallery index (slide actual del carousel del hero). Solo aplica en
+    // experiences — en performance events el hero es un poster estático.
+    galleryIndex: 0,
+    galleryNext() {
+      if (!this.event || !this.event.gallery) return;
+      const n = this.event.gallery.length;
+      this.galleryIndex = (this.galleryIndex + 1) % n;
+    },
+    galleryPrev() {
+      if (!this.event || !this.event.gallery) return;
+      const n = this.event.gallery.length;
+      this.galleryIndex = (this.galleryIndex - 1 + n) % n;
+    },
+    galleryGoTo(idx) {
+      if (!this.event || !this.event.gallery) return;
+      this.galleryIndex = Math.max(0, Math.min(idx, this.event.gallery.length - 1));
+    },
+    // Lightbox (modal fullscreen). Cuando está open bloqueamos scroll del body
+    // y escuchamos keyboard (ESC para cerrar, ←→ para navegar — ese listener
+    // está en el template del lightbox).
+    lightboxOpen: false,
+    openLightbox() {
+      if (!this.event || !(this.event.gallery || []).length) return;
+      this.lightboxOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+    closeLightbox() {
+      this.lightboxOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    // Schedule modal — para experiences, el calendario + slot picker viven
+    // en un modal overlay (patrón Airbnb Experiences). El booking widget
+    // sticky muestra un botón "Elegí tu fecha" que abre este modal.
+    scheduleModalOpen: false,
+    openScheduleModal() {
+      this.scheduleModalOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+    closeScheduleModal() {
+      this.scheduleModalOpen = false;
+      document.body.style.overflow = '';
+    },
+    // Confirmar selección del modal — "Confirmar selección" ahora es el CTA
+    // final del picker y va directo al checkout (identity o details). Evita
+    // el paso redundante de cerrar modal → clickear "Reservar mi lugar" en
+    // el widget. UX: una sola acción termina el picker y abre el flow.
+    confirmScheduleSelection() {
+      if (!this.hasSelectedClass) return;
+      this.closeScheduleModal();
+      this.continueToClass();
     },
 
     // Helpers de parseo/comparación de "YYYY-M" (month 0..11). Prefijados con
@@ -2240,10 +2318,15 @@ document.addEventListener('alpine:init', () => {
       }
 
       // 2) Tab inicial desde URL (?tab=tickets|favs). Default: tickets.
+      //    También leemos el hash (#section-favoritos) que usa el redirect
+      //    post-auth cuando el guest guardó un favorito antes de loguearse.
       try {
         const params = new URLSearchParams(location.search);
         const t = params.get('tab');
         if (t === 'favs' || t === 'tickets') this.tab = t;
+        // Hash toma precedencia sobre ?tab — más específico y viene del
+        // flow del prompt de favoritos.
+        if (location.hash === '#section-favoritos') this.tab = 'favs';
       } catch {}
 
       // 3) Cerrar dropdown al click afuera. Guardamos la función en this._onDocClick
