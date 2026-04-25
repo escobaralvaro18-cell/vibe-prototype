@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibes — Buscar</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --color-accent:       #c6f800;
+      --color-accent-hover: #b5e000;
+      --color-accent-soft:  #f5ffcc;
+      --color-ink:          #0a0a0a;
+      --color-ink-mid:      #4a4a4a;
+      --color-ink-dim:      #8c8c88;
+      --color-bg:           #ffffff;
+      --color-bg-soft:      #f7f7f5;
+      --color-line:         #e5e3dd;
+      --font-display:       "Geist", -apple-system, system-ui, sans-serif;
+      --font-serif:         "Playfair Display", Georgia, serif;
+      --font-mono:          "Geist Mono", ui-monospace, monospace;
+    }
+  </style>
+
+  <link rel="stylesheet" href="css/proto.css">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
+  <script defer src="js/data/countries.js"></script>
+  <script defer src="js/data/events.js"></script>
+  <script defer src="js/stores.js"></script>
+  <script defer src="js/components.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<body
+  x-data
+  :class="{ 'menu-open': $store.ui?.menuOpen }"
+  class="mode-ticks search-page-body">
+
+<!-- Header (compacto, no header-hero) -->
+<header class="header header-search-page">
+  <div class="container header-inner">
+    <a href="index.html" class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibes</a>
+
+    <nav class="nav-desktop"
+         x-show="!$store.session.isAuthed" x-cloak>
+      <a href="creators.html" class="nav-link">Para creadores</a>
+    </nav>
+
+    <div class="header-actions">
+      <template x-if="!$store.session.isAuthed">
+        <a class="btn-signin" href="auth.html?mode=login">Ingresar</a>
+      </template>
+
+      <div class="account-header-avatar-wrap"
+           x-data="sessionMenu"
+           x-show="$store.session.isAuthed"
+           x-cloak>
+        <button type="button" class="account-avatar" @click="toggle()" aria-label="Menú de cuenta">
+          <span x-text="initials.charAt(0) || 'U'"></span>
+        </button>
+        <div class="account-menu-dropdown" :class="{ active: open }">
+          <div class="account-menu-header">
+            <div class="account-avatar account-avatar-lg"><span x-text="initials"></span></div>
+            <div class="account-menu-user">
+              <div class="account-menu-name" x-text="fullName"></div>
+              <div class="account-menu-email" x-text="email"></div>
+            </div>
+          </div>
+          <a class="account-menu-item" href="account.html?tab=tickets">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
+            Mis tickets
+          </a>
+          <a class="account-menu-item" href="account.html?tab=favs">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+            Favoritos
+          </a>
+          <a class="account-menu-item" @click.prevent="logout()" href="#">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesión
+          </a>
+        </div>
+      </div>
+
+      <button class="icon-btn menu-toggle" @click="$store.ui.menuOpen = !$store.ui.menuOpen" aria-label="Abrir menú"><svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </div>
+
+  <div class="mobile-menu">
+    <template x-if="$store.session.isAuthed">
+      <div class="mobile-menu-section">
+        <span class="mobile-menu-label">Mi cuenta</span>
+        <a href="account.html?tab=tickets">Mis tickets <span class="chev">→</span></a>
+        <a href="account.html?tab=favs">Mis favoritos <span class="chev">→</span></a>
+      </div>
+    </template>
+    <div class="mobile-menu-section">
+      <span class="mobile-menu-label">Explorar</span>
+      <a href="index.html">Eventos <span class="chev">→</span></a>
+    </div>
+    <template x-if="!$store.session.isAuthed">
+      <div class="mobile-menu-section mobile-menu-creators">
+        <span class="mobile-menu-label">Para creadores</span>
+        <a href="creators.html">Publicá tu evento <span class="chev">→</span></a>
+        <a href="creator-auth.html?mode=login">Panel del organizador <span class="chev">→</span></a>
+      </div>
+    </template>
+    <div class="mobile-menu-ctas">
+      <template x-if="!$store.session.isAuthed">
+        <a class="mobile-cta-primary" href="auth.html?mode=login">Ingresar</a>
+      </template>
+      <template x-if="!$store.session.isAuthed">
+        <a class="mobile-cta-secondary" href="auth.html?mode=signup">Crear cuenta</a>
+      </template>
+      <template x-if="$store.session.isAuthed">
+        <a class="mobile-cta-secondary"
+           @click.prevent="$store.session.logout(); $store.cart.clear(); location.href='index.html'"
+           href="#">Cerrar sesión</a>
+      </template>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- SEARCH PAGE                                   -->
+<!-- ============================================= -->
+<main class="search-page" x-data="searchPage" x-init="init()">
+
+  <!-- Search input + título -->
+  <section class="search-hero container">
+    <h1 class="search-page-title">Buscá tu <em>vibra</em>.</h1>
+
+    <label class="search-page-input">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+      <input type="text"
+             placeholder="Buscá por artista, evento, ciudad o venue…"
+             autocomplete="off"
+             x-model="query"
+             @input.debounce.250="onQueryInput()"
+             aria-label="Buscar" />
+      <button type="button" class="search-page-input-clear"
+              x-show="query.length > 0" x-cloak
+              @click="query=''; onQueryInput()"
+              aria-label="Limpiar búsqueda">
+        <svg viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </label>
+  </section>
+
+  <!-- Sticky filter bar — single-line dropdown buttons -->
+  <section class="search-filter-bar">
+    <div class="container">
+      <div class="search-filters-row">
+
+        <!-- Categoría -->
+        <div class="filter-dropdown-wrap">
+          <button type="button" class="filter-dropdown-btn"
+                  :class="{ active: !!cat, open: openDropdown === 'cat' }"
+                  @click.stop="toggleDropdown('cat')">
+            <span class="filter-dropdown-label" x-text="cat ? catLabel(cat) : 'Categoría'"></span>
+            <svg class="filter-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="filter-dropdown-popover" x-show="openDropdown === 'cat'" x-cloak x-transition.opacity>
+            <button type="button" class="filter-dropdown-item"
+                    :class="{ selected: cat === null }"
+                    @click="cat = null; visibleCount = pageSize; syncURL(); closeDropdown()">
+              Todas las categorías
+            </button>
+            <template x-for="c in CATEGORIES" :key="c.id">
+              <button type="button" class="filter-dropdown-item"
+                      :class="{ selected: cat === c.id }"
+                      @click="cat = c.id; visibleCount = pageSize; syncURL(); closeDropdown()"
+                      x-text="c.label"></button>
+            </template>
+          </div>
+        </div>
+
+        <!-- País -->
+        <div class="filter-dropdown-wrap">
+          <button type="button" class="filter-dropdown-btn"
+                  :class="{ active: !!country, open: openDropdown === 'country' }"
+                  @click.stop="toggleDropdown('country')">
+            <span class="filter-dropdown-label" x-text="country ? countryLabel(country) : 'País'"></span>
+            <svg class="filter-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="filter-dropdown-popover" x-show="openDropdown === 'country'" x-cloak x-transition.opacity>
+            <button type="button" class="filter-dropdown-item"
+                    :class="{ selected: country === null }"
+                    @click="country = null; visibleCount = pageSize; syncURL(); closeDropdown()">
+              Toda Centroamérica
+            </button>
+            <template x-for="c in COUNTRIES" :key="c.id">
+              <button type="button" class="filter-dropdown-item"
+                      :class="{ selected: country === c.id }"
+                      @click="country = c.id; visibleCount = pageSize; syncURL(); closeDropdown()"
+                      x-text="c.label"></button>
+            </template>
+          </div>
+        </div>
+
+        <!-- Fecha — popover elegante con presets + custom -->
+        <div class="filter-dropdown-wrap filter-dropdown-wrap-date">
+          <button type="button" class="filter-dropdown-btn"
+                  :class="{ active: !!datePreset, open: openDropdown === 'date' }"
+                  @click.stop="toggleDropdown('date')">
+            <span class="filter-dropdown-label" x-text="dateButtonLabel"></span>
+            <svg class="filter-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="filter-dropdown-popover filter-dropdown-popover-date"
+               x-show="openDropdown === 'date'" x-cloak x-transition.opacity>
+            <!-- Tabs internos: Preset / Personalizado -->
+            <div class="date-tabs">
+              <button type="button" class="date-tab"
+                      :class="{ active: dateMode === 'preset' }"
+                      @click="dateMode = 'preset'">Sugeridas</button>
+              <button type="button" class="date-tab"
+                      :class="{ active: dateMode === 'custom' }"
+                      @click="dateMode = 'custom'">Personalizada</button>
+            </div>
+
+            <!-- Modo preset: chips en grid 2 columnas -->
+            <div class="date-presets-grid" x-show="dateMode === 'preset'" x-cloak>
+              <template x-for="p in DATE_PRESETS" :key="p.id">
+                <button type="button" class="date-preset-chip"
+                        :class="{ selected: datePreset === p.id }"
+                        @click="setDatePreset(p.id); closeDropdown()"
+                        x-text="p.label"></button>
+              </template>
+            </div>
+
+            <!-- Modo custom: dos date inputs lado a lado -->
+            <div class="date-custom-form" x-show="dateMode === 'custom'" x-cloak>
+              <div class="date-custom-row">
+                <label class="date-custom-field">
+                  <span>Desde</span>
+                  <input type="date" x-model="dateFrom" />
+                </label>
+                <label class="date-custom-field">
+                  <span>Hasta</span>
+                  <input type="date" x-model="dateTo" />
+                </label>
+              </div>
+              <button type="button" class="date-custom-apply"
+                      @click="applyCustomDate(); closeDropdown()"
+                      :disabled="!dateFrom && !dateTo">
+                Aplicar
+              </button>
+            </div>
+
+            <!-- Footer — limpiar -->
+            <div class="date-popover-footer" x-show="!!datePreset" x-cloak>
+              <button type="button" class="date-popover-clear"
+                      @click="datePreset = null; dateFrom = ''; dateTo = ''; dateMode = 'preset'; visibleCount = pageSize; syncURL();">
+                Limpiar fecha
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <div class="filter-dropdown-wrap">
+          <button type="button" class="filter-dropdown-btn"
+                  :class="{ active: priceMin != null || priceMax != null, open: openDropdown === 'price' }"
+                  @click.stop="toggleDropdown('price')">
+            <span class="filter-dropdown-label" x-text="priceButtonLabel"></span>
+            <svg class="filter-dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="filter-dropdown-popover filter-dropdown-popover-price"
+               x-show="openDropdown === 'price'" x-cloak x-transition.opacity>
+            <div class="price-popover-row">
+              <label class="price-popover-field">
+                <span>Mínimo</span>
+                <div class="price-popover-input">
+                  <span class="price-popover-prefix">$</span>
+                  <input type="number" min="0" placeholder="0"
+                         x-model.number.lazy="priceMin"
+                         @change="onPriceChange()" />
+                </div>
+              </label>
+              <label class="price-popover-field">
+                <span>Máximo</span>
+                <div class="price-popover-input">
+                  <span class="price-popover-prefix">$</span>
+                  <input type="number" min="0" placeholder="∞"
+                         x-model.number.lazy="priceMax"
+                         @change="onPriceChange()" />
+                </div>
+              </label>
+            </div>
+            <div class="date-popover-footer" x-show="priceMin != null || priceMax != null" x-cloak>
+              <button type="button" class="date-popover-clear"
+                      @click="priceMin = null; priceMax = null; visibleCount = pageSize; syncURL();">
+                Limpiar precio
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Limpiar todo: inline después de los filtros, solo visible si hay alguno activo -->
+        <button type="button" class="filter-clear-inline"
+                x-show="hasAnyFilter" x-cloak
+                @click="clearAll()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6"/></svg>
+          Limpiar todo
+        </button>
+
+        <!-- Sort: derecha -->
+        <div class="search-filters-spacer"></div>
+        <div class="filter-dropdown-wrap">
+          <select x-model="sort" @change="setSort(sort)" class="filter-sort-select" aria-label="Ordenar">
+            <template x-for="o in SORT_OPTIONS" :key="o.id">
+              <option :value="o.id" x-text="o.label"></option>
+            </template>
+          </select>
+        </div>
+
+        <!-- Mobile: botón único "Filtros" -->
+        <button type="button" class="search-mobile-filters-btn"
+                @click="filterSheetOpen = true">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" d="M4 6h16M7 12h10M10 18h4"/></svg>
+          Filtros
+          <span class="search-chip-badge" x-show="activeFilterCount > 0" x-text="activeFilterCount"></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Resultados -->
+  <section class="container search-results-section">
+    <div class="search-results-header">
+      <span class="search-results-count">
+        <strong x-text="results.length"></strong>
+        <span x-text="resultsNoun + resultsContext"></span>
+      </span>
+    </div>
+
+    <!-- Empty state -->
+    <template x-if="results.length === 0">
+      <div class="search-empty-page">
+        <div class="search-empty-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <h3 class="search-empty-title">
+          <template x-if="query">
+            <span>No encontramos "<span x-text="query"></span>"</span>
+          </template>
+          <template x-if="!query">
+            <span>No encontramos eventos con esos filtros</span>
+          </template>
+        </h3>
+        <p class="search-empty-sub">Probá quitar algún filtro o buscar otra cosa.</p>
+        <div class="search-empty-actions">
+          <button type="button" class="search-empty-btn" @click="clearAll()">Limpiar todo</button>
+        </div>
+        <div class="search-empty-suggestions">
+          <span class="search-empty-sub-label">Sugerencias</span>
+          <div class="search-chip-row">
+            <template x-for="s in SUGGESTIONS" :key="s">
+              <button type="button" class="search-chip" @click="useSuggestion(s)" x-text="s"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Grid -->
+    <template x-if="results.length > 0">
+      <div>
+        <div class="search-grid">
+          <template x-for="r in visibleResults" :key="r.id">
+            <a class="event-card search-page-card"
+               :href="'event.html?id=' + r.id"
+               :data-country-filter="r._country">
+              <div class="event-thumb-wrap">
+                <div class="event-thumb-img">
+                  <div :class="r.raw.bg"></div>
+                </div>
+                <span class="event-genre" x-text="(r.raw.kicker || r._cat || '').split(' · ')[0]"></span>
+                <button type="button" class="event-save"
+                        :class="{ saved: $store.favorites.has(r.id) }"
+                        @click.prevent.stop="$store.favorites.onHeartClick(r.id)"
+                        aria-label="Guardar">
+                  <svg stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+                </button>
+              </div>
+              <div class="event-body">
+                <h3 class="event-title" x-html="(r.raw.title || '').replace(/<br>/g, ' ').replace(/<em>(.*?)<\/em>/g, '$1')"></h3>
+                <div class="event-date" x-text="formatDate(r._date) + (timeOf(r.raw) ? ' · ' + timeOf(r.raw) : '')"></div>
+                <div class="event-venue">
+                  <span x-text="(r._country ? (countryLabel(r._country) + ' · ') : '') + (r.raw.venue || '')"></span>
+                </div>
+                <div class="event-price"><span>Desde</span><strong x-text="r.raw.price"></strong></div>
+              </div>
+            </a>
+          </template>
+        </div>
+
+        <div class="search-load-more" x-show="hasMore" x-cloak>
+          <button type="button" class="search-load-more-btn" @click="loadMore()">
+            Ver más resultados
+          </button>
+        </div>
+      </div>
+    </template>
+
+  </section>
+
+  <!-- Mobile filter sheet -->
+  <div class="search-filter-sheet" :class="{ open: filterSheetOpen }" x-cloak>
+    <div class="search-filter-sheet-backdrop" @click="filterSheetOpen = false"></div>
+    <div class="search-filter-sheet-card">
+      <div class="search-filter-sheet-header">
+        <h2 class="search-filter-sheet-title">Filtros</h2>
+        <button type="button" class="search-filter-sheet-close" @click="filterSheetOpen = false" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
+      </div>
+      <div class="search-filter-sheet-body">
+        <div class="search-filter-group">
+          <span class="search-filter-label">Categoría</span>
+          <div class="search-chip-list">
+            <template x-for="c in CATEGORIES" :key="'mc-' + c.id">
+              <button type="button" class="search-chip-filter"
+                      :class="{ active: cat === c.id }"
+                      @click="setCat(c.id)" x-text="c.label"></button>
+            </template>
+          </div>
+        </div>
+        <div class="search-filter-group">
+          <span class="search-filter-label">País</span>
+          <div class="search-chip-list">
+            <template x-for="c in COUNTRIES" :key="'mco-' + c.id">
+              <button type="button" class="search-chip-filter"
+                      :class="{ active: country === c.id }"
+                      @click="setCountry(c.id)" x-text="c.label"></button>
+            </template>
+          </div>
+        </div>
+        <div class="search-filter-group">
+          <span class="search-filter-label">Fecha</span>
+          <div class="search-chip-list">
+            <template x-for="p in DATE_PRESETS" :key="'md-' + p.id">
+              <button type="button" class="search-chip-filter"
+                      :class="{ active: datePreset === p.id }"
+                      @click="setDatePreset(p.id)" x-text="p.label"></button>
+            </template>
+          </div>
+          <div class="search-price-row" style="margin-top:10px">
+            <input type="date" x-model="dateFrom" @change="applyCustomDate()" class="search-price-input" />
+            <span class="search-price-sep">→</span>
+            <input type="date" x-model="dateTo" @change="applyCustomDate()" class="search-price-input" />
+          </div>
+        </div>
+        <div class="search-filter-group">
+          <span class="search-filter-label">Precio</span>
+          <div class="search-price-row">
+            <input type="number" min="0" placeholder="Mín $"
+                   x-model.number.lazy="priceMin"
+                   @change="onPriceChange()"
+                   class="search-price-input" />
+            <span class="search-price-sep">–</span>
+            <input type="number" min="0" placeholder="Máx $"
+                   x-model.number.lazy="priceMax"
+                   @change="onPriceChange()"
+                   class="search-price-input" />
+          </div>
+        </div>
+        <div class="search-filter-group">
+          <span class="search-filter-label">Ordenar</span>
+          <select x-model="sort" @change="setSort(sort)" class="search-sort-select">
+            <template x-for="o in SORT_OPTIONS" :key="'so-' + o.id">
+              <option :value="o.id" x-text="o.label"></option>
+            </template>
+          </select>
+        </div>
+      </div>
+      <div class="search-filter-sheet-footer">
+        <button type="button" class="search-clear-all" @click="clearAll()">Limpiar</button>
+        <button type="button" class="search-filter-sheet-apply" @click="filterSheetOpen = false">
+          Mostrar <span x-text="results.length"></span> resultados
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo"><span class="logo-mark"><svg viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="8" width="6" height="16" rx="1"/><rect x="12" y="4" width="6" height="24" rx="1"/><rect x="22" y="10" width="6" height="12" rx="1"/></svg></span>Vibes</div>
+        <p>La plataforma de eventos de Centroamérica. Desde 2018.</p>
+        <div class="footer-social"><a>IG</a><a>FB</a><a>TT</a><a>X</a></div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><h4>Explorá</h4><a href="index.html">Todos</a><a href="search.html?cat=concierto">Conciertos</a><a href="search.html?cat=deporte">Deporte</a><a href="search.html?cat=experiencia">Experiencias</a></div>
+        <div class="footer-col"><h4>Organizadores</h4><a>Publicar</a><a>Precios</a></div>
+        <div class="footer-col"><h4>Ayuda</h4><a>Centro de ayuda</a><a>Contacto</a></div>
+        <div class="footer-col"><h4>Empresa</h4><a>Nosotros</a><a>Términos</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 VIBES.</span><span>Hecho con <span style="color: var(--accent);">✦</span> en Centroamérica</span></div>
+  </div>
+</footer>
+
+<!-- Toast (global) -->
+<div class="vibe-toast" x-data
+     x-show="$store.toast.visible" x-cloak x-transition.opacity
+     role="status" aria-live="polite">
+  <svg class="vibe-toast-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 000-7.6z"/></svg>
+  <span class="vibe-toast-message" x-text="$store.toast.message"></span>
+  <template x-if="$store.toast.linkHref">
+    <a class="vibe-toast-link" :href="$store.toast.linkHref" x-text="$store.toast.linkText"></a>
+  </template>
+</div>
+
+<!-- Favorites prompt modal (consistencia con resto del site) -->
+<div class="fav-prompt-modal" x-data
+     x-show="$store.favorites.promptOpen" x-cloak x-transition.opacity
+     @click.self="$store.favorites.closePrompt()"
+     @keydown.escape.window="$store.favorites.promptOpen && $store.favorites.closePrompt()"
+     role="dialog" aria-modal="true" aria-labelledby="fav-prompt-title-search">
+  <div class="fav-prompt-card" @click.stop>
+    <button type="button" class="fav-prompt-close" @click="$store.favorites.closePrompt()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+    <div x-show="$store.favorites.authStep === 'email'" x-cloak>
+      <h2 class="fav-prompt-title">Ingresá a Vibes</h2>
+      <p class="fav-prompt-body">Usá tu email o tu cuenta de Google. Sin contraseñas.</p>
+      <button type="button" class="fav-prompt-google"
+              @click="$store.favorites.loginWithGoogleInline()"
+              :disabled="$store.favorites.authBusy">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        <span x-text="$store.favorites.authBusy ? 'Conectando…' : 'Continuar con Google'"></span>
+      </button>
+      <div class="fav-prompt-divider">o con email</div>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthEmail()">
+        <div class="fav-prompt-field">
+          <label class="fav-prompt-label" for="fav-auth-email-search">Email</label>
+          <input class="fav-prompt-input" id="fav-auth-email-search" type="email"
+                 x-model="$store.favorites.authEmail"
+                 placeholder="tu@email.com" required autocomplete="email" />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">Continuar</button>
+        <p class="fav-prompt-legal">Te enviaremos un código de 6 dígitos para verificar tu email. Al continuar aceptás los <a href="#">Términos</a> y la <a href="#">Política de Privacidad</a>.</p>
+      </form>
+    </div>
+    <div x-show="$store.favorites.authStep === 'otp'" x-cloak>
+      <h2 class="fav-prompt-title">Verificá tu email</h2>
+      <p class="fav-prompt-body">
+        Enviamos un código de 6 dígitos a <strong x-text="$store.favorites.authEmail"></strong>.
+        <a class="fav-prompt-change" href="#" @click.prevent="$store.favorites.backToAuthEmail()">Cambiar</a>
+      </p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthOtp()">
+        <div class="fav-prompt-otp-group" role="group" aria-label="Código de 6 dígitos">
+          <template x-for="idx in [0,1,2,3,4,5]" :key="idx">
+            <input class="fav-prompt-otp-input" type="text"
+                   inputmode="numeric" maxlength="1"
+                   :data-fav-otp-idx="idx"
+                   :aria-label="'Dígito ' + (idx + 1)"
+                   autocomplete="one-time-code"
+                   :value="$store.favorites.authOtp[idx]"
+                   @input="$store.favorites.onAuthOtpInput(idx, $event)"
+                   @keydown="$store.favorites.onAuthOtpKeydown(idx, $event)"
+                   @paste="$store.favorites.onAuthOtpPaste($event)" />
+          </template>
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary" :disabled="$store.favorites.authBusy">
+          <span x-text="$store.favorites.authBusy ? 'Verificando…' : 'Verificar'"></span>
+        </button>
+      </form>
+    </div>
+    <div x-show="$store.favorites.authStep === 'name'" x-cloak>
+      <h2 class="fav-prompt-title">Último paso</h2>
+      <p class="fav-prompt-body">Contanos tu nombre.</p>
+      <form class="fav-prompt-form" @submit.prevent="$store.favorites.submitAuthName()">
+        <div class="fav-prompt-form-grid">
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authFirstName"
+                 placeholder="Nombre" required />
+          <input class="fav-prompt-input" type="text"
+                 x-model="$store.favorites.authLastName"
+                 placeholder="Apellido" required />
+        </div>
+        <p class="fav-prompt-error" x-show="$store.favorites.authError" x-text="$store.favorites.authError" x-cloak></p>
+        <button type="submit" class="fav-prompt-primary">Entrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

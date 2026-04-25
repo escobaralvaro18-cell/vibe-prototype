@@ -614,6 +614,7 @@ window.EVENT_DATA = {
   'clasico-cr': {
     eventType: 'single',
     ticketMode: 'ga',
+    category: 'deporte', country: 'CR',
     seatedConfig: {
       sections: [
         { id: 'palco',    name: 'Palco Cabina',   price: 75, color: '#c6f800', status: 'fewleft',   description: 'Palco con bebidas y snacks incluidos' },
@@ -650,6 +651,7 @@ window.EVENT_DATA = {
   'alianza-fas': {
     eventType: 'single',
     ticketMode: 'ga',
+    category: 'deporte', country: 'SV',
     seatedConfig: {
       sections: [
         { id: 'palco',    name: 'Palco VIP',     price: 60, color: '#c6f800', status: 'fewleft',   description: 'Palco con catering · vista preferencial' },
@@ -685,6 +687,7 @@ window.EVENT_DATA = {
   'olimpia-motagua': {
     eventType: 'single',
     ticketMode: 'ga',
+    category: 'deporte', country: 'HN',
     seatedConfig: {
       sections: [
         { id: 'palco',        name: 'Palco',         price: 55, color: '#c6f800', status: 'fewleft',   description: 'Palco cubierto · vista al centro' },

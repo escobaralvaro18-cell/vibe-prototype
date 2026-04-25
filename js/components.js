@@ -289,6 +289,486 @@ document.addEventListener('alpine:init', () => {
     },
   }));
 
+  // -------- SEARCH PAGE ---------------------------------------------------
+  // Página de búsqueda dedicada (/search.html). A diferencia del overlay
+  // (instant search en modal), esta es una página completa con filtros
+  // avanzados, URL sync, y resultados en grid.
+  //
+  // URL params soportados:
+  //   ?q=<texto>            búsqueda libre
+  //   ?cat=<slug>           concierto | deporte | experiencia | clase
+  //   ?country=<code>       CR | SV | HN
+  //   ?date=<preset>        hoy | finde | semana | mes | next-mes
+  //   ?from=<iso>&to=<iso>  rango custom
+  //   ?priceMin=<n>&priceMax=<n>
+  //   ?age=<v>              18plus
+  //   ?sort=<v>             date | popular | price-asc | price-desc
+  //   ?save=1               (interno) abre el modal "Guardar búsqueda" tras hidrate
+  Alpine.data('searchPage', () => ({
+    query: '',
+    cat: null,
+    country: null,
+    datePreset: null,    // 'hoy' | 'finde' | 'semana' | 'mes' | 'next-mes' | 'custom'
+    dateFrom: '',
+    dateTo: '',
+    priceMin: null,
+    priceMax: null,
+    sort: 'date',        // 'date' | 'popular' | 'price-asc' | 'price-desc'
+
+    // UI state
+    filterSheetOpen: false,         // mobile bottom sheet
+    openDropdown: null,             // 'cat' | 'country' | 'date' | 'price' | null
+    dateMode: 'preset',             // 'preset' | 'custom' — toggle dentro del popover de fecha
+    pageSize: 24,
+    visibleCount: 24,
+
+    _resultsCache: null,
+    _hydrating: false,
+    _docListener: null,
+
+    // Catalog of category metadata
+    CATEGORIES: [
+      { id: 'concierto',   label: 'Conciertos' },
+      { id: 'deporte',     label: 'Deporte' },
+      { id: 'experiencia', label: 'Experiencias' },
+      { id: 'clase',       label: 'Clases' },
+    ],
+    COUNTRIES: [
+      { id: 'CR', label: 'Costa Rica' },
+      { id: 'SV', label: 'El Salvador' },
+      { id: 'HN', label: 'Honduras' },
+    ],
+    DATE_PRESETS: [
+      { id: 'hoy',      label: 'Hoy' },
+      { id: 'finde',    label: 'Este finde' },
+      { id: 'semana',   label: 'Esta semana' },
+      { id: 'mes',      label: 'Este mes' },
+      { id: 'next-mes', label: 'Próximo mes' },
+    ],
+    SORT_OPTIONS: [
+      { id: 'date',       label: 'Próximos primero' },
+      { id: 'popular',    label: 'Más populares' },
+      { id: 'price-asc',  label: 'Precio: menor a mayor' },
+      { id: 'price-desc', label: 'Precio: mayor a menor' },
+    ],
+    // Mapping ciudad → país para concertos sin field `country`
+    CITY_COUNTRY: {
+      'San José': 'CR', 'Alajuela': 'CR', 'Liberia': 'CR', 'Heredia': 'CR',
+      'Tamarindo': 'CR', 'Monteverde': 'CR',
+      'San Salvador': 'SV', 'Santa Tecla': 'SV',
+      'Concepción de Ataco': 'SV', 'Ataco': 'SV',
+      'Tegucigalpa': 'HN', 'San Pedro Sula': 'HN',
+      'Roatán': 'HN', 'West Bay': 'HN', 'Copán Ruinas': 'HN',
+    },
+    MONTH_MAP: { ene:0, feb:1, mar:2, abr:3, may:4, jun:5, jul:6, ago:7, sep:8, oct:9, nov:10, dic:11 },
+
+    init() {
+      this._hydrating = true;
+      this.hydrateFromURL();
+      this._hydrating = false;
+      // Listener bfcache: si user vuelve atrás, re-leer URL.
+      window.addEventListener('pageshow', () => {
+        this._hydrating = true;
+        this.hydrateFromURL();
+        this._hydrating = false;
+      });
+      // Cierra el dropdown abierto cuando se hace click fuera.
+      this._docListener = (e) => {
+        if (!this.openDropdown) return;
+        // No cerrar si el click fue dentro de un dropdown o su botón.
+        const inside = e.target.closest('.filter-dropdown-popover, .filter-dropdown-btn');
+        if (!inside) this.openDropdown = null;
+      };
+      document.addEventListener('click', this._docListener);
+    },
+
+    destroy() {
+      if (this._docListener) document.removeEventListener('click', this._docListener);
+    },
+
+    hydrateFromURL() {
+      const p = new URLSearchParams(location.search);
+      this.query     = p.get('q') || '';
+      this.cat       = p.get('cat') || null;
+      this.country   = p.get('country') || (this.$store.ui ? this.$store.ui.country : null);
+      this.datePreset = p.get('date') || null;
+      this.dateFrom  = p.get('from') || '';
+      this.dateTo    = p.get('to') || '';
+      const pmin = p.get('priceMin'); this.priceMin = pmin ? Number(pmin) : null;
+      const pmax = p.get('priceMax'); this.priceMax = pmax ? Number(pmax) : null;
+      this.sort      = p.get('sort') || 'date';
+      this.dateMode  = (this.datePreset === 'custom') ? 'custom' : 'preset';
+      this.visibleCount = this.pageSize;
+    },
+
+    toggleDropdown(name) {
+      this.openDropdown = this.openDropdown === name ? null : name;
+    },
+    closeDropdown() {
+      this.openDropdown = null;
+    },
+
+    syncURL() {
+      if (this._hydrating) return;
+      const p = new URLSearchParams();
+      if (this.query)       p.set('q', this.query);
+      if (this.cat)         p.set('cat', this.cat);
+      if (this.country)     p.set('country', this.country);
+      if (this.datePreset)  p.set('date', this.datePreset);
+      if (this.datePreset === 'custom' && this.dateFrom) p.set('from', this.dateFrom);
+      if (this.datePreset === 'custom' && this.dateTo)   p.set('to', this.dateTo);
+      if (this.priceMin != null) p.set('priceMin', String(this.priceMin));
+      if (this.priceMax != null) p.set('priceMax', String(this.priceMax));
+      if (this.sort && this.sort !== 'date') p.set('sort', this.sort);
+      const qs = p.toString();
+      const newUrl = location.pathname + (qs ? '?' + qs : '') + location.hash;
+      history.replaceState(null, '', newUrl);
+    },
+
+    // --- DERIVERS ---------------------------------------------------------
+    categoryOf(ev) {
+      if (!ev) return null;
+      // Kind wins primero (experiences/clases tienen `category` de display
+      // como "Tours · Cultura", colisiona con slugs de filtro).
+      if (ev.kind === 'experience' && ev.experienceType === 'class') return 'clase';
+      if (ev.kind === 'experience') return 'experiencia';
+      // Solo aceptamos slugs explícitos de filtro (no display labels).
+      if (ev.category === 'deporte') return 'deporte';
+      return 'concierto';
+    },
+    countryOf(ev) {
+      if (!ev) return null;
+      if (ev.country) return ev.country;
+      const city = ev.city || '';
+      return this.CITY_COUNTRY[city] || null;
+    },
+    parseEventDate(ev) {
+      if (!ev) return null;
+      // Experience: usar pattern para próximo día matching
+      if (ev.pattern) {
+        const today = new Date(); today.setHours(0,0,0,0);
+        for (let i = 0; i < 14; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
+          if (ev.pattern.days.includes(d.getDay())) return d;
+        }
+        return today;
+      }
+      // Multi-date: usar primera fecha de array
+      let dateStr = ev.date;
+      if (!dateStr && Array.isArray(ev.dates) && ev.dates[0]) {
+        const d = ev.dates[0];
+        dateStr = d.day + ' ' + d.month;
+      }
+      if (!dateStr) return null;
+      // Normalizar y extraer
+      const norm = String(dateStr).toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const parts = norm.split(/\s+/).filter(Boolean);
+      let day = null, mon = null;
+      for (const t of parts) {
+        if (/^\d+$/.test(t)) day = parseInt(t, 10);
+        else if (this.MONTH_MAP[t] !== undefined) mon = this.MONTH_MAP[t];
+      }
+      if (day == null || mon == null) return null;
+      // Inferir año: si la fecha ya pasó este año, asumir el siguiente.
+      const now = new Date();
+      let year = now.getFullYear();
+      const candidate = new Date(year, mon, day);
+      if (candidate < new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)) {
+        year++;
+      }
+      return new Date(year, mon, day);
+    },
+    priceOf(ev) {
+      if (!ev) return 0;
+      // Soporta "$45.00", "$ 45", "₡5000" etc — extraemos números.
+      const m = String(ev.price || '0').replace(/[^\d.]/g, '');
+      return parseFloat(m) || 0;
+    },
+
+    // --- DATE FILTER ------------------------------------------------------
+    matchesDate(eventDate) {
+      if (!eventDate) return true; // sin fecha pasable, no filtra
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (this.datePreset === 'hoy') {
+        const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+        return eventDate >= today && eventDate < tomorrow;
+      }
+      if (this.datePreset === 'finde') {
+        // Próximo Sábado-Domingo desde hoy
+        const dow = today.getDay(); // 0=Dom,6=Sáb
+        const sat = new Date(today);
+        sat.setDate(today.getDate() + ((6 - dow + 7) % 7 || 7));
+        const monAfter = new Date(sat); monAfter.setDate(sat.getDate() + 2);
+        return eventDate >= today && eventDate < monAfter;
+      }
+      if (this.datePreset === 'semana') {
+        const end = new Date(today); end.setDate(today.getDate() + 7);
+        return eventDate >= today && eventDate < end;
+      }
+      if (this.datePreset === 'mes') {
+        const end = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        return eventDate >= today && eventDate < end;
+      }
+      if (this.datePreset === 'next-mes') {
+        const start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        const end   = new Date(today.getFullYear(), today.getMonth() + 2, 1);
+        return eventDate >= start && eventDate < end;
+      }
+      if (this.datePreset === 'custom') {
+        if (this.dateFrom) {
+          const from = new Date(this.dateFrom);
+          if (eventDate < from) return false;
+        }
+        if (this.dateTo) {
+          const to = new Date(this.dateTo);
+          to.setDate(to.getDate() + 1); // inclusive
+          if (eventDate >= to) return false;
+        }
+        return true;
+      }
+      // Sin date filter → matchea todo, pero excluimos pasados
+      return eventDate >= today;
+    },
+
+    // --- TEXT MATCH (accent-insensitive) ----------------------------------
+    matchesQuery(ev) {
+      const q = (this.query || '').trim().toLowerCase();
+      if (!q) return true;
+      const norm = (s) => String(s || '').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const strip = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const hay = norm([
+        strip(ev.title), strip(ev.kicker), strip(ev.venue), strip(ev.city),
+        strip(ev.category || ''),
+      ].join(' '));
+      const parts = norm(q).split(/\s+/).filter(Boolean);
+      return parts.every(p => hay.includes(p));
+    },
+
+    // --- RESULTS ----------------------------------------------------------
+    get allEvents() {
+      const data = window.EVENT_DATA || {};
+      const rows = [];
+      for (const id in data) {
+        const ev = data[id];
+        if (!ev) continue;
+        rows.push({
+          id, raw: ev,
+          _cat: this.categoryOf(ev),
+          _country: this.countryOf(ev),
+          _date: this.parseEventDate(ev),
+          _price: this.priceOf(ev),
+        });
+      }
+      return rows;
+    },
+
+    get results() {
+      const filtered = this.allEvents.filter(r => {
+        if (this.cat && r._cat !== this.cat) return false;
+        if (this.country && r._country !== this.country) return false;
+        if (!this.matchesDate(r._date)) return false;
+        if (this.priceMin != null && r._price < this.priceMin) return false;
+        if (this.priceMax != null && r._price > this.priceMax) return false;
+        if (!this.matchesQuery(r.raw)) return false;
+        return true;
+      });
+      // Sort
+      const sorted = [...filtered];
+      if (this.sort === 'date') {
+        sorted.sort((a, b) => (a._date?.getTime() || 0) - (b._date?.getTime() || 0));
+      } else if (this.sort === 'price-asc') {
+        sorted.sort((a, b) => a._price - b._price);
+      } else if (this.sort === 'price-desc') {
+        sorted.sort((a, b) => b._price - a._price);
+      } else if (this.sort === 'popular') {
+        // "popular" = orden manual por hardcoded weight (mock)
+        const POPULAR_WEIGHT = {
+          'badbunny': 100, 'karolg': 95, 'feid': 90, 'maluma': 85, 'comasagua': 82,
+          'clasico-cr': 80, 'arcangel': 78, 'camilo': 75, 'manuelturizo': 72,
+          'alianza-fas': 70, 'olimpia-motagua': 68,
+        };
+        sorted.sort((a, b) => (POPULAR_WEIGHT[b.id] || 0) - (POPULAR_WEIGHT[a.id] || 0));
+      }
+      return sorted;
+    },
+
+    get visibleResults() {
+      return this.results.slice(0, this.visibleCount);
+    },
+
+    get hasMore() {
+      return this.results.length > this.visibleCount;
+    },
+    loadMore() {
+      this.visibleCount += this.pageSize;
+    },
+
+    // --- ACTIVE FILTERS ---------------------------------------------------
+    get activeFilterCount() {
+      let n = 0;
+      if (this.cat) n++;
+      if (this.country) n++;
+      if (this.datePreset) n++;
+      if (this.priceMin != null || this.priceMax != null) n++;
+      return n;
+    },
+    get hasAnyFilter() {
+      return this.activeFilterCount > 0 || !!this.query;
+    },
+    get activeFilterChips() {
+      const chips = [];
+      if (this.cat) {
+        const c = this.CATEGORIES.find(x => x.id === this.cat);
+        if (c) chips.push({ key: 'cat', label: c.label });
+      }
+      if (this.country) {
+        const c = this.COUNTRIES.find(x => x.id === this.country);
+        if (c) chips.push({ key: 'country', label: c.label });
+      }
+      if (this.datePreset) {
+        const lbl = this.datePreset === 'custom'
+          ? `${this.dateFrom || '…'} → ${this.dateTo || '…'}`
+          : this.DATE_PRESETS.find(x => x.id === this.datePreset)?.label;
+        if (lbl) chips.push({ key: 'date', label: lbl });
+      }
+      if (this.priceMin != null || this.priceMax != null) {
+        const lo = this.priceMin != null ? '$' + this.priceMin : '$0';
+        const hi = this.priceMax != null ? '$' + this.priceMax : '∞';
+        chips.push({ key: 'price', label: `${lo} – ${hi}` });
+      }
+      return chips;
+    },
+
+    // --- ACTIONS ----------------------------------------------------------
+    setCat(c)         { this.cat       = (this.cat === c ? null : c);     this.visibleCount = this.pageSize; this.syncURL(); },
+    setCountry(c)     { this.country   = (this.country === c ? null : c); this.visibleCount = this.pageSize; this.syncURL(); },
+    setDatePreset(p)  {
+      this.datePreset = (this.datePreset === p ? null : p);
+      this.dateMode = 'preset';
+      this.dateFrom = ''; this.dateTo = '';
+      this.visibleCount = this.pageSize;
+      this.syncURL();
+    },
+    setSort(s)        { this.sort       = s; this.syncURL(); },
+    onQueryInput()    { this.visibleCount = this.pageSize; this.syncURL(); },
+    onPriceChange()   { this.visibleCount = this.pageSize; this.syncURL(); },
+    applyCustomDate() {
+      this.datePreset = 'custom';
+      this.dateMode = 'custom';
+      this.visibleCount = this.pageSize;
+      this.syncURL();
+    },
+
+    removeChip(key) {
+      if (key === 'cat')      this.cat = null;
+      if (key === 'country')  this.country = null;
+      if (key === 'date')     { this.datePreset = null; this.dateFrom = ''; this.dateTo = ''; this.dateMode = 'preset'; }
+      if (key === 'price')    { this.priceMin = null; this.priceMax = null; }
+      this.visibleCount = this.pageSize;
+      this.syncURL();
+    },
+
+    clearAll() {
+      this.query = '';
+      this.cat = null;
+      this.country = null;
+      this.datePreset = null;
+      this.dateFrom = '';
+      this.dateTo = '';
+      this.dateMode = 'preset';
+      this.priceMin = null;
+      this.priceMax = null;
+      this.visibleCount = this.pageSize;
+      this.syncURL();
+    },
+
+    // Etiqueta corta para el botón del dropdown de fecha.
+    get dateButtonLabel() {
+      if (!this.datePreset) return 'Fecha';
+      if (this.datePreset === 'custom') {
+        if (this.dateFrom && this.dateTo) return `${this.dateFrom} → ${this.dateTo}`;
+        if (this.dateFrom) return `Desde ${this.dateFrom}`;
+        if (this.dateTo)   return `Hasta ${this.dateTo}`;
+        return 'Personalizado';
+      }
+      return this.DATE_PRESETS.find(p => p.id === this.datePreset)?.label || 'Fecha';
+    },
+    get priceButtonLabel() {
+      if (this.priceMin == null && this.priceMax == null) return 'Precio';
+      const lo = this.priceMin != null ? '$' + this.priceMin : '$0';
+      const hi = this.priceMax != null ? '$' + this.priceMax : '∞';
+      return `${lo} – ${hi}`;
+    },
+
+    // --- SUGGESTIONS para empty state -------------------------------------
+    SUGGESTIONS: [
+      'Bad Bunny','Karol G','Reggaetón','Costa Rica','Conciertos','Experiencias',
+      'Esta semana','Fútbol','Surf','Salsa',
+    ],
+    useSuggestion(s) {
+      // Aplicar sugerencia inteligentemente
+      const lower = s.toLowerCase();
+      if (this.CATEGORIES.find(c => c.label.toLowerCase() === lower)) {
+        this.cat = this.CATEGORIES.find(c => c.label.toLowerCase() === lower).id;
+      } else if (this.COUNTRIES.find(c => c.label.toLowerCase() === lower)) {
+        this.country = this.COUNTRIES.find(c => c.label.toLowerCase() === lower).id;
+      } else if (this.DATE_PRESETS.find(p => p.label.toLowerCase() === lower)) {
+        this.datePreset = this.DATE_PRESETS.find(p => p.label.toLowerCase() === lower).id;
+      } else {
+        this.query = s;
+      }
+      this.visibleCount = this.pageSize;
+      this.syncURL();
+    },
+
+    // --- DATE FORMAT para card display -------------------------------------
+    formatDate(date) {
+      if (!date) return '';
+      const days = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+      const months = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+      return days[date.getDay()] + ' ' + date.getDate() + ' ' + months[date.getMonth()];
+    },
+    timeOf(ev) {
+      if (ev.pattern && ev.pattern.time) return ev.pattern.time;
+      return ev.time || '';
+    },
+
+    // --- HELPERS UI -------------------------------------------------------
+    catLabel(id) { return this.CATEGORIES.find(c => c.id === id)?.label || id; },
+    countryLabel(id) { return this.COUNTRIES.find(c => c.id === id)?.label || id; },
+
+    // Texto contextual del result count: "5 conciertos en Costa Rica",
+    // "3 partidos en Centroamérica", "12 eventos en Honduras", etc.
+    // Nouns por categoría:
+    //   concierto/conciertos | partido/partidos | experiencia/experiencias |
+    //   clase/clases | evento/eventos (sin filtro de categoría)
+    get resultsNoun() {
+      const n = this.results.length;
+      const map = {
+        concierto:   ['concierto', 'conciertos'],
+        deporte:     ['partido', 'partidos'],
+        experiencia: ['experiencia', 'experiencias'],
+        clase:       ['clase', 'clases'],
+      };
+      const pair = this.cat ? map[this.cat] : ['evento', 'eventos'];
+      return pair[n === 1 ? 0 : 1];
+    },
+    get resultsContext() {
+      // Si el usuario tipeó algo, no agregamos contexto geográfico (cambia el sentido).
+      if ((this.query || '').trim()) return '';
+      return this.country
+        ? ' en ' + this.countryLabel(this.country)
+        : ' en Centroamérica';
+    },
+    // Suffix dinámico para el H1: " · Conciertos" cuando hay categoría.
+    get titleSuffix() {
+      return this.cat ? ' · ' + this.catLabel(this.cat) : '';
+    },
+  }));
+
   // -------- SESSION MENU --------------------------------------------------
   // Avatar + dropdown para mostrar en el header cuando hay sesión activa.
   // Drop-in reutilizable en index.html, event.html, checkout.html, auth.html.

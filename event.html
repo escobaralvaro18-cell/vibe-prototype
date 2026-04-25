@@ -1268,7 +1268,7 @@
               <span x-text="results.length === 1 ? 'resultado' : 'resultados'"></span>
             </div>
             <div class="search-overlay-results">
-              <template x-for="(r, i) in results" :key="'res-' + r.id + '-' + i">
+              <template x-for="(r, i) in results.slice(0, 6)" :key="'res-' + r.id + '-' + i">
                 <a href="#" class="search-result-card" :data-idx="i" :class="{ 'is-focused': cursor === i }" @click.prevent="go(r)">
                   <div class="search-result-thumb"><div :class="r.bg"></div></div>
                   <div class="search-result-meta" x-text="r.kicker || r.date"></div>
@@ -1277,6 +1277,13 @@
                   <div class="search-result-price">Desde <strong x-text="r.price"></strong></div>
                 </a>
               </template>
+            </div>
+            <div class="search-overlay-cta">
+              <a class="search-overlay-cta-btn"
+                 :href="'search.html?q=' + encodeURIComponent(query)">
+                Ver todos los resultados
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path stroke-linecap="round" d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </a>
             </div>
           </div>
         </template>
