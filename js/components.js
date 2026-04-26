@@ -1114,6 +1114,44 @@ document.addEventListener('alpine:init', () => {
       this.continueToClass();
     },
 
+    // ---- Participant qty stepper (experiences) ---------------------------
+    // Cuántas personas para esta fecha. Default 1. Para experiencias permite
+    // booking grupal en una sola transacción (tour para 4, etc.). Cap por
+    // groupMax del evento o cuposRestantes del slot — el menor de ambos.
+    // Se resetea cuando el user cambia de día o slot (vía watcher implícito
+    // en setSelectedDay / pickClass).
+    participantQty: 1,
+    incParticipants() {
+      const max = this.maxParticipants;
+      if (this.participantQty < max) this.participantQty++;
+    },
+    decParticipants() {
+      if (this.participantQty > 1) this.participantQty--;
+    },
+    // Cap real = min(groupMax del evento, cuposRestantes del slot). Si no
+    // hay groupMax definido, fallback a 10 (limite razonable).
+    get maxParticipants() {
+      const ev = this.event;
+      const groupMax = (ev && Number(ev.groupMax)) || 10;
+      const cls = this.selectedClass;
+      // cuposRestantes solo aplica si el slot lo trae (clases recurrentes
+      // con capacity tracking). Para tours generalmente solo usamos groupMax.
+      const slotLeft = cls && typeof cls.cuposRestantes === 'number'
+        ? cls.cuposRestantes
+        : Infinity;
+      return Math.max(1, Math.min(groupMax, slotLeft));
+    },
+    // Precio total preview "$45 × 2 personas = $90". Usa el price del slot
+    // seleccionado (selectedClass.price) como source of truth.
+    get participantUnitPrice() {
+      const cls = this.selectedClass;
+      if (!cls) return 0;
+      return Number(String(cls.price).replace(/[^0-9.]/g, '')) || 0;
+    },
+    get participantPriceTotal() {
+      return this.participantUnitPrice * this.participantQty;
+    },
+
     // Helpers de parseo/comparación de "YYYY-M" (month 0..11). Prefijados con
     // _ porque son internos al componente — no se usan desde el template.
     _parseMonthKey(k) {
@@ -1234,6 +1272,7 @@ document.addEventListener('alpine:init', () => {
       // Reset de selección al cambiar de mes
       this.selectedDay = null;
       this.selectedClassIdx = null;
+      this.participantQty = 1;
     },
 
     selectDay(day) {
@@ -1241,6 +1280,7 @@ document.addEventListener('alpine:init', () => {
       if (slots.length === 0) return;
       this.selectedDay = day;
       this.selectedClassIdx = null;
+      this.participantQty = 1;
     },
 
     selectClass(day, idx) {
@@ -1250,6 +1290,9 @@ document.addEventListener('alpine:init', () => {
       // Sólo permitimos elegir una clase del día actualmente seleccionado.
       if (day !== this.selectedDay) this.selectedDay = day;
       this.selectedClassIdx = idx;
+      // Reset qty al elegir nuevo slot — evita carry-over si user había
+      // subido el stepper en una selección previa con groupMax mayor.
+      this.participantQty = 1;
       // Auto-scroll al CTA "Continuar" para que el usuario vea el próximo paso
       // sin tener que buscarlo (matchea prototipo MVP_Phoenix líneas 12875-12877).
       this.$nextTick(() => {
@@ -1263,27 +1306,34 @@ document.addEventListener('alpine:init', () => {
     // "Continuar con esta clase" → empuja al $store.cart 1 ticket con los
     // datos de la clase y navega a checkout. Usamos `tierId = cls-<key>` para
     // que sea único y estable, y el nombre combina "ClassName · Teacher".
+    // Para experiencias, qty viene del stepper de participantes (default 1,
+    // max = groupMax o cuposRestantes). Para clases sigue siendo 1 a menos
+    // que el user explícitamente subiera el stepper (se permite reservar
+    // 2 cupos en la misma clase para "vos + tu pareja").
     continueToClass() {
       const cls = this.selectedClass;
       if (!cls) return;
       const priceNum = Number(String(cls.price).replace(/[^0-9.]/g, '')) || 0;
       const cart = this.$store.cart;
       cart.setEvent(this.eventId);
-      // Reemplazá el carrito con la clase elegida (qty=1). Si el usuario
+      // Reemplazá el carrito con la clase elegida. Si el usuario
       // vuelve atrás y cambia de clase, no queremos acumular.
       const tierKey = 'cls-' + this.calMonthKey + '-' + this.selectedDay + '-' + this.selectedClassIdx;
+      // Cap defensivo: nunca pasar maxParticipants aunque el state local
+      // se haya quedado stale (paranoia frente a cambios de slot).
+      const safeQty = Math.max(1, Math.min(this.participantQty || 1, this.maxParticipants));
       cart.tickets = [{
         tierId: tierKey,
         name: cls.name + ' · ' + cls.teacher + ' · ' + cls.time,
         price: priceNum,
-        qty: 1,
+        qty: safeQty,
       }];
       // Arranca el countdown igual que el flujo normal (toDetails() lo hace
       // en eventos single/GA). Sin esto, el usuario entra a checkout sin el
       // reloj de 10 min que lockea la reserva.
       cart.countdownEndsAt = Date.now() + 10 * 60 * 1000;
       // Saltá directo al step de details — en recurring la selección de
-      // "cuántas entradas" no tiene sentido, ya elegiste la clase.
+      // "cuántas entradas" no tiene sentido, ya elegiste la clase + qty.
       location.href = 'checkout.html?step=details&event=' + encodeURIComponent(this.eventId);
     },
 
@@ -1665,6 +1715,76 @@ document.addEventListener('alpine:init', () => {
       const id = this.$store.cart.eventId;
       return id ? ((window.EVENT_DATA || {})[id] || null) : null;
     },
+
+    // ======================================================================
+    // COPY FORK: eventos vs experiencias
+    // ======================================================================
+    // Filosofía: el comprador de un concierto tiene expectativa emocional
+    // de "entradas aseguradas"; el de una experiencia/clase espera
+    // "reserva confirmada". Forkear el copy por bucket le da voz auténtica
+    // a cada vertical sin sobre-ingenierizar (solo 2 buckets, no 3).
+    //
+    // Bucket detection: usa `ev.kind === 'experience'` (data layer ya tiene
+    // este flag para distinguir performance vs experiencia/clase/tour).
+    //
+    // Toda la copy variable del checkout vive en el getter `copy` —
+    // single source of truth, fácil de auditar y mantener.
+    // ======================================================================
+    get isExperience() {
+      const ev = this.activeEvent;
+      return !!(ev && ev.kind === 'experience');
+    },
+    get kindLabel() {
+      const ev = this.activeEvent;
+      if (!ev || ev.kind !== 'experience') return 'EVENTO';
+      if (ev.experienceType === 'class') return 'CLASE';
+      return 'EXPERIENCIA';
+    },
+    get copy() {
+      const buyerEmail = (this.buyer && this.buyer.email) || '';
+      if (this.isExperience) {
+        return {
+          cartHeading:        'Elegí tu acceso',
+          emptyCart:          'Aún no elegiste tu acceso',
+          gaDesc:             'Acceso general · cupos limitados',
+          backLink:           'Volver a la experiencia',
+          reservationHint:    'Te enviaremos la confirmación al correo.',
+          detailsHint:        'Te mandamos la confirmación acá',
+          attendeesHeading:   'Participantes',
+          attendeeEmailHint:  'Le mandaremos el acceso a este correo.',
+          paymentHeading:     'Pagá tu reserva',
+          successHeroLead:    'Reserva',
+          successHeroAccent:  'confirmada!',
+          successGuestHint:   buyerEmail
+            ? `Enviamos la confirmación a ${buyerEmail}.`
+            : 'Enviamos la confirmación al correo que ingresaste.',
+          noticeLogged:       'Tu reserva ya está en Mi Cuenta.',
+          noticeGuest:        'Te enviamos los detalles por email. Revisá tu bandeja (a veces cae en Promociones o Spam).',
+          ctaLogged:          'Ver mis reservas',
+          ctaGuest:           'Crear cuenta para guardar tu reserva',
+        };
+      }
+      return {
+        cartHeading:        'Elegí tus entradas',
+        emptyCart:          'Aún no elegiste entradas',
+        gaDesc:             'Acceso general al evento · sin asiento asignado',
+        backLink:           'Volver a entradas',
+        reservationHint:    'Te enviaremos las entradas al correo.',
+        detailsHint:        'Te mandamos las entradas acá',
+        attendeesHeading:   'Titulares de las entradas',
+        attendeeEmailHint:  'Le mandaremos su entrada a este correo.',
+        paymentHeading:     'Pagá tus entradas',
+        successHeroLead:    'Entradas',
+        successHeroAccent:  'aseguradas!',
+        successGuestHint:   buyerEmail
+          ? `Enviamos tu entrada a ${buyerEmail}.`
+          : 'Enviamos tu entrada al correo que ingresaste.',
+        noticeLogged:       'Tus entradas ya están en Mi Cuenta.',
+        noticeGuest:        'Te enviamos las entradas por email. Revisá tu bandeja (a veces cae en Promociones o Spam).',
+        ctaLogged:          'Ver mis entradas',
+        ctaGuest:           'Crear cuenta para no perder tus entradas',
+      };
+    },
     get tiers() {
       const ev = this.activeEvent;
 
@@ -1710,7 +1830,7 @@ document.addEventListener('alpine:init', () => {
           price: num,
           color: '#2d9cdb',
           status: 'available',
-          description: 'Acceso general al evento · sin asiento asignado',
+          description: this.copy.gaDesc,
         }];
       }
       // Seated sin seatedConfig propio: caemos a los tiers por defecto.

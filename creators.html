@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vibes — Para creadores</title>
+  <title>Vibes — Para creadores · eventos, experiencias y clases</title>
 
   <!-- Favicon inline (SVG) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><g fill='%23c6f800'><rect x='6' y='10' width='4' height='12' rx='1'/><rect x='14' y='6' width='4' height='20' rx='1'/><rect x='22' y='12' width='4' height='8' rx='1'/></g></svg>">
@@ -35,7 +35,7 @@
   </style>
 
   <!-- Estilos del prototipo -->
-  <link rel="stylesheet" href="css/proto.css?v=13">
+  <link rel="stylesheet" href="css/proto.css?v=15">
 
   <!-- Scripts en orden: persist, data, stores, components, Alpine core. -->
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
@@ -79,7 +79,7 @@
         <a class="btn-ghost" href="creator-auth.html?mode=login">Iniciar sesión</a>
       </template>
       <template x-if="!$store.session.isAuthed">
-        <a class="btn-primary-sm" href="creator-auth.html?mode=signup">Publicar evento</a>
+        <a class="btn-primary-sm" href="creator-auth.html?mode=signup">Empezar gratis</a>
       </template>
 
       <!-- Logged-in: avatar + dropdown (sessionMenu) -->
@@ -131,12 +131,12 @@
     </div>
     <div class="mobile-menu-section mobile-menu-creators">
       <span class="mobile-menu-label">Soy creador</span>
-      <a href="creator-auth.html?mode=signup">Publicar evento <span class="chev">→</span></a>
+      <a href="creator-auth.html?mode=signup">Empezar gratis <span class="chev">→</span></a>
       <a href="creator-auth.html?mode=login">Iniciar sesión <span class="chev">→</span></a>
     </div>
     <div class="mobile-menu-ctas">
       <template x-if="!$store.session.isAuthed">
-        <a class="mobile-cta-primary" href="creator-auth.html?mode=signup">Publicar evento</a>
+        <a class="mobile-cta-primary" href="creator-auth.html?mode=signup">Empezar gratis</a>
       </template>
       <template x-if="!$store.session.isAuthed">
         <a class="mobile-cta-secondary" href="creator-auth.html?mode=login">Ya tengo cuenta</a>
@@ -157,18 +157,17 @@
   <div class="container creators-hero-inner">
     <div>
       <span class="creators-kicker">✦ Para creadores</span>
-      <!-- H1: outcome-first ("llená tu evento") en vez de "publicá en VIBE"
-           (redundante — el user YA está en VIBE). El italic sobre "evento"
-           en Playfair mantiene el contraste visual del hero original.       -->
-      <h1>Llená tu próximo <em>evento</em>.</h1>
-      <!-- Sub: tres value props comprimidos:
-             1. Audiencia concreta ("miles de asistentes activos")
-             2. Región ("Centroamérica")
-             3. Velocidad ("publicás en minutos · vendés el mismo día")     -->
-      <p class="creators-hero-sub">Llegá a miles de asistentes activos en Centroamérica. Publicás en minutos y empezás a vender el mismo día.</p>
+      <!-- H1: outcome-first y agnóstico al tipo de publicación. "Próxima
+           fecha" funciona para conciertos, partidos, talleres recurrentes,
+           tours, clases semanales — todo lo que se vende por fechas.       -->
+      <h1>Llená tu próxima <em>fecha</em>.</h1>
+      <!-- Sub: opening con el list inclusivo (concierto, experiencia, clase)
+           para que el user de cada tipo se sienta vista, después value prop
+           regional + velocidad.                                            -->
+      <p class="creators-hero-sub">Conciertos, experiencias o clases — publicá en minutos y vendé a miles de asistentes activos en Centroamérica.</p>
       <div class="creators-cta-row">
         <a class="creators-cta-primary" href="creator-auth.html?mode=signup">
-          Publicá tu evento
+          Empezar gratis
           <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a class="creators-cta-secondary" href="creator-auth.html?mode=login">Ya tengo cuenta</a>
@@ -181,7 +180,7 @@
     <div class="creators-hero-stats">
       <div>
         <div class="creators-stat-num">+240</div>
-        <div class="creators-stat-label">Eventos<br>publicados</div>
+        <div class="creators-stat-label">Organizadores<br>activos</div>
       </div>
       <div>
         <div class="creators-stat-num">50K</div>
@@ -202,13 +201,13 @@
   <div class="container">
     <div class="creators-benefits-head">
       <h2>Todo lo que necesitás</h2>
-      <p>Herramientas profesionales para vender entradas, gestionar accesos y crecer tu audiencia.</p>
+      <p>Para conciertos, experiencias y clases. Vendé entradas, gestioná reservas y crecé tu audiencia con herramientas profesionales.</p>
     </div>
     <div class="creators-benefits-grid">
       <div class="benefit-card">
         <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <h3>Publicación en minutos</h3>
-        <p>Creá tu evento en 5 minutos. Configurá múltiples tipos de entrada, fases de precios y descuentos.</p>
+        <p>Creá tu publicación en 5 minutos — sea un concierto, un tour o una clase recurrente. Configurá tipos de entrada, fechas, fases de precio y descuentos.</p>
       </div>
       <div class="benefit-card">
         <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
@@ -218,7 +217,7 @@
       <div class="benefit-card">
         <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
         <h3>Check-in sin filas</h3>
-        <p>App de scanner para tu equipo. Valida códigos QR en segundos y controla el aforo en vivo.</p>
+        <p>App de scanner para tu equipo. Valida QRs en segundos en la entrada del show, en cada salida del tour o en cada sesión de tu clase.</p>
       </div>
       <div class="benefit-card">
         <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg></div>
@@ -233,7 +232,7 @@
       <div class="benefit-card">
         <div class="benefit-icon"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div>
         <h3>Audiencia que crece</h3>
-        <p>Tu evento aparece en miles de feeds. Emails segmentados a compradores que ya conocen tu marca.</p>
+        <p>Tu publicación aparece en miles de feeds. Emails segmentados a quienes ya compraron entradas, reservaron una experiencia o se anotaron en tu clase.</p>
       </div>
     </div>
 
@@ -242,10 +241,10 @@
          el trade: publicación sin costo, solo pagás cuando te compran.    -->
     <div class="creators-cta-section">
       <h2>¿Listo para <em>vender</em>?</h2>
-      <p>Registrate en 2 minutos, publicá tu evento gratis y empezá a cobrar entradas hoy mismo.</p>
+      <p>Registrate en 2 minutos. Publicá tu evento, experiencia o clase gratis y empezá a cobrar el mismo día.</p>
       <div class="creators-cta-row">
         <a class="creators-cta-primary" href="creator-auth.html?mode=signup">
-          Publicar evento gratis
+          Empezar gratis
           <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a class="creators-cta-secondary" href="creator-auth.html?mode=login">Ya tengo cuenta</a>

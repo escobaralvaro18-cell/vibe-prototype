@@ -207,6 +207,29 @@ body.scrolled .header.header-hero {
 body:not(.scrolled) .header-hero .nav-link { color: rgba(255,255,255,0.75); }
 body:not(.scrolled) .header-hero .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
 body:not(.scrolled) .header-hero .nav-link.active { color: #fff; }
+
+/* Dark-hero context (creators landing): los botones .btn-ghost y .btn-primary-sm
+   usan colores ink (oscuros) por default — se vuelven invisibles sobre el hero
+   negro. Acá los repintamos para que tengan el contraste correcto.            */
+body:not(.scrolled) .header-hero .btn-ghost {
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: transparent;
+}
+body:not(.scrolled) .header-hero .btn-ghost:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.10);
+}
+/* Primary CTA: invertir a fondo blanco con texto negro — pop máximo sobre
+   el hero oscuro y comunica claramente la acción principal.                  */
+body:not(.scrolled) .header-hero .btn-primary-sm {
+  background: #fff !important;
+  color: var(--ink) !important;
+  font-weight: 600;
+}
+body:not(.scrolled) .header-hero .btn-primary-sm:hover {
+  background: var(--accent) !important;
+  color: var(--ink) !important;
+}
 /* Glass treatment para "Ingresar" cuando flotamos sobre el dark hero
    (combina con el rest del header floating glass). */
 body:not(.scrolled) .header-hero .btn-signin {
@@ -10290,6 +10313,99 @@ body.scrolled .page[data-page="inicio"] .header.header-hero {
   padding: 16px 24px 20px;
   border-top: 1px solid var(--line);
 }
+
+/* ---- Participant qty stepper (experiencias) ----
+   Aparece arriba del CTA de "Confirmar selección" cuando hay slot elegido.
+   Layout: label + hint a la izquierda, stepper a la derecha. Mobile-first
+   con buen tap target (40×40 botones). */
+.schedule-participant-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.schedule-participant-info {
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 0; flex: 1;
+}
+.schedule-participant-label {
+  font-size: 14px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.005em;
+}
+.schedule-participant-hint {
+  font-size: 12px; color: var(--ink-mid);
+  font-family: var(--font-mono, 'Geist Mono', monospace);
+  letter-spacing: 0.02em;
+}
+.schedule-participant-stepper {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg-soft, #f7f7f5);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.schedule-stepper-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.schedule-stepper-btn:hover:not(:disabled) {
+  background: var(--ink); border-color: var(--ink); color: #fff;
+}
+.schedule-stepper-btn:active:not(:disabled) { transform: scale(0.94); }
+.schedule-stepper-btn:disabled {
+  background: transparent; border-color: transparent;
+  color: var(--ink-dim); cursor: not-allowed; opacity: 0.5;
+}
+.schedule-stepper-btn svg { width: 14px; height: 14px; }
+.schedule-stepper-count {
+  min-width: 28px; text-align: center;
+  font-size: 16px; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Live price preview "$45 × 2 personas = $90" ---- */
+.schedule-price-preview {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--accent-soft, #f5ffcc);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.schedule-price-math {
+  font-size: 13px; color: var(--ink-mid);
+  font-family: var(--font-mono, 'Geist Mono', monospace);
+  letter-spacing: 0.01em;
+}
+.schedule-price-times {
+  margin: 0 4px;
+  color: var(--ink-dim);
+}
+.schedule-price-total {
+  font-size: 18px; font-weight: 800;
+  color: var(--ink); letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .schedule-participant-row { padding: 12px 0; gap: 12px; }
+  .schedule-participant-label { font-size: 13.5px; }
+  .schedule-participant-hint { font-size: 11px; }
+  .schedule-stepper-btn { width: 32px; height: 32px; }
+  .schedule-stepper-count { min-width: 24px; font-size: 15px; }
+  .schedule-price-preview { padding: 8px 12px; }
+  .schedule-price-total { font-size: 16px; }
+}
+
 .schedule-modal-confirm {
   width: 100%;
   padding: 16px 20px;

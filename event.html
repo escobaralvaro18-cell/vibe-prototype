@@ -35,7 +35,7 @@
   </style>
 
   <!-- Estilos del prototipo (compartidos con index.html) -->
-  <link rel="stylesheet" href="css/proto.css?v=13">
+  <link rel="stylesheet" href="css/proto.css?v=15">
 
   <!-- Orden crítico: persist PRIMERO (para que Alpine.$persist esté registrado
        cuando corre el listener de alpine:init en stores.js), luego data/stores/
@@ -44,8 +44,8 @@
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
   <script defer src="js/data/countries.js"></script>
   <script defer src="js/data/events.js"></script>
-  <script defer src="js/stores.js"></script>
-  <script defer src="js/components.js"></script>
+  <script defer src="js/stores.js?v=4"></script>
+  <script defer src="js/components.js?v=4"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 </head>
 
@@ -970,6 +970,43 @@
       </div>
 
       <footer class="schedule-modal-footer">
+        <!-- Participant stepper — solo aparece cuando ya hay slot elegido,
+             para evitar mostrar un control sin contexto. Cap dinámico vía
+             maxParticipants (groupMax del evento ∩ cuposRestantes del slot).
+             Para clases (qty=1 implícito) igual lo mostramos: permite reservar
+             múltiples cupos en la misma sesión (vos + tu pareja). -->
+        <div class="schedule-participant-row" x-show="hasSelectedClass" x-cloak>
+          <div class="schedule-participant-info">
+            <span class="schedule-participant-label">¿Cuántas personas?</span>
+            <span class="schedule-participant-hint"
+                  x-text="'Máximo ' + maxParticipants + (maxParticipants === 1 ? ' persona' : ' personas')"></span>
+          </div>
+          <div class="schedule-participant-stepper" role="group" aria-label="Cantidad de personas">
+            <button type="button" class="schedule-stepper-btn"
+                    :disabled="participantQty <= 1"
+                    @click="decParticipants()"
+                    aria-label="Quitar una persona">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
+            </button>
+            <span class="schedule-stepper-count" x-text="participantQty" aria-live="polite"></span>
+            <button type="button" class="schedule-stepper-btn"
+                    :disabled="participantQty >= maxParticipants"
+                    @click="incParticipants()"
+                    aria-label="Sumar una persona">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Preview vivo del precio: "$45 × 2 personas = $90". Da feedback
+             inmediato al user de cuánto va a pagar antes de continuar. -->
+        <div class="schedule-price-preview" x-show="hasSelectedClass" x-cloak>
+          <span class="schedule-price-math">
+            $<span x-text="participantUnitPrice"></span>
+            <span class="schedule-price-times">×</span>
+            <span x-text="participantQty + (participantQty === 1 ? ' persona' : ' personas')"></span>
+          </span>
+          <span class="schedule-price-total">$<span x-text="participantPriceTotal"></span></span>
+        </div>
         <button type="button" class="schedule-modal-confirm btn-accent"
                 :disabled="!hasSelectedClass"
                 @click="confirmScheduleSelection()">

@@ -30,7 +30,7 @@
     }
   </style>
 
-  <link rel="stylesheet" href="css/proto.css?v=13">
+  <link rel="stylesheet" href="css/proto.css?v=15">
 
   <!-- Orden crítico: persist PRIMERO (para que Alpine.$persist esté registrado
        cuando corre el listener de alpine:init en stores.js), luego data/stores/
@@ -39,8 +39,8 @@
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.1/dist/cdn.min.js"></script>
   <script defer src="js/data/countries.js"></script>
   <script defer src="js/data/events.js"></script>
-  <script defer src="js/stores.js"></script>
-  <script defer src="js/components.js"></script>
+  <script defer src="js/stores.js?v=4"></script>
+  <script defer src="js/components.js?v=4"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 </head>
 
@@ -130,9 +130,9 @@
        - step=cart pero no hay evento asociado (llegaron sin ?event=)
        - step !== cart y no hay tickets (y no estamos en success). -->
   <section class="container" x-show="(step === 'cart' && !activeEvent) || (cartEmpty && step !== 'success' && step !== 'cart')" x-cloak style="padding:80px 0;">
-    <h1 style="font-family:var(--font-serif);font-size:44px;font-weight:700;margin-bottom:12px;">Todavía no elegiste entradas</h1>
-    <p style="color:var(--ink-mid);margin-bottom:24px;">Elegí un evento para empezar.</p>
-    <a href="index.html" class="btn-primary">Ver eventos</a>
+    <h1 style="font-family:var(--font-serif);font-size:44px;font-weight:700;margin-bottom:12px;" x-text="copy.emptyCart"></h1>
+    <p style="color:var(--ink-mid);margin-bottom:24px;">Elegí algo para empezar.</p>
+    <a href="index.html" class="btn-primary">Ver todo</a>
   </section>
 
   <!-- ======= CONTENIDO DE CADA STEP =======
@@ -165,7 +165,7 @@
     <div x-show="step === 'cart'" x-cloak class="checkout-step checkout-step-cart">
       <a :href="'event.html?id=' + ($store.cart.eventId || '')" class="detail-back">
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Volver al evento
+        <span x-text="isExperience ? 'Volver a la experiencia' : 'Volver al evento'"></span>
       </a>
 
       <!-- Tickets header (paridad prototipo .tickets-header): contexto +
@@ -201,7 +201,7 @@
                · Con plano interactivo → "Elegí tus asientos" (preciso)
                · Resto (tiers / GA)    → "Elegí tus entradas" (unificado)   -->
         <h1 class="checkout-h1" x-show="isSeated">Elegí tus asientos</h1>
-        <h1 class="checkout-h1" x-show="!isSeated">Elegí tus entradas</h1>
+        <h1 class="checkout-h1" x-show="!isSeated" x-text="copy.cartHeading"></h1>
       </div>
 
       <div class="checkout-layout"><!-- cart uses list+aside grid -->
@@ -346,7 +346,7 @@
               </div>
             </template>
           </div>
-          <p class="summary-empty" x-show="$store.cart.qtyTotal === 0">Seleccioná al menos una entrada.</p>
+          <p class="summary-empty" x-show="$store.cart.qtyTotal === 0" x-text="isExperience ? 'Seleccioná al menos un acceso.' : 'Seleccioná al menos una entrada.'"></p>
 
           <dl>
             <dt>Subtotal</dt><dd x-text="'$' + $store.cart.subtotal.toFixed(2)"></dd>
@@ -373,7 +373,9 @@
       <div class="mobile-cart-bar" x-show="$store.cart.qtyTotal > 0" x-cloak>
         <div class="mobile-cart-bar-inner">
           <div class="mobile-cart-bar-info">
-            <span class="mobile-cart-bar-label" x-text="$store.cart.qtyTotal + ' ' + ($store.cart.qtyTotal === 1 ? 'entrada' : 'entradas')"></span>
+            <span class="mobile-cart-bar-label" x-text="$store.cart.qtyTotal + ' ' + (isExperience
+              ? ($store.cart.qtyTotal === 1 ? 'persona' : 'personas')
+              : ($store.cart.qtyTotal === 1 ? 'entrada' : 'entradas'))"></span>
             <span class="mobile-cart-bar-total" x-text="'$' + $store.cart.total.toFixed(2)"></span>
           </div>
           <button class="btn-accent mobile-cart-bar-cta" @click="toDetails()">
@@ -405,13 +407,13 @@
           <template x-if="activeEvent?.kind === 'experience'">
             <a :href="'event.html?id=' + ($store.cart.eventId || '')" class="detail-back">
               <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-              Volver al evento
+              <span x-text="copy.backLink"></span>
             </a>
           </template>
           <template x-if="activeEvent?.kind !== 'experience'">
             <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
               <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-              Volver a entradas
+              <span x-text="copy.backLink"></span>
             </a>
           </template>
           <h1 class="checkout-h1">¿Cómo querés continuar?</h1>
@@ -462,7 +464,7 @@
             <button class="identity-card identity-card-v2" type="button" @click="continueAsGuest()">
               <div class="identity-card-body">
                 <span class="identity-card-title">Continuar como invitado</span>
-                <div class="identity-card-desc">Te enviaremos las entradas al correo.</div>
+                <div class="identity-card-desc" x-text="copy.reservationHint"></div>
               </div>
               <span class="identity-card-arrow"><svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </button>
@@ -542,13 +544,13 @@
       <template x-if="activeEvent?.kind === 'experience'">
         <a :href="'event.html?id=' + ($store.cart.eventId || '')" class="detail-back">
           <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Volver al evento
+          <span x-text="copy.backLink"></span>
         </a>
       </template>
       <template x-if="activeEvent?.kind !== 'experience'">
         <a href="#" @click.prevent="gotoStep('cart')" class="detail-back">
           <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Volver a entradas
+          <span x-text="copy.backLink"></span>
         </a>
       </template>
       <h1 class="checkout-h1">Ingresá tus datos</h1>
@@ -604,7 +606,7 @@
                  x-cloak>
               <div class="checkout-section-head">
                 <span class="checkout-section-title">Tus datos de contacto</span>
-                <span class="checkout-section-hint">Te mandamos las entradas acá</span>
+                <span class="checkout-section-hint" x-text="copy.detailsHint"></span>
               </div>
               <div class="form-grid">
                 <div class="form-field">
@@ -699,7 +701,9 @@
                 <div class="form-field full" x-show="isAttendeeAgeRestricted" x-cloak>
                   <label class="form-label" for="bf-id">Documento de identidad</label>
                   <input class="form-input" id="bf-id" type="text" x-model="buyer.idDoc" :required="isAttendeeAgeRestricted" placeholder="Cédula, DNI o pasaporte">
-                  <span class="form-hint">Se verificará al ingresar al evento (+18).</span>
+                  <span class="form-hint" x-text="isExperience
+                    ? 'Se verificará al participar (+18).'
+                    : 'Se verificará al ingresar al evento (+18).'"></span>
                 </div>
               </div>
             </div>
@@ -715,15 +719,19 @@
                 <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg>
                 <div>
                   <strong>Evento para mayores de <span x-text="activeEvent?.ageRestricted || 18"></span> años.</strong>
-                  <span>Cada titular debe presentar su documento de identidad al ingresar al evento.</span>
+                  <span x-text="isExperience
+                    ? 'Cada participante debe presentar su documento de identidad al momento de la actividad.'
+                    : 'Cada titular debe presentar su documento de identidad al ingresar al evento.'"></span>
                 </div>
               </div>
 
               <div class="checkout-section-head">
-                <span class="checkout-section-title">Titulares de las entradas</span>
+                <span class="checkout-section-title" x-text="copy.attendeesHeading"></span>
                 <span class="checkout-section-hint">
                   <span x-text="attendees.length"></span>
-                  <span x-text="attendees.length === 1 ? ' entrada' : ' entradas'"></span>
+                  <span x-text="isExperience
+                    ? (attendees.length === 1 ? ' persona' : ' personas')
+                    : (attendees.length === 1 ? ' entrada' : ' entradas')"></span>
                 </span>
               </div>
 
@@ -772,7 +780,7 @@
                           <label class="form-label" :for="'at-fn-' + idx">Nombre</label>
                           <input class="form-input" :id="'at-fn-' + idx" type="text"
                                  x-model="attendees[idx].firstName"
-                                 placeholder="Nombre del titular"
+                                 :placeholder="isExperience ? 'Nombre del participante' : 'Nombre del titular'"
                                  :required="a.mode === 'other'">
                         </div>
                         <div class="form-field">
@@ -783,12 +791,12 @@
                                  :required="a.mode === 'other'">
                         </div>
                         <div class="form-field full">
-                          <label class="form-label" :for="'at-em-' + idx">Email del titular</label>
+                          <label class="form-label" :for="'at-em-' + idx" x-text="isExperience ? 'Email del participante' : 'Email del titular'"></label>
                           <input class="form-input" :id="'at-em-' + idx" type="email"
                                  x-model="attendees[idx].email"
-                                 placeholder="titular@email.com"
+                                 :placeholder="isExperience ? 'participante@email.com' : 'titular@email.com'"
                                  :required="a.mode === 'other'">
-                          <span class="form-hint">Le mandaremos su entrada directamente a este correo.</span>
+                          <span class="form-hint" x-text="copy.attendeeEmailHint"></span>
                         </div>
                         <template x-if="isAttendeeAgeRestricted">
                           <div class="form-field full">
@@ -797,7 +805,9 @@
                                    x-model="attendees[idx].idDoc"
                                    placeholder="Cédula, DNI o pasaporte"
                                    :required="a.mode === 'other' && isAttendeeAgeRestricted">
-                            <span class="form-hint">Se verificará al ingresar al evento (+18).</span>
+                            <span class="form-hint" x-text="isExperience
+                    ? 'Se verificará al participar (+18).'
+                    : 'Se verificará al ingresar al evento (+18).'"></span>
                           </div>
                         </template>
                       </div>
@@ -828,7 +838,7 @@
         <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Volver a datos
       </a>
-      <h1 class="checkout-h1">Pagá tus entradas</h1>
+      <h1 class="checkout-h1" x-text="copy.paymentHeading"></h1>
 
       <!-- Payment: single-column como identity/details. Reemplazamos el
            aside con un .payment-summary arriba que muestra: timer +
@@ -1144,10 +1154,10 @@
             </svg>
           </div>
           <p class="success-kicker">Compra confirmada</p>
-          <h1 class="success-title">¡Entradas <em>aseguradas!</em></h1>
+          <h1 class="success-title">¡<span x-text="copy.successHeroLead"></span> <em x-text="copy.successHeroAccent"></em></h1>
           <p class="success-sub" x-text="$store.session.isAuthed
             ? ('Tu compra se completó con éxito' + (buyer.firstName ? ', ' + buyer.firstName : '') + '.')
-            : ('Enviamos tu entrada a ' + (buyer.email || 'tu email') + '. Revisá tu bandeja.')"></p>
+            : copy.successGuestHint"></p>
           <div class="success-ref">Orden <span x-text="orderRef || '—'"></span></div>
         </div>
       </section>
@@ -1161,7 +1171,7 @@
               <div :class="(activeEvent && activeEvent.bg) || 'art-reggaeton'"></div>
             </div>
             <div class="success-event-info">
-              <p class="success-event-kicker" x-text="(activeEvent && activeEvent.kicker) || 'VIBES · EVENTO'"></p>
+              <p class="success-event-kicker" x-text="(activeEvent && activeEvent.kicker) || ('VIBES · ' + kindLabel)"></p>
               <h2 class="success-event-title" x-text="(activeEvent && String(activeEvent.title || '').replace(/<br\s*\/?>(\s*)/gi,' ').replace(/<\/?em>/gi,'').replace(/\s+/g,' ').trim()) || 'Tu evento'"></h2>
               <div class="success-event-meta">
                 <span>
@@ -1178,7 +1188,7 @@
                   <div class="success-ticket-line" x-text="t.qty + '× ' + t.name"></div>
                 </template>
                 <template x-if="!$store.cart.tickets || !$store.cart.tickets.length">
-                  <div class="success-ticket-line">1× Entrada</div>
+                  <div class="success-ticket-line" x-text="isExperience ? '1× Acceso' : '1× Entrada'"></div>
                 </template>
               </div>
             </div>
@@ -1191,8 +1201,10 @@
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4z"/><path stroke-linecap="round" d="M13 5v14"/></svg>
               </div>
               <div class="success-notice-body">
-                <h3 class="success-notice-title">Tus entradas ya están en Mi Cuenta</h3>
-                <p class="success-notice-copy">También te enviamos una copia a <strong x-text="buyer.email || 'tu email'"></strong>. Podés presentar el QR desde la app o desde el email.</p>
+                <h3 class="success-notice-title" x-text="copy.noticeLogged"></h3>
+                <p class="success-notice-copy" x-html="(isExperience
+                  ? 'También te enviamos una copia a <strong>' + (buyer.email || 'tu email') + '</strong>. Vas a recibir los detalles del lugar y horario antes de la actividad.'
+                  : 'También te enviamos una copia a <strong>' + (buyer.email || 'tu email') + '</strong>. Podés presentar el QR desde la app o desde el email.')"></p>
               </div>
             </div>
           </template>
@@ -1202,8 +1214,12 @@
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
               </div>
               <div class="success-notice-body">
-                <h3 class="success-notice-title">Te enviamos las entradas por email</h3>
-                <p class="success-notice-copy">Revisá tu bandeja en <strong x-text="buyer.email || 'tu email'"></strong> en los próximos minutos. Desde ahí podés agregarlas a tu wallet o reenviártelas si hace falta.</p>
+                <h3 class="success-notice-title" x-text="isExperience
+                  ? 'Te enviamos los detalles por email'
+                  : 'Te enviamos las entradas por email'"></h3>
+                <p class="success-notice-copy" x-html="(isExperience
+                  ? 'Revisá tu bandeja en <strong>' + (buyer.email || 'tu email') + '</strong> en los próximos minutos. Ahí vas a encontrar la confirmación, el lugar y el horario.'
+                  : 'Revisá tu bandeja en <strong>' + (buyer.email || 'tu email') + '</strong> en los próximos minutos. Desde ahí podés agregarlas a tu wallet o reenviártelas si hace falta.')"></p>
               </div>
             </div>
           </template>
@@ -1212,13 +1228,13 @@
           <div class="success-actions">
             <template x-if="$store.session.isAuthed">
               <a href="account.html?tab=tickets" class="success-cta-primary accent">
-                Ver mis entradas
+                <span x-text="copy.ctaLogged"></span>
                 <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </template>
             <template x-if="!$store.session.isAuthed">
               <a :href="'auth.html?mode=signup&email=' + encodeURIComponent(buyer.email || '') + '&redirect=account'" class="success-cta-primary accent">
-                Crear cuenta para no perder tus entradas
+                <span x-text="copy.ctaGuest"></span>
                 <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </template>
