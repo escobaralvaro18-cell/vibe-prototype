@@ -3504,26 +3504,32 @@ body.menu-open .mobile-menu {
 @media (min-width: 900px) { .footer-top { grid-template-columns: 1.5fr 3fr; } }
 .footer-brand .logo { margin-bottom: 14px; }
 .footer-brand p { color: var(--ink-mid); font-size: 13px; margin-bottom: 18px; max-width: 280px; }
-.footer-social { display: flex; gap: 6px; }
+.footer-social { display: flex; gap: 8px; }
 .footer-social a {
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   background: #fff; border: 1.5px solid var(--line-strong);
   display: inline-flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
-  color: var(--ink-mid); transition: all 0.15s;
+  color: var(--ink-mid);
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
-.footer-social a:hover { border-color: var(--accent); color: var(--accent); }
+.footer-social a:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.footer-social a svg { width: 16px; height: 16px; }
 .footer-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-@media (min-width: 600px) { .footer-cols { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 600px) { .footer-cols { grid-template-columns: repeat(3, 1fr); } }
 .footer-col h4 {
   font-family: var(--font-mono); font-size: 10px; font-weight: 600;
   letter-spacing: 0.15em; text-transform: uppercase;
   color: var(--ink-mid); margin-bottom: 14px;
 }
-.footer-col a { display: block; font-size: 13px; padding: 5px 0; transition: color 0.15s; cursor: pointer; color: var(--ink); }
+.footer-col a { display: block; font-size: 13px; padding: 5px 0; transition: color 0.15s; cursor: pointer; color: var(--ink); text-decoration: none; }
 .footer-col a:hover { color: var(--accent); }
 .footer-bottom {
-  padding-top: 22px; display: flex; justify-content: space-between;
+  padding-top: 22px; display: flex; justify-content: flex-start;
   align-items: center; flex-wrap: wrap; gap: 12px;
   font-size: 11px; color: var(--ink-dim);
 }
